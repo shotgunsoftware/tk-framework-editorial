@@ -64,7 +64,7 @@ def timecode_from_frame(frame, fps=24):
     return timecode
 
 class Timecode(object):
-    def __init__(self, timecode_string):
+    def __init__(self, timecode_string, fps=24):
         """
         Instantiate a timecode from a timecode string
         
@@ -75,10 +75,29 @@ class Timecode(object):
             raise ValueError(
                 "Given timecode %s is not in hour:minute:second:frame format" % timecode_string
             )
+        self._fps = fps
         self._hours = int(fields[0])
         self._minutes = int(fields[1])
         self._seconds = int(fields[2])
         self._frames = int(fields[3])
+        # Do some basic checks
+        if self._frames >= self._fps:
+            raise ValueError(
+                "Invalid frame value %d, it must be smaller than the framerate %d" % (
+                self._frames, self._fps)
+            )
+        if self._hours > 23:
+            raise ValueError(
+                "Invalid hours value %d, it must be smaller than 24" % self._hours
+            )
+        if self._minutes > 59:
+            raise ValueError(
+                "Invalid minutes value %d, it must be smaller than 60" % self._minutes
+            )
+        if self._seconds > 59:
+            raise ValueError(
+                "Invalid seconds value %d, it must be smaller than 60" % self._seconds
+            )
 
     @classmethod
     def from_frame(cls, frame, fps=24):
@@ -89,20 +108,39 @@ class Timecode(object):
         :param fps: Number of frames per second, as an int
         :return: A Timecode instance
         """
-        return Timecode(timecode_from_frame(frame, fps))
+        return Timecode(timecode_from_frame(frame, fps), fps=fps)
 
-    def to_frame(self, fps=24):
+    def to_frame(self):
         """
         Return the frame number corresponding to this Timecode at the given fps
         
-        :param fps: Number of frames per second, as an int
         :return: A frame number, as an int
         """
         return frame_from_timecode(
-            (self._hours, self._minutes, self._seconds, self._frames),fps
+            (self._hours, self._minutes, self._seconds, self._frames),self._fps
         )
 
+    # Redefine some standars operators
+    def __add__(self, right):
+        if isinstance(right, Timecode):
+            return self.from_frame( self.to_frame() + right.to_frame(), self._fps)
+        if isinstance(right, int):
+            return self.from_frame( self.to_frame() + right, self._fps)
+        raise TypeError("Unsupported operand type for +" % str(type(right))[8:-2])
 
+    def __radd__(self,left):
+        return self.__add__(left)
+    
+    def __sub__(self, right):
+        if isinstance(right, Timecode):
+            return self.from_frame( self.to_frame() - right.to_frame(), self._fps)
+        if isinstance(right, int):
+            return self.from_frame( self.to_frame() - right, self._fps)
+        raise TypeError("Unsupported operand type for -" % str(type(right))[8:-2])
+
+    def __rsub__(self, left):
+        return self.__sub__(left)
+    
     def __str__(self):
         """
         String representation of this timecode
