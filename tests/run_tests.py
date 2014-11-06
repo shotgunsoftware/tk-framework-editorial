@@ -27,7 +27,7 @@ sys.path = [python_path] + sys.path
 
 import unittest2 as unittest
 
-class TankTestRunner(object):
+class TestRunner(object):
     def __init__(self):
         file_path = os.path.abspath(__file__)
         self.test_path = os.path.dirname(file_path)
@@ -72,12 +72,12 @@ if __name__ == "__main__":
     if args:
         test_name = args[0]
      
-    tank_test_runner = TankTestRunner()
+    runner = TestRunner()
 
     if options.coverage:
-        ret_val = tank_test_runner.run_tests_with_coverage(test_name)
+        ret_val = runner.run_tests_with_coverage(test_name)
     else:
-        ret_val = tank_test_runner.run_tests(test_name)
+        ret_val = runner.run_tests(test_name)
 
     # Exit value determined by failures and errors
     exit_val = 0
