@@ -11,6 +11,35 @@
 from .timecode import Timecode
 import logging
 
+class FrameworkLogHandler(logging.StreamHandler):
+    def __init__(self, *args, **kwargs):
+        super(FrameworkLogHandler, self).__init__(*args, **kwargs)
+        self._framework = None
+        try:
+            import sgtk
+            self._framework = sgtk.platform.current_bundle()
+        except:
+            pass
+
+    def emit(self, record):
+        print "YO", self.level, record.getMessage()
+        if self._framework:
+            if record.levelno == logging.INFO:
+                self._framework.log_info(record.getMessage())
+            elif record.levelno == logging.INFO:
+                self._framework.log_debug(record.getMessage())
+            elif record.levelno == logging.WARNING:
+                self._framework.log_warning(record.getMessage())
+            elif record.levelno == logging.ERROR:
+                self._framework.log_warning(record.getMessage())
+        #super(FrameworkLogHandler, self).emit(record)
+
+def get_logger():
+    """
+    Retrieve a logger
+    """
+    logger = logging.getLogger(__name__)
+
 class Edit(object):
     """
     An entry or event or edit from an edit list
@@ -135,6 +164,7 @@ class Edit(object):
             str(self._record_out),
         )
 
+
 class EditList(object):
     def __init__(self, fps=24, logger=None):
         """
@@ -148,6 +178,7 @@ class EditList(object):
         self._edits = []
         self._fps = fps
         self._logger = logger or logging.getLogger(__name__)
+        self._logger.addHandler(FrameworkLogHandler())
 
     @property
     def edits(self):
