@@ -8,7 +8,7 @@
 # agreement to the Shotgun Pipeline Toolkit Source Code License. All rights 
 # not expressly granted therein are reserved by Shotgun Software Inc.
 
-from ..timecode.timecode import Timecode
+from .timecode import Timecode
 import logging
 
 class Edit(object):
@@ -29,7 +29,7 @@ class Edit(object):
         """
         Instantiate a new Edit
 
-        :param id: The edit id in a Edit Decision list
+        :param id: The edit id in a Edit Decision list, as an int
         :param reel: The reel for this edit
         :param channels: Channels for this edit, video, audio, etc ...
         :param source_in: Timecode in for the source, as a hh:mm:ss:ff string
@@ -41,7 +41,7 @@ class Edit(object):
         self._effect = []
         self._comments = []
         self._retime = None
-        self._id = id
+        self._id = int(id)
         self._reel = reel
         self._channels = channels
         self._source_in = Timecode(source_in, fps=fps)
@@ -55,11 +55,11 @@ class Edit(object):
         """
         self._effect.append( " ".join(tokens))
 
-    def add_comments(self, comment):
+    def add_comments(self, comments):
         """
         Associate a comment line to this edit
         """
-        self._comments.append(comment)
+        self._comments.append(comments)
 
     def add_retime(self, tokens):
         """
@@ -67,6 +67,17 @@ class Edit(object):
         """
         self._retime = " ".join(tokens)
 
+    def __str__(self):
+        return "%03d %s %s %s %s %s %s %s" % (
+            self._id,
+            self._reel,
+            self._channels,
+            "C",
+            str(self._source_in),
+            str(self._source_out),
+            str(self._record_in),
+            str(self._record_out),
+        )
 class EditList(object):
     def __init__(self, fps=24, logger=None):
         """
@@ -118,7 +129,7 @@ class EditList(object):
                     elif line_tokens[0].startswith("*"):
                         # A comment
                         if edit :
-                            edit.append_comment(line)
+                            edit.add_comments(line)
                             if locators_parser:
                                 # Blindly call the parser with current edit and tokens
                                 locators_parser(edit, line_tokens)
