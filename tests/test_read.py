@@ -14,8 +14,15 @@ from edl import edl
 import logging
 
 class TestRead(unittest.TestCase):
+    def __init__(self, *args, **kwargs):
+        super(TestRead,self).__init__(*args, **kwargs)
+        self._edl_examples = []
+
     def setUp(self):
-        pass
+        resources_dir = os.path.join(os.path.dirname(__file__), "resources")
+        for f in os.listdir(resources_dir):
+            if f.endswith(".edl"):
+                self._edl_examples.append(os.path.join(resources_dir, f))
 
     def read_edl_file(self, file):
         print "Reading %s" % file
@@ -25,8 +32,14 @@ class TestRead(unittest.TestCase):
             print edit
 
     def test_read_all_files(self):
-        # Retrieve all edls from resources directory
-        resources_dir = os.path.join(os.path.dirname(__file__), "resources")
-        for f in os.listdir(resources_dir):
-            if f.endswith(".edl"):
-                self.read_edl_file(os.path.join(resources_dir, f))
+        # Try to read all edls from resources directory
+        for f in self._edl_examples:
+            self.read_edl_file(f)
+
+    def dummy_visitor(self, edit):
+        print "Visiting %s" % str(edit)
+        print "Comments are %s :\n" % "\n".join(edit.comments)
+
+    def test_visitor(self):
+        tc = edl.EditList()
+        tc.read_cmx_edl(self._edl_examples[0], visitor=self.dummy_visitor)

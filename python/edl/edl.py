@@ -49,6 +49,62 @@ class Edit(object):
         self._record_in = Timecode(record_in, fps=fps)
         self._record_out = Timecode(record_out, fps=fps)
 
+    @property
+    def id(self):
+        """
+        Return the id for this edit
+        """
+        return self._id
+
+    @property
+    def comments(self):
+        """
+        Return the comments for this edit, as a list
+        """
+        return self._comments
+
+    @property
+    def timecodes(self):
+        """
+        Return the source in, source out, record in, record out timecodes for this
+        edit as a tuple.
+        """
+        return (
+            self._source_in,
+            self._source_out,
+            self._record_in,
+            self._record_out
+        )
+
+    @property
+    def source_in(self):
+        """
+        Return the source in timecode for this edit
+        """
+        return self._source_in
+
+    @property
+    def source_out(self):
+        """
+        Return the source out timecode for this edit
+        """
+        return self._source_out
+
+    @property
+    def record_in(self):
+        """
+        Return the record in timecode for this edit
+        """
+        return self._record_in
+
+    @property
+    def record_out(self):
+        """
+        Return the record out timecode for this edit
+        """
+        return self._record_out
+
+
     def add_effect(self, tokens):
         """
         For now, just register the effect line
@@ -78,6 +134,7 @@ class Edit(object):
             str(self._record_in),
             str(self._record_out),
         )
+
 class EditList(object):
     def __init__(self, fps=24, logger=None):
         """
@@ -92,7 +149,15 @@ class EditList(object):
         self._fps = fps
         self._logger = logger or logging.getLogger(__name__)
 
-    def read_cmx_edl(self, path, locators_parser=None):
+    @property
+    def edits(self):
+        return self._edits
+
+    @property
+    def title(self):
+        return self._title
+
+    def read_cmx_edl(self, path, visitor=None):
         """
         Parse the given edl file, extract a list of versions that need to be
         created
@@ -130,9 +195,6 @@ class EditList(object):
                         # A comment
                         if edit :
                             edit.add_comments(line)
-                            if locators_parser:
-                                # Blindly call the parser with current edit and tokens
-                                locators_parser(edit, line_tokens)
                     elif line_tokens[0] == "M2": # Retime
                         if not edit:
                             raise RuntimeError(
@@ -141,6 +203,10 @@ class EditList(object):
                         edit.add_retime(line_tokens)
                     elif line_tokens[0].isdigit():
                         # New edit
+                        # Time to call the visitor ( if any ) with the previous
+                        # edit ( if any )
+                        if edit and visitor:
+                            visitor(edit)
                         type = line_tokens[3]
                         if type == "C": # cut
                             # Number of tokens can vary in the middle
@@ -162,7 +228,9 @@ class EditList(object):
                                     "Found unexpected effect"
                                 )
                             edit.add_effect(line_tokens)
-
+                    # Call the visitor ( if any ) with the last edit ( if any )
+                    if edit and visitor:
+                        visitor(edit)
             except Exception, e:  # Catch the exception so we can add the current line contents
                 args = ["%s while parsing %s at line\n%s" % (e.args[0], path, line)] + list(e.args[1:])
                 e.args = args
