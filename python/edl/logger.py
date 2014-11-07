@@ -1,4 +1,4 @@
-# Copyright (c) 2013 Shotgun Software Inc.
+# Copyright (c) 2014 Shotgun Software Inc.
 # 
 # CONFIDENTIAL AND PROPRIETARY
 # 
@@ -11,12 +11,24 @@
 import logging
 
 class FrameworkLogHandler(logging.StreamHandler):
+    """
+    A logging Handler to log messages with the Framework log_xxxx methods
+    """
     def __init__(self, framework, *args, **kwargs):
+        """
+        Instantiante a new handler for the given Framework
+        
+        :param framework: A Toolkit framework
+        """
         super(FrameworkLogHandler, self).__init__(*args, **kwargs)
         self._framework = framework
 
     def emit(self, record):
+        """
+        Emit the given record
+        """
         if self._framework:
+            # Pick up the right framework method, given the record level
             if record.levelno == logging.INFO:
                 self._framework.log_info(record.getMessage())
             elif record.levelno == logging.INFO:
@@ -24,8 +36,7 @@ class FrameworkLogHandler(logging.StreamHandler):
             elif record.levelno == logging.WARNING:
                 self._framework.log_warning(record.getMessage())
             elif record.levelno == logging.ERROR:
-                self._framework.log_warning(record.getMessage())
-        #super(FrameworkLogHandler, self).emit(record)
+                self._framework.log_error(record.getMessage())
 
 def get_logger(level=logging.INFO):
     """
@@ -40,7 +51,7 @@ def get_logger(level=logging.INFO):
     else:
         logger_name = logger_parts[0]
     logger = logging.getLogger(logger_name)
-    # Check if we running this module from a Toolkit
+    # Check if we are running this module from a Toolkit
     # framework. The only dependency we have with Toolkit
     # if for logging, so it's worth trying to allow using
     # this module from non Toolkit apps, using regular Python

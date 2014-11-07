@@ -46,9 +46,7 @@ class TestRunner(object):
 
     def run_tests_with_coverage(self, test_name):
         import coverage
-        shotgun_path = os.path.join(self.packages_path, "shotgun_api3")
-        shotgun_path = shotgun_path + os.path.sep + "*"
-        cov = coverage.coverage(source=["tank"], omit=shotgun_path)
+        cov = coverage.coverage(source=["edl"])
         cov.start()
         self.setup_suite(test_name)
         result = unittest.TextTestRunner(verbosity=2).run(self.suite)

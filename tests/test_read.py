@@ -39,7 +39,11 @@ class TestRead(unittest.TestCase):
     def dummy_visitor(self, edit):
         print "Visiting %s" % str(edit)
         print "Comments are %s :\n" % "\n".join(edit.comments)
+        # Test if adding a runtime attribute works
+        edit.private_id = edit.id
 
     def test_visitor(self):
         tc = edl.EditList()
         tc.read_cmx_edl(self._edl_examples[0], visitor=self.dummy_visitor)
+        for edit in tc.edits:
+            self.assertEqual(edit.private_id, edit.id)

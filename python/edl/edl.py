@@ -1,4 +1,4 @@
-# Copyright (c) 2013 Shotgun Software Inc.
+# Copyright (c) 2014 Shotgun Software Inc.
 # 
 # CONFIDENTIAL AND PROPRIETARY
 # 
@@ -10,15 +10,23 @@
 
 from .timecode import Timecode
 from . import logger
+import os
 
 class Edit(object):
     """
-    An entry or event or edit from an edit list
+    An entry, or event, or edit from an edit list
+    
+    New attributes can be added at runtime, provided that they don't
+    clash with Edit regular attributes, by just setting their value, e.g.
+    edit.my_own_attribute = "awesome"
+    They then are accessible like other regular attributes, e.g.
+    print edit.my_own_attribute
+
     """
     def __init__(
         self,
-        id      = None,
-        reel    = None,
+        id          = None,
+        reel        = None,
         channels    = None,
         source_in   = None,
         source_out  = None,
@@ -40,6 +48,7 @@ class Edit(object):
         """
         self._effect = []
         self._comments = []
+        self._meta_data = {} # A place holder where additional meta data can be stored
         self._retime = None
         self._id = int(id)
         self._reel = reel
@@ -91,6 +100,15 @@ class Edit(object):
         return self._source_out
 
     @property
+    def source_duration(self):
+        """
+        Return the source duration, in frames
+        """
+        # Timecode out are exclusive, e.g.
+        # 00:00:00:01 -> 00:00:00:02 is only one frame long
+        return self._source_out.to_frame() - self._source_in.to_frame()
+
+    @property
     def record_in(self):
         """
         Return the record in timecode for this edit
@@ -104,10 +122,27 @@ class Edit(object):
         """
         return self._record_out
 
+    @property
+    def record_duration(self):
+        """
+        Return the record duration, in frames
+        """
+        # Timecode out are exclusive, e.g.
+        # 00:00:00:01 -> 00:00:00:02 is only one frame long
+        return self._record_out.to_frame() - self._record_in.to_frame()
+
+    @property
+    def has_effect(self):
+        """
+        Return True if this edit has some effect(s)
+        """
+        return bool(self._effects)
 
     def add_effect(self, tokens):
         """
         For now, just register the effect line
+        Later we might want to parse the tokens, and store some actual
+        effects value on this edit
         """
         self._effect.append( " ".join(tokens))
 
@@ -117,13 +152,25 @@ class Edit(object):
         """
         self._comments.append(comments)
 
+    @property
+    def has_retime(self):
+        """
+        Return True if this edit has some retime
+        """
+        return bool(self._retime)
+
     def add_retime(self, tokens):
         """
         For now, just register the retime line
+        Later we might want to parse the tokens, and store some actual
+        retime values
         """
         self._retime = " ".join(tokens)
 
     def __str__(self):
+        """
+        String representation for this Edit
+        """
         return "%03d %s %s %s %s %s %s %s" % (
             self._id,
             self._reel,
@@ -134,28 +181,95 @@ class Edit(object):
             str(self._record_in),
             str(self._record_out),
         )
+    def __setarr__(self, attr_name, value):
+        """
+        Allow new attributes to be added on the fly, e.g. when parsing a file
+        with a visitor
+        
+        :param attr_name: Name of the attribute that needs setting
+        :param value: The value the attribute should take
+        """
+        if hasattr(self, attr_name):
+            object.__setattr__(self, name, value)
+        else:
+            self._meta_data[attr_name] = value
 
+    def __getattr__(self, attr_name):
+        """
+        Retrieve runtime attributes from meta_data dictionary
+        
+        :param attr_name: An attribute name
+        :return: The value for the given attribute name
+        :raise: AttributeError if the attribute can't be found
+        """
+        if attr_name in self._meta_data:
+            return self._meta_data[attr_name]
+        raise AttributeError("Edit has no attribute %s" % attr_name)
 
 class EditList(object):
+    """
+    An Edit Decision List
+    
+    Typical use of EditList could look like that :
+    
+    # Define a visitor to extract some extra information from comments or locators
+    def edit_parser(edit):
+        # New attributes can be added on the fly
+        if edit.id % 2:
+            edit.is_even = False
+        else:
+            edit.is_even = True
+
+    edl = EditList(file_path="/tmp/my_edl.edl", visitor=edit_parser)
+    for edit in edl.entries:
+        print str(edit)
+        # Added attributes are reachable like regular ones
+        print edit.is_even
+    """
+
     __logger = logger.get_logger()
-    def __init__(self, fps=24):
+
+    def __init__(self, fps=24, file_path=None, visitor=None):
         """
         Instantiate a new Edit Decision List
         
         :param fps: Number of frames per second for this EditList
+        :file_path: Full path to a file to read
         """
         
         self._title = None
         self._edits = []
         self._fps = fps
+        if file_path:
+            _, ext = os.path.splitext(file_path)
+            if ext != ".edl":
+                raise NotImplementedError(
+                    "Can't read %s : don't know how to read files with %s extension",
+                    file_path,
+                    ext
+                )
+            self.read_cmx_edl(file_path, visitor)
 
     @property
     def edits(self):
+        """
+        Return a list of all edits in this EditList
+        """
         return self._edits
 
     @property
     def title(self):
+        """
+        Return this EditList's title
+        """
         return self._title
+
+    @property
+    def fps(self):
+        """
+        Return the number of frame per seconds used by this EditList
+        """
+        return self._fps
 
     def read_cmx_edl(self, path, visitor=None):
         """

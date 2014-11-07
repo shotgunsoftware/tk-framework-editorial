@@ -1,4 +1,4 @@
-# Copyright (c) 2013 Shotgun Software Inc.
+# Copyright (c) 2014 Shotgun Software Inc.
 # 
 # CONFIDENTIAL AND PROPRIETARY
 # 
@@ -16,7 +16,7 @@ def frame_from_timecode(timecode, fps=24):
     Return the frame number for the given timecode at the given fps
 
     :param timecode: A timecode, either 
-        as a string in hour:minute:second:frame format
+        as a string in hh:mm:ss:ff format
         or as a (hours, minutes, seconds, frames) tuple
     :param fps : Number of frames per second
     :return: Corresponding frame number, as an int
@@ -40,7 +40,7 @@ def timecode_from_frame(frame, fps=24):
 
     :param frame: A frame number, as an int
     :param fps: Number of frames per seconds, as an int
-    :return: A string in hour:minute:second:frame format
+    :return: A string in hh:mm:ss:ff format
     """
     # total number of seconds in whole clip
     seconds = decimal.Decimal(frame) / fps
@@ -64,16 +64,19 @@ def timecode_from_frame(frame, fps=24):
     return timecode
 
 class Timecode(object):
+    """
+    A non drop frame timecode
+    """
     def __init__(self, timecode_string, fps=24):
         """
         Instantiate a timecode from a timecode string
         
-        :param timecode_string: A timecode string in hour:minute:second:frame format
+        :param timecode_string: A timecode string in hh:mm:ss:ff format
         """
         fields = timecode_string.split(":")
         if len(fields) != 4:
             raise ValueError(
-                "Given timecode %s is not in hour:minute:second:frame format" % timecode_string
+                "Given timecode %s is not in hh:mm:ss:ff format" % timecode_string
             )
         self._fps = fps
         self._hours = int(fields[0])
