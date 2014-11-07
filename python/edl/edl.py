@@ -9,36 +9,7 @@
 # not expressly granted therein are reserved by Shotgun Software Inc.
 
 from .timecode import Timecode
-import logging
-
-class FrameworkLogHandler(logging.StreamHandler):
-    def __init__(self, *args, **kwargs):
-        super(FrameworkLogHandler, self).__init__(*args, **kwargs)
-        self._framework = None
-        try:
-            import sgtk
-            self._framework = sgtk.platform.current_bundle()
-        except:
-            pass
-
-    def emit(self, record):
-        print "YO", self.level, record.getMessage()
-        if self._framework:
-            if record.levelno == logging.INFO:
-                self._framework.log_info(record.getMessage())
-            elif record.levelno == logging.INFO:
-                self._framework.log_debug(record.getMessage())
-            elif record.levelno == logging.WARNING:
-                self._framework.log_warning(record.getMessage())
-            elif record.levelno == logging.ERROR:
-                self._framework.log_warning(record.getMessage())
-        #super(FrameworkLogHandler, self).emit(record)
-
-def get_logger():
-    """
-    Retrieve a logger
-    """
-    logger = logging.getLogger(__name__)
+from . import logger
 
 class Edit(object):
     """
@@ -166,19 +137,17 @@ class Edit(object):
 
 
 class EditList(object):
-    def __init__(self, fps=24, logger=None):
+    __logger = logger.get_logger()
+    def __init__(self, fps=24):
         """
         Instantiate a new Edit Decision List
         
         :param fps: Number of frames per second for this EditList
-        :param logger: A standard logging logger
         """
         
         self._title = None
         self._edits = []
         self._fps = fps
-        self._logger = logger or logging.getLogger(__name__)
-        self._logger.addHandler(FrameworkLogHandler())
 
     @property
     def edits(self):
@@ -199,7 +168,7 @@ class EditList(object):
         self._title = None
         self._edits = []
         # And read the file
-        self._logger.info("Parsing EDL %s" % path)
+        self.__logger.info("Parsing EDL %s" % path)
         with open(path, "rU") as handle:
             title = ""
             versions = []
@@ -212,7 +181,7 @@ class EditList(object):
                     if not line:
                         continue
 
-                    self._logger.debug("Treating : [%s]" % line)
+                    self.__logger.debug("Treating : [%s]" % line)
                     line_tokens = line.split()
                     if line.startswith("TITLE:"):
                         self._title = line_tokens[-1]
