@@ -36,9 +36,9 @@ class TestRead(unittest.TestCase):
         for f in self._edl_examples:
             self.read_edl_file(f)
 
-    def dummy_visitor(self, edit):
-        print "Visiting %s" % str(edit)
-        print "Comments are %s :\n" % "\n".join(edit.comments)
+    def dummy_visitor(self, edit, logger):
+        logger.info("Visiting %s" % str(edit))
+        logger.info("Comments are %s :\n" % "\n".join(edit.comments))
         # Test if adding a runtime attribute works
         edit.private_id = edit.id
 

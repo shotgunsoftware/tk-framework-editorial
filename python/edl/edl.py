@@ -11,6 +11,24 @@
 from .timecode import Timecode
 from . import logger
 import os
+import re
+
+def process_edit(edit, logger, shot_regexp=None):
+    # Add our runtime attributes
+    edit._name = None
+    edit._shot_name = None
+    edit._clip_name = None
+    edit._asc_sop = None
+    edit._asc_sat = None
+    # Treat all comments
+    for comment in comments:
+        pass
+    if edit._name and shot_regexp:
+        # Support pre-compiled regexp or strings
+        if not isinstance(shot_regexp, re.RegexObject):
+            m = re.search(shot_regexp, edit._name)
+        else:
+            m = shot_regexp.search(edit._name)
 
 class Edit(object):
     """
@@ -234,7 +252,9 @@ class EditList(object):
         Instantiate a new Edit Decision List
         
         :param fps: Number of frames per second for this EditList
-        :file_path: Full path to a file to read
+        :param file_path: Full path to a file to read
+        :param visitor: A callable which will be called on every edit and should 
+                        accept as input an Edit and a logger
         """
         
         self._title = None
@@ -248,7 +268,7 @@ class EditList(object):
                     file_path,
                     ext
                 )
-            self.read_cmx_edl(file_path, visitor)
+            self.read_cmx_edl(file_path, fps=self._fps, visitor=visitor)
 
     @property
     def edits(self):
@@ -271,12 +291,16 @@ class EditList(object):
         """
         return self._fps
 
-    def read_cmx_edl(self, path, visitor=None):
+    def read_cmx_edl(self, path, fps=24, visitor=None):
         """
         Parse the given edl file, extract a list of versions that need to be
         created
         http://xmil.biz/EDL-X/CMX3600.pdf
         http://www.scottsimmons.tv/blog/2006/10/12/how-to-read-an-edl/
+
+        :param path: Full path to a cmx compatible file to read
+        :param visitor: A callable which will be called on every edit and should 
+                        accept as input an Edit and a logger
         """
         # Reset defaut values
         self._title = None
@@ -320,13 +344,15 @@ class EditList(object):
                         # Time to call the visitor ( if any ) with the previous
                         # edit ( if any )
                         if edit and visitor:
-                            visitor(edit)
+                            self.__logger.debug("Visiting : [%s]" % edit)
+                            visitor(edit, self.__logger)
                         type = line_tokens[3]
                         if type == "C": # cut
                             # Number of tokens can vary in the middle
                             # so tokens at the end of the line are indexed with
                             # negative indexes
                             edit = Edit(
+                                fps         = fps,
                                 id          = int(line_tokens[0]),
                                 reel        = line_tokens[1],
                                 channels    = line_tokens[2],
@@ -344,7 +370,8 @@ class EditList(object):
                             edit.add_effect(line_tokens)
                     # Call the visitor ( if any ) with the last edit ( if any )
                     if edit and visitor:
-                        visitor(edit)
+                        self.__logger.debug("Visiting : [%s]" % edit)
+                        visitor(edit, self.__logger)
             except Exception, e:  # Catch the exception so we can add the current line contents
                 args = ["%s while parsing %s at line\n%s" % (e.args[0], path, line)] + list(e.args[1:])
                 e.args = args
