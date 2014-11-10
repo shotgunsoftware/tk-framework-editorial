@@ -12,23 +12,89 @@ from .timecode import Timecode
 from . import logger
 import os
 import re
+# A list of keywords we will be looking for in comments
+_COMMENTS_KEYWORDS = [
+    "LOC",
+    "SOURCE FILE",
+    "FROM CLIP NAME",
+    "ASC_SOP",
+    "ASC_SAT",
+]
+# Build a regular expression to match the keywords above, matching lines beginning
+# with :
+#* KEYWORD:
+# The regexp is build with : "((?:" + keyword1 + ")|(?:" + keyword2 + ... + "))"
+# ")|(?:" being used to join the different keywords together
+_COMMENT_REGEXP = re.compile("\*\s*((?:%s))\s*:\s+(.*)" % ")|(?:".join(_COMMENTS_KEYWORDS)
+)
 
 def process_edit(edit, logger, shot_regexp=None):
     # Add our runtime attributes
     edit._name = None
+    edit._tape = None
     edit._shot_name = None
     edit._clip_name = None
     edit._asc_sop = None
     edit._asc_sat = None
+    edit._type = None
+    edit._format = None
+
     # Treat all comments
-    for comment in comments:
-        pass
+    for comment in edit.comments:
+        m= _COMMENT_REGEXP.match(comment)
+        if m:
+            type = m.group(1)
+            value = m.group(2)
+            logger.info("[%s] : %s" % (type, value))
+            if type == "LOC":
+                tokens = value.split()
+                if len(tokens) > 2:
+                    edit._name = tokens[2]
+            elif type == "SOURCE FILE":
+                edit._tape = value.split()[-1]
+            elif type == "FROM CLIP NAME":
+                edit._clip_name = value
+            elif type == "ASC_SOP":
+                edit._asc_sop = value
+            elif type == "ASC_SAT":
+                edit._asc_sat = value
+
+    # Extract a shot name
+    # Default assignment
+    edit._shot_name = edit._name
     if edit._name and shot_regexp:
         # Support pre-compiled regexp or strings
         if not isinstance(shot_regexp, re.RegexObject):
-            m = re.search(shot_regexp, edit._name)
+            regexp = re.compile(shot_regexp)
         else:
-            m = shot_regexp.search(edit._name)
+            regexp = shot_regexp
+
+        m = regexp.search(edit._name)
+        if m:
+            if regexp.groups == 1: # Only one capturing group, use it for the shot name
+                edit._shot_name = m.group(1)
+            else:
+                grid = regexp.groupindex
+                if "shot_name" not in grid:
+                    raise ValueError("No 'shot_name' named group in regular expression %s" % regexp.pattern)
+                edit._shot_name = m.group("shot_name")
+                if "type" in grid:
+                    type_token = m.group("type")
+                    if type_token == "BG01":
+                        edit._type = "Main Plate"
+                    elif type_token.startswith("BG"):
+                        edit._type = "Secondary Plate"
+                    elif type_token.startswith("RF"):
+                        edit._type = "Reference Plate"
+                    elif type_token.startswith("CP"):
+                        edit._type = "Clean Plate"
+                    elif type_token.startswith("EL"):
+                        edit._type = "Element Plate"
+                    else:
+                        edit._type = "Generic Plate"
+                if "format" in grid:
+                    edit._format = m.group("format")
+    logger.info("Meta data : %s " % str(edit._meta_data))
 
 class Edit(object):
     """
@@ -41,6 +107,22 @@ class Edit(object):
     print edit.my_own_attribute
 
     """
+    # Our known attributes
+    # Every other attributes will go into the _meta_data dictionary
+    __mine = [
+        "_effect",
+        "_comments",
+        "_meta_data",
+        "_retime",
+        "_id",
+        "_reel",
+        "_channels",
+        "_source_in",
+        "_source_out",
+        "_record_in",
+        "_record_out",
+    ]
+
     def __init__(
         self,
         id          = None,
@@ -64,6 +146,9 @@ class Edit(object):
         :param record_out: Timecode out for the recorder, as a hh:mm:ss:ff string
         :param fps: Number of frames per second for this edit, as a hh:mm:ss:ff string
         """
+        
+        # If new attributes are added here, their name should be added to the
+        # __mine list as well
         self._effect = []
         self._comments = []
         self._meta_data = {} # A place holder where additional meta data can be stored
@@ -199,7 +284,8 @@ class Edit(object):
             str(self._record_in),
             str(self._record_out),
         )
-    def __setarr__(self, attr_name, value):
+
+    def __setattr__(self, attr_name, value):
         """
         Allow new attributes to be added on the fly, e.g. when parsing a file
         with a visitor
@@ -207,8 +293,8 @@ class Edit(object):
         :param attr_name: Name of the attribute that needs setting
         :param value: The value the attribute should take
         """
-        if hasattr(self, attr_name):
-            object.__setattr__(self, name, value)
+        if attr_name in self.__mine:
+            object.__setattr__(self, attr_name, value)
         else:
             self._meta_data[attr_name] = value
 

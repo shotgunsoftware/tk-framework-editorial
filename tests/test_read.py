@@ -47,3 +47,10 @@ class TestRead(unittest.TestCase):
         tc.read_cmx_edl(self._edl_examples[0], visitor=self.dummy_visitor)
         for edit in tc.edits:
             self.assertEqual(edit.private_id, edit.id)
+
+    def test_standard_visitor(self):
+        for f in self._edl_examples:
+            tc = edl.EditList()
+            tc.read_cmx_edl(f, visitor=edl.process_edit)
+#        for edit in tc.edits:
+#            self.assertEqual(edit.private_id, edit.id)
