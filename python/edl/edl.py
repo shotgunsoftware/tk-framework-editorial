@@ -25,10 +25,35 @@ _COMMENTS_KEYWORDS = [
 #* KEYWORD:
 # The regexp is build with : "((?:" + keyword1 + ")|(?:" + keyword2 + ... + "))"
 # ")|(?:" being used to join the different keywords together
-_COMMENT_REGEXP = re.compile("\*\s*((?:%s))\s*:\s+(.*)" % ")|(?:".join(_COMMENTS_KEYWORDS)
+_COMMENT_REGEXP = re.compile(
+    "\*\s*((?:%s))\s*:\s+(.*)" % ")|(?:".join(_COMMENTS_KEYWORDS)
 )
 
 def process_edit(edit, logger, shot_regexp=None):
+    """
+    Extract standard meta data from comments for an Edit :
+        - name from '* LOC: 01:00:00:12 YELLOW  MR0200'
+        - clip name from '* FROM CLIP NAME:  246AA-6'
+        - tape from '* SOURCE FILE: LR9907610'
+        - asc_sop and asc_sat from :
+            '*ASC_SOP (1.0854 1.0451 0.9943)(0.0009 0.0022 -0.0292)(1.0163 1.0105 0.9424)'
+            '*ASC_SAT 1.0000'
+
+    If a regular expression is given, it will be used to extract extra informations
+    from the edit name.
+        - a shot name
+        - a type
+        - a format
+    Typical values for the regular expression would be as simple as a single group
+    to extract the shot name, e.g. ^(\w+)_.+$
+    or more advanced regular expression with named groups to extract additional
+    informations, e.g. : (?P<shot_name>\w+)_(?P<type>\w\w\d\d)_(?P<version>[V,v]\d+)$
+
+    :param edit: An Edit instance
+    :param logger: A standard logger
+    :param shot_regexp: A regular expression to extract extra information from the
+                        edit name
+    """
     # Add our runtime attributes
     edit._name = None
     edit._tape = None
@@ -38,14 +63,14 @@ def process_edit(edit, logger, shot_regexp=None):
     edit._asc_sat = None
     edit._type = None
     edit._format = None
-
+#    edit._version = None
     # Treat all comments
     for comment in edit.comments:
         m= _COMMENT_REGEXP.match(comment)
         if m:
             type = m.group(1)
             value = m.group(2)
-            logger.info("[%s] : %s" % (type, value))
+            logger.debug("Found in comments [%s] : %s" % (type, value))
             if type == "LOC":
                 tokens = value.split()
                 if len(tokens) > 2:
@@ -64,13 +89,14 @@ def process_edit(edit, logger, shot_regexp=None):
     edit._shot_name = edit._name
     if edit._name and shot_regexp:
         # Support pre-compiled regexp or strings
-        if not isinstance(shot_regexp, re.RegexObject):
+        if isinstance(shot_regexp, str):
             regexp = re.compile(shot_regexp)
         else:
             regexp = shot_regexp
-
+        logger.debug("Parsing %s with %s" % (edit._name, str(regexp)))
         m = regexp.search(edit._name)
         if m:
+            logger.debug("Matched groups : %s" % str(m.groups()))
             if regexp.groups == 1: # Only one capturing group, use it for the shot name
                 edit._shot_name = m.group(1)
             else:
@@ -79,22 +105,11 @@ def process_edit(edit, logger, shot_regexp=None):
                     raise ValueError("No 'shot_name' named group in regular expression %s" % regexp.pattern)
                 edit._shot_name = m.group("shot_name")
                 if "type" in grid:
-                    type_token = m.group("type")
-                    if type_token == "BG01":
-                        edit._type = "Main Plate"
-                    elif type_token.startswith("BG"):
-                        edit._type = "Secondary Plate"
-                    elif type_token.startswith("RF"):
-                        edit._type = "Reference Plate"
-                    elif type_token.startswith("CP"):
-                        edit._type = "Clean Plate"
-                    elif type_token.startswith("EL"):
-                        edit._type = "Element Plate"
-                    else:
-                        edit._type = "Generic Plate"
+                    edit._type = m.group("type")
                 if "format" in grid:
                     edit._format = m.group("format")
-    logger.info("Meta data : %s " % str(edit._meta_data))
+                if "version" in grid:
+                    edit._version = m.group("version")
 
 class Edit(object):
     """
@@ -148,7 +163,7 @@ class Edit(object):
         """
         
         # If new attributes are added here, their name should be added to the
-        # __mine list as well
+        # __mine list as well, otherwise will end up in the meta data dictionary
         self._effect = []
         self._comments = []
         self._meta_data = {} # A place holder where additional meta data can be stored

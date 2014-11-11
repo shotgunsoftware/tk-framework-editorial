@@ -43,7 +43,6 @@ def get_logger(level=logging.INFO):
     Retrieve a logger
     """
     logger_parts = __name__.split(".")
-    print str(logger_parts)
     if len(logger_parts) > 1:
         # Remove the last part which should be this file
         # name

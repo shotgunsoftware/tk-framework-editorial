@@ -38,7 +38,7 @@ class TestRead(unittest.TestCase):
 
     def dummy_visitor(self, edit, logger):
         logger.info("Visiting %s" % str(edit))
-        logger.info("Comments are %s :\n" % "\n".join(edit.comments))
+        logger.info("Comments are :\n\t%s" % "\n\t".join(edit.comments))
         # Test if adding a runtime attribute works
         edit.private_id = edit.id
 
@@ -48,9 +48,32 @@ class TestRead(unittest.TestCase):
         for edit in tc.edits:
             self.assertEqual(edit.private_id, edit.id)
 
+    def advanced_visitor(self, edit, logger):
+        edl.process_edit(
+            edit,
+            logger,
+            shot_regexp="(?P<shot_name>\w+)_(?P<type>\w\w\d\d)_(?P<version>[V,v]\d+)$"
+        )
+
     def test_standard_visitor(self):
+        # Make sure we are able to read all examples
         for f in self._edl_examples:
             tc = edl.EditList()
             tc.read_cmx_edl(f, visitor=edl.process_edit)
-#        for edit in tc.edits:
-#            self.assertEqual(edit.private_id, edit.id)
+
+    def test_advanced_visitor(self):
+        # Check we are able to extract expected information from a well known
+        # example
+        path = os.path.join(os.path.dirname(__file__), "resources", "scan_request_test.edl")
+        tc = edl.EditList(
+            file_path=path,
+            visitor=self.advanced_visitor,
+        )
+        for edit in tc.edits:
+            self.assertIsNotNone(edit._shot_name)
+            self.assertIsNotNone(edit._name)
+            self.assertEqual(edit._asc_sat, "asat%d" % edit.id)
+            self.assertEqual(edit._asc_sop, "asop%d" % edit.id)
+            self.assertEqual(edit._version, "V0001")
+            self.assertEqual(edit._name, "%s_%s_%s" % (edit._shot_name, edit._type, edit._version))
+
