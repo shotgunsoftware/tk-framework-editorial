@@ -42,6 +42,10 @@ def timecode_from_frame(frame, fps=24):
     :param fps: Number of frames per seconds, as an int
     :return: A string in hh:mm:ss:ff format
     """
+    
+    # int values are casted to float with Decimal
+    # to ensure we do real divisions and not C like integer divisions
+
     # total number of seconds in whole clip
     seconds = decimal.Decimal(frame) / fps
     # remainder frames from seconds calculation
