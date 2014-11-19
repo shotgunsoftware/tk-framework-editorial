@@ -125,6 +125,14 @@ class Timecode(object):
 
     # Redefine some standars operators
     def __add__(self, right):
+        """
+        + operator override : Add a timecode or a number of frames to this Timecode
+        with the Timecode on the right of the operator
+        
+        :param right: Right operand for + operator, either a Timecode instance or an int
+                representing a number of frames
+        :return: A new Timecode instance, in this Timecode fps, result of the addition
+        """
         if isinstance(right, Timecode):
             return self.from_frame( self.to_frame() + right.to_frame(), self._fps)
         if isinstance(right, int):
@@ -132,9 +140,23 @@ class Timecode(object):
         raise TypeError("Unsupported operand type for +" % str(type(right))[8:-2])
 
     def __radd__(self,left):
+        """
+        + operator override : Add a number of frames to this Timecode, with the 
+        Timecode on the left of the + operator
+
+        :return: A new Timecode instance, in this Timecode fps, result of the addition
+        """
         return self.__add__(left)
     
     def __sub__(self, right):
+        """
+        - operator override : Substract a timecode or a number of frames to this Timecode
+        with the Timecode on the right of the operator
+        
+        :param right: Right operand for - operator, either a Timecode instance or an int
+                representing a number of frames
+        :return: A new Timecode instance, in this Timecode fps, result of the substraction
+        """
         if isinstance(right, Timecode):
             return self.from_frame( self.to_frame() - right.to_frame(), self._fps)
         if isinstance(right, int):
@@ -142,6 +164,12 @@ class Timecode(object):
         raise TypeError("Unsupported operand type for -" % str(type(right))[8:-2])
 
     def __rsub__(self, left):
+        """
+        - operator override : Substract a number of frames to this Timecode, with the
+        Timecode on the left of the - operator
+
+        :return: A new Timecode instance, in this Timecode fps, result of the substraction
+        """
         return self.__sub__(left)
     
     def __str__(self):
