@@ -413,10 +413,10 @@ class EditList(object):
             versions = []
             edit = None
             try:
-                for line in handle.read().split("\n"):
+                for line in handle:
                     # Not sure why we have to do that ...
                     # Some crappy Windows thing ?
-                    line = line.replace("\x1a", "").strip()
+                    line = line.replace("\x1a", "").strip(" \n")
                     if not line:
                         continue
 
