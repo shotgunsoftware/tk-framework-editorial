@@ -120,6 +120,9 @@ class Edit(object):
     edit.my_own_attribute = "awesome"
     They then are accessible like other regular attributes, e.g.
     print edit.my_own_attribute
+    
+    This implementation assume timecodes out are exclusive, meaning that a one
+    frame long record would be 00:00:00:01 00:00:00:02 ( not 00:00:00:01 )
 
     """
     # Our known attributes
