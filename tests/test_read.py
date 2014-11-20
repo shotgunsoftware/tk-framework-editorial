@@ -41,6 +41,9 @@ class TestRead(unittest.TestCase):
         logger.info("Comments are :\n\t%s" % "\n\t".join(edit.comments))
         # Test if adding a runtime attribute works
         edit.private_id = edit.id
+        # Check if bad things happen when we set attributes clashing with
+        # property getter
+        edit.id = "foo"
 
     def test_visitor(self):
         tc = edl.EditList()
