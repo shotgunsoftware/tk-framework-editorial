@@ -26,7 +26,7 @@ _COMMENTS_KEYWORDS = [
 # The regexp is build with : "((?:" + keyword1 + ")|(?:" + keyword2 + ... + "))"
 # ")|(?:" being used to join the different keywords together
 _COMMENT_REGEXP = re.compile(
-    "\*\s*((?:%s))\s*:\s+(.*)" % ")|(?:".join(_COMMENTS_KEYWORDS)
+    "\*\s*(?P<type>(?:%s))\s*:\s+(?P<value>.*)" % ")|(?:".join(_COMMENTS_KEYWORDS)
 )
 
 def process_edit(edit, logger, shot_regexp=None):
@@ -68,8 +68,8 @@ def process_edit(edit, logger, shot_regexp=None):
     for comment in edit.comments:
         m= _COMMENT_REGEXP.match(comment)
         if m:
-            type = m.group(1)
-            value = m.group(2)
+            type = m.group("type")
+            value = m.group("value")
             logger.debug("Found in comments [%s] : %s" % (type, value))
             if type == "LOC":
                 tokens = value.split()
