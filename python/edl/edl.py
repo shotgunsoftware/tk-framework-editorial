@@ -29,6 +29,24 @@ _COMMENT_REGEXP = re.compile(
     "\*\s*(?P<type>(?:%s))\s*:\s+(?P<value>.*)" % ")|(?:".join(_COMMENTS_KEYWORDS)
 )
 
+class EditProcessor(object):
+    """
+    An example of keeping previous parsed edit event around, while using the process
+    edit function
+    """
+    def __init__(self, shot_regexp=None):
+        super(EditProcessor, self).__init__()
+        self._previous_edit = None
+        self._shot_regexp = shot_regexp
+
+    def process(self, edit, logger):
+        """
+        Example : process the current edit and display previous and current one
+        """
+        process_edit(edit, logger, self._shot_regexp)
+        logger.info("Treated edit %s previous was %s" % ( edit, self._previous_edit))
+        self._previous_edit = edit
+
 def process_edit(edit, logger, shot_regexp=None):
     """
     Extract standard meta data from comments for an Edit :

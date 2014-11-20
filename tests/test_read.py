@@ -64,6 +64,13 @@ class TestRead(unittest.TestCase):
             tc = edl.EditList()
             tc.read_cmx_edl(f, visitor=edl.process_edit)
 
+    def test_class_visitor(self):
+        processor = edl.EditProcessor()
+        # Make sure we are able to read all examples
+        for f in self._edl_examples:
+            tc = edl.EditList()
+            tc.read_cmx_edl(f, visitor=processor.process)
+
     def test_advanced_visitor(self):
         # Check we are able to extract expected information from a well known
         # example
