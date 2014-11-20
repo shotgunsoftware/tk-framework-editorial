@@ -111,12 +111,12 @@ def process_edit(edit, logger, shot_regexp=None):
                 if "version" in grid:
                     edit._version = m.group("version")
 
-class Edit(object):
+class EditEvent(object):
     """
     An entry, or event, or edit from an edit list
     
     New attributes can be added at runtime, provided that they don't
-    clash with Edit regular attributes, by just setting their value, e.g.
+    clash with EditEvent regular attributes, by just setting their value, e.g.
     edit.my_own_attribute = "awesome"
     They then are accessible like other regular attributes, e.g.
     print edit.my_own_attribute
@@ -153,7 +153,7 @@ class Edit(object):
         fps         =  24,
     ):
         """
-        Instantiate a new Edit
+        Instantiate a new EditEvent
 
         :param id: The edit id in a Edit Decision list, as an int
         :param reel: The reel for this edit
@@ -290,7 +290,7 @@ class Edit(object):
 
     def __str__(self):
         """
-        String representation for this Edit
+        String representation for this EditEvent
         """
         return "%03d %s %s %s %s %s %s %s" % (
             self._id,
@@ -326,7 +326,7 @@ class Edit(object):
         """
         if attr_name in self._meta_data:
             return self._meta_data[attr_name]
-        raise AttributeError("Edit has no attribute %s" % attr_name)
+        raise AttributeError("EditEvent has no attribute %s" % attr_name)
 
 class EditList(object):
     """
@@ -358,7 +358,7 @@ class EditList(object):
         :param fps: Number of frames per second for this EditList
         :param file_path: Full path to a file to read
         :param visitor: A callable which will be called on every edit and should 
-                        accept as input an Edit and a logger
+                        accept as input an EditEvent and a logger
         """
         
         self._title = None
@@ -377,7 +377,7 @@ class EditList(object):
     @property
     def edits(self):
         """
-        Return a list of all edits in this EditList
+        Return a list of all edit events in this EditList
         """
         return self._edits
 
@@ -404,7 +404,7 @@ class EditList(object):
 
         :param path: Full path to a cmx compatible file to read
         :param visitor: A callable which will be called on every edit and should 
-                        accept as input an Edit and a logger
+                        accept as input an EditEvent and a logger
         """
         # Reset defaut values
         self._title = None
@@ -455,7 +455,7 @@ class EditList(object):
                             # Number of tokens can vary in the middle
                             # so tokens at the end of the line are indexed with
                             # negative indexes
-                            edit = Edit(
+                            edit = EditEvent(
                                 fps         = fps,
                                 id          = int(line_tokens[0]),
                                 reel        = line_tokens[1],
