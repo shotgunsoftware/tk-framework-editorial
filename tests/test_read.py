@@ -41,9 +41,6 @@ class TestRead(unittest.TestCase):
         logger.info("Comments are :\n\t%s" % "\n\t".join(edit.comments))
         # Test if adding a runtime attribute works
         edit.private_id = edit.id
-        # Check if bad things happen when we set attributes clashing with
-        # property getter
-        edit.id = "foo"
 
     def test_visitor(self):
         tc = edl.EditList()
@@ -86,4 +83,16 @@ class TestRead(unittest.TestCase):
             self.assertEqual(edit._asc_sop, "asop%d" % edit.id)
             self.assertEqual(edit._version, "V0001")
             self.assertEqual(edit._name, "%s_%s_%s" % (edit._shot_name, edit._type, edit._version))
+
+    def failing_property_override(self, edit, logger):
+        edit.id = "foo"
+
+    def test_accessor_overrides(self):
+        with self.assertRaises(AttributeError) as cm:
+            for f in self._edl_examples:
+                tc = edl.EditList(
+                    file_path=f,
+                    visitor=self.failing_property_override,
+                )
+
 

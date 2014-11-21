@@ -158,6 +158,9 @@ class EditEvent(object):
         "_record_in",
         "_record_out",
     ]
+    # Protect accessors clashes by building a list of them
+    # from internal attributes
+    __protected = [x[1:] for x in __mine]
 
     def __init__(
         self,
@@ -329,6 +332,8 @@ class EditEvent(object):
         :param attr_name: Name of the attribute that needs setting
         :param value: The value the attribute should take
         """
+        if attr_name in self.__protected:
+            raise AttributeError("EditEvent %s attribute can't be redefined" % attr_name)
         if attr_name in self.__mine:
             object.__setattr__(self, attr_name, value)
         else:
