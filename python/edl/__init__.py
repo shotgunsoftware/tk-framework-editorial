@@ -8,4 +8,4 @@
 # agreement to the Shotgun Pipeline Toolkit Source Code License. All rights 
 # not expressly granted therein are reserved by Shotgun Software Inc.
 from .edl import EditList, EditEvent, process_edit, EditProcessor
-from .timecode import Timecode
+from .timecode import Timecode, frame_from_timecode, timecode_from_frame
