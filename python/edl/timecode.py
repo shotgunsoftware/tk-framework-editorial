@@ -126,7 +126,13 @@ class Timecode(object):
         return frame_from_timecode(
             (self._hours, self._minutes, self._seconds, self._frames),self._fps
         )
+
     def to_seconds(self):
+        """
+        Convert this timecode to seconds, using its frame rate
+        
+        :return: Number of seconds as a Decimal
+        """
         frame = self.to_frame()
         return decimal.Decimal(frame) / self._fps
 
