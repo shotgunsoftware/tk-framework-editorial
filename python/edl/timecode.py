@@ -126,6 +126,9 @@ class Timecode(object):
         return frame_from_timecode(
             (self._hours, self._minutes, self._seconds, self._frames),self._fps
         )
+    def to_seconds(self):
+        frame = self.to_frame()
+        return decimal.Decimal(frame) / self._fps
 
     # Redefine some standars operators
     def __add__(self, right):
