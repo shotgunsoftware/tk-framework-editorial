@@ -435,7 +435,6 @@ class EditList(object):
         # And read the file
         self.__logger.info("Parsing EDL %s" % path)
         with open(path, "rU") as handle:
-            title = ""
             versions = []
             edit = None
             try:
@@ -449,7 +448,8 @@ class EditList(object):
                     self.__logger.debug("Treating : [%s]" % line)
                     line_tokens = line.split()
                     if line.startswith("TITLE:"):
-                        self._title = line_tokens[-1]
+                        if len(line_tokens) > 1:
+                            self._title = " ".join(line_tokens[1:])
                     elif line.startswith("FCM:"):
                         # Can be DROP FRAME or NON DROP FRAME
                         if line_tokens[1] == "DROP FRAME":
