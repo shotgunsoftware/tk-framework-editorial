@@ -208,6 +208,13 @@ class EditEvent(object):
         return self._id
 
     @property
+    def reel(self):
+        """
+        Return the reel for this edit
+        """
+        return self._reel
+
+    @property
     def comments(self):
         """
         Return the comments for this edit, as a list
