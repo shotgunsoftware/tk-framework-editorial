@@ -474,12 +474,18 @@ class EditList(object):
                             )
                         edit.add_retime(line_tokens)
                     elif line_tokens[0].isdigit():
+                        id = int(line_tokens[0])
                         # New edit
                         # Time to call the visitor ( if any ) with the previous
                         # edit ( if any )
-                        if edit and visitor:
-                            self.__logger.debug("Visiting : [%s]" % edit)
-                            visitor(edit, self.__logger)
+                        if edit :
+                            if edit.id == id:
+                                # Duplicated id, it is an effect
+                                edit.add_effect(line_tokens)
+                                continue
+                            if visitor:
+                                self.__logger.debug("Visiting : [%s]" % edit)
+                                visitor(edit, self.__logger)
                         type = line_tokens[3]
                         if type == "C": # cut
                             # Number of tokens can vary in the middle
@@ -487,7 +493,7 @@ class EditList(object):
                             # negative indexes
                             edit = EditEvent(
                                 fps         = fps,
-                                id          = int(line_tokens[0]),
+                                id          = id,
                                 reel        = line_tokens[1],
                                 channels    = line_tokens[2],
                                 source_in   = line_tokens[-4],
