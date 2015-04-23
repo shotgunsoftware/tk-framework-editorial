@@ -12,6 +12,7 @@ import os
 import unittest2 as unittest
 from edl import edl
 import logging
+import re
 
 class TestRead(unittest.TestCase):
     def __init__(self, *args, **kwargs):
@@ -30,6 +31,10 @@ class TestRead(unittest.TestCase):
         tc.read_cmx_edl(file)
         for edit in tc._edits:
             print edit
+            for c in edit.pure_comments:
+                # Check that pure comments are pure and do not contain
+                # known keywords
+                self.assertIsNone(edl._COMMENT_REGEXP.match(c))
 
     def test_read_all_files(self):
         # Try to read all edls from resources directory
@@ -83,6 +88,19 @@ class TestRead(unittest.TestCase):
             self.assertEqual(edit._asc_sop, "asop%d" % edit.id)
             self.assertEqual(edit._version, "V0001")
             self.assertEqual(edit._name, "%s_%s_%s" % (edit._shot_name, edit._type, edit._version))
+            # All comments in this example include known keywords
+            # so the very first call to next should raise a StopIteration
+            with self.assertRaises(StopIteration):
+                edit.pure_comments.next()
+
+    def test_pure_comments(self):
+        path = os.path.join(os.path.dirname(__file__), "resources", "ER_00119_with_comments.edl")
+        tc = edl.EditList(
+            file_path=path,
+        )
+        for edit in tc.edits:
+            for c in edit.pure_comments:
+                self.assertIsNotNone(re.search("this_is_a_pure_comment", c))
 
     def failing_property_override(self, edit, logger):
         edit.id = "foo"
