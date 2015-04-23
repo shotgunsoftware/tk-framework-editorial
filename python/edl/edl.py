@@ -222,6 +222,16 @@ class EditEvent(object):
         return self._comments
 
     @property
+    def pure_comments(self):
+        """
+        An iterator over "pure" comments, that is comments which
+        do not contain known keywords
+        """
+        for comment in self._comments:
+            if not _COMMENT_REGEXP.match(comment):
+                yield comment
+            
+    @property
     def timecodes(self):
         """
         Return the source in, source out, record in, record out timecodes for this

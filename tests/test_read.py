@@ -83,6 +83,11 @@ class TestRead(unittest.TestCase):
             self.assertEqual(edit._asc_sop, "asop%d" % edit.id)
             self.assertEqual(edit._version, "V0001")
             self.assertEqual(edit._name, "%s_%s_%s" % (edit._shot_name, edit._type, edit._version))
+            # All comments in this example include known keywords
+            # so the very first call to next should raise a StopIteration
+            with self.assertRaises(StopIteration):
+                edit.pure_comments.next()
+
 
     def failing_property_override(self, edit, logger):
         edit.id = "foo"
