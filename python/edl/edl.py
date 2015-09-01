@@ -414,6 +414,14 @@ class EditList(object):
                 )
             self.read_cmx_edl(file_path, fps=self._fps, visitor=visitor)
 
+    @classmethod
+    def set_logger(cls, logger):
+        """
+        Allow to use another logger than the default one provided in this
+        framework
+        """
+        cls.__logger = logger
+
     @property
     def edits(self):
         """
