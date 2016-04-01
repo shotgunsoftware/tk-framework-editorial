@@ -46,6 +46,8 @@ def timecode_from_frame(frame, fps=24):
     # int values are casted to float with Decimal
     # to ensure we do real divisions and not C like integer divisions
 
+    fps = decimal.Decimal(fps)
+
     # total number of seconds in whole clip
     seconds = decimal.Decimal(frame) / fps
     # remainder frames from seconds calculation
