@@ -1,22 +1,25 @@
 # Copyright (c) 2013 Shotgun Software Inc.
-# 
+#
 # CONFIDENTIAL AND PROPRIETARY
-# 
-# This work is provided "AS IS" and subject to the Shotgun Pipeline Toolkit 
+#
+# This work is provided "AS IS" and subject to the Shotgun Pipeline Toolkit
 # Source Code License included in this distribution package. See LICENSE.
-# By accessing, using, copying or modifying this work you indicate your 
-# agreement to the Shotgun Pipeline Toolkit Source Code License. All rights 
+# By accessing, using, copying or modifying this work you indicate your
+# agreement to the Shotgun Pipeline Toolkit Source Code License. All rights
 # not expressly granted therein are reserved by Shotgun Software Inc.
 
 import os
+import decimal
 import unittest2 as unittest
 from edl import edl
+from edl import timecode
 import logging
 import re
 
+
 class TestRead(unittest.TestCase):
     def __init__(self, *args, **kwargs):
-        super(TestRead,self).__init__(*args, **kwargs)
+        super(TestRead, self).__init__(*args, **kwargs)
         self._edl_examples = []
 
     def setUp(self):
@@ -113,4 +116,24 @@ class TestRead(unittest.TestCase):
                     visitor=self.failing_property_override,
                 )
 
+    def test_tc_round_trip(self):
+        tc = "01:02:03:04"
+        frame = timecode.frame_from_timecode(tc, fps=24)
+        new_tc = timecode.timecode_from_frame(frame, fps=24)
+        assert tc == new_tc
 
+    def test_frame_round_trip(self):
+        frame = 2394732
+        tc = timecode.timecode_from_frame(frame, fps=24)
+        new_frame = timecode.frame_from_timecode(tc, fps=24)
+        assert frame == new_frame
+
+    def test_fps_types(self):
+        _int = 24
+        _float = 23.95
+        _decimal = decimal.Decimal(24)
+        frame = 2394732
+        tc_int = timecode.timecode_from_frame(frame, fps=_int)
+        tc_float = timecode.timecode_from_frame(frame, fps=_float)
+        tc_decimal = timecode.timecode_from_frame(frame, fps=_decimal)
+        assert tc_int == tc_float == tc_decimal
