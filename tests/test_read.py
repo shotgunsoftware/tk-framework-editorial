@@ -145,7 +145,6 @@ class TestRead(unittest.TestCase):
             tc_float = timecode.timecode_from_frame(frame, fps=_float)
             tc_decimal = timecode.timecode_from_frame(frame, fps=_decimal)
             assert tc_int == tc_float == tc_decimal
-
         # Testing input of non-int
         frame_rates = [23.976, 59.94]
         for fps in frame_rates:
