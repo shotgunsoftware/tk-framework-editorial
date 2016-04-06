@@ -1,32 +1,32 @@
 # Copyright (c) 2013 Shotgun Software Inc.
-# 
+#
 # CONFIDENTIAL AND PROPRIETARY
-# 
-# This work is provided "AS IS" and subject to the Shotgun Pipeline Toolkit 
+#
+# This work is provided "AS IS" and subject to the Shotgun Pipeline Toolkit
 # Source Code License included in this distribution package. See LICENSE.
-# By accessing, using, copying or modifying this work you indicate your 
-# agreement to the Shotgun Pipeline Toolkit Source Code License. All rights 
+# By accessing, using, copying or modifying this work you indicate your
+# agreement to the Shotgun Pipeline Toolkit Source Code License. All rights
 # not expressly granted therein are reserved by Shotgun Software Inc.
 
 import sys
 import os
 from optparse import OptionParser
+import unittest2 as unittest
 import logging
 logging.basicConfig(level=logging.INFO)
 
 # prepend tank_vendor location to PYTHONPATH to make sure we are running
 # the tests against the vendor libs, not local libs on the machine
-python_path = os.path.abspath(os.path.join( os.path.dirname(__file__), "..", "python"))
+python_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "python"))
 print "Adding tank location to python_path: %s" % python_path
 sys.path = [python_path] + sys.path
 
 # prepend tank_vendor location to PYTHONPATH to make sure we are running
 # the tests against the vendor libs, not local libs on the machine
-python_path = os.path.abspath(os.path.join( os.path.dirname(__file__), "python"))
+python_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "python"))
 print "Adding tests/python location to python_path: %s" % python_path
 sys.path = [python_path] + sys.path
 
-import unittest2 as unittest
 
 class TestRunner(object):
     def __init__(self):
@@ -64,13 +64,13 @@ if __name__ == "__main__":
     parser = OptionParser()
     parser.add_option("--with-coverage",
                       action="store_true",
-                      dest="coverage", 
+                      dest="coverage",
                       help="run with coverage (requires coverage is installed)")
     (options, args) = parser.parse_args()
     test_name = None
     if args:
         test_name = args[0]
-     
+
     runner = TestRunner()
 
     if options.coverage:
@@ -83,4 +83,3 @@ if __name__ == "__main__":
     if ret_val.errors or ret_val.failures:
         exit_val = 1
     sys.exit(exit_val)
-

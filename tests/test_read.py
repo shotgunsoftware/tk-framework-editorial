@@ -1,22 +1,25 @@
 # Copyright (c) 2013 Shotgun Software Inc.
-# 
+#
 # CONFIDENTIAL AND PROPRIETARY
-# 
-# This work is provided "AS IS" and subject to the Shotgun Pipeline Toolkit 
+#
+# This work is provided "AS IS" and subject to the Shotgun Pipeline Toolkit
 # Source Code License included in this distribution package. See LICENSE.
-# By accessing, using, copying or modifying this work you indicate your 
-# agreement to the Shotgun Pipeline Toolkit Source Code License. All rights 
+# By accessing, using, copying or modifying this work you indicate your
+# agreement to the Shotgun Pipeline Toolkit Source Code License. All rights
 # not expressly granted therein are reserved by Shotgun Software Inc.
 
 import os
+import decimal
 import unittest2 as unittest
 from edl import edl
+from edl import timecode
 import logging
 import re
 
+
 class TestRead(unittest.TestCase):
     def __init__(self, *args, **kwargs):
-        super(TestRead,self).__init__(*args, **kwargs)
+        super(TestRead, self).__init__(*args, **kwargs)
         self._edl_examples = []
 
     def setUp(self):
@@ -26,11 +29,11 @@ class TestRead(unittest.TestCase):
                 self._edl_examples.append(os.path.join(resources_dir, f))
 
     def read_edl_file(self, file):
-        print "Reading %s" % file
+        logging.info("Reading %s" % file)
         tc = edl.EditList()
         tc.read_cmx_edl(file)
         for edit in tc._edits:
-            print edit
+            logging.info(edit)
             for c in edit.pure_comments:
                 # Check that pure comments are pure and do not contain
                 # known keywords
@@ -113,4 +116,42 @@ class TestRead(unittest.TestCase):
                     visitor=self.failing_property_override,
                 )
 
+    def test_tc_round_trip(self):
+        # We need to make sure tc values aren't mutated when going back and
+        # forth from tc to frames to tc
+        tc = "01:02:03:04"
+        frame = timecode.frame_from_timecode(tc, fps=24)
+        new_tc = timecode.timecode_from_frame(frame, fps=24)
+        assert tc == new_tc
 
+    def test_frame_round_trip(self):
+        # We need to make sure frame values aren't mutated when going back and
+        # forth from frames to tc to frames
+        frames = [2394732, -2394732]
+        for frame in frames:
+            tc = timecode.timecode_from_frame(frame, fps=24)
+            new_frame = timecode.frame_from_timecode(tc, fps=24)
+            assert frame == new_frame
+
+    def test_fps_types(self):
+        # Testing input of effective int and establishing the fact that these
+        # are valid input types
+        frame_rates = [24, -24, 24.00, -24.00, 60, -60, 60.00, -60.00]
+        for fps in frame_rates:
+            _int = int(fps)
+            _float = float(fps)
+            _decimal = decimal.Decimal(fps)
+            frame = 2394732
+            tc_int = timecode.timecode_from_frame(frame, fps=_int)
+            tc_float = timecode.timecode_from_frame(frame, fps=_float)
+            tc_decimal = timecode.timecode_from_frame(frame, fps=_decimal)
+            assert tc_int == tc_float == tc_decimal
+        # Testing input of non-int
+        frame_rates = [23.976, -23.976, 59.94, -59.94]
+        for fps in frame_rates:
+            _float = float(fps)
+            _decimal = decimal.Decimal(fps)
+            frame = 2394732
+            tc_float = timecode.timecode_from_frame(frame, fps=_float)
+            tc_decimal = timecode.timecode_from_frame(frame, fps=_decimal)
+            assert tc_float == tc_decimal
