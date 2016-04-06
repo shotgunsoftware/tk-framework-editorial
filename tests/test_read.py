@@ -117,23 +117,41 @@ class TestRead(unittest.TestCase):
                 )
 
     def test_tc_round_trip(self):
+        # We need to make sure tc values aren't mutated when going back and
+        # forth from tc to frames to tc
         tc = "01:02:03:04"
         frame = timecode.frame_from_timecode(tc, fps=24)
         new_tc = timecode.timecode_from_frame(frame, fps=24)
         assert tc == new_tc
 
     def test_frame_round_trip(self):
+        # We need to make sure frame values aren't mutated when going back and
+        # forth from frames to tc to frames
         frame = 2394732
         tc = timecode.timecode_from_frame(frame, fps=24)
         new_frame = timecode.frame_from_timecode(tc, fps=24)
         assert frame == new_frame
 
     def test_fps_types(self):
-        _int = 24
-        _float = 23.95
-        _decimal = decimal.Decimal(24)
-        frame = 2394732
-        tc_int = timecode.timecode_from_frame(frame, fps=_int)
-        tc_float = timecode.timecode_from_frame(frame, fps=_float)
-        tc_decimal = timecode.timecode_from_frame(frame, fps=_decimal)
-        assert tc_int == tc_float == tc_decimal
+        # Testing input of effective int and establishing the fact that these
+        # are valid input types
+        frame_rates = [24, 24.00, 60, 60.00]
+        for fps in frame_rates:
+            _int = int(fps)
+            _float = float(fps)
+            _decimal = decimal.Decimal(fps)
+            frame = 2394732
+            tc_int = timecode.timecode_from_frame(frame, fps=_int)
+            tc_float = timecode.timecode_from_frame(frame, fps=_float)
+            tc_decimal = timecode.timecode_from_frame(frame, fps=_decimal)
+            assert tc_int == tc_float == tc_decimal
+
+        # Testing input of non-int
+        frame_rates = [23.976, 59.94]
+        for fps in frame_rates:
+            _float = float(fps)
+            _decimal = decimal.Decimal(fps)
+            frame = 2394732
+            tc_float = timecode.timecode_from_frame(frame, fps=_float)
+            tc_decimal = timecode.timecode_from_frame(frame, fps=_decimal)
+            assert tc_float == tc_decimal
