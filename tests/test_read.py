@@ -29,11 +29,11 @@ class TestRead(unittest.TestCase):
                 self._edl_examples.append(os.path.join(resources_dir, f))
 
     def read_edl_file(self, file):
-        print "Reading %s" % file
+        logging.info("Reading %s" % file)
         tc = edl.EditList()
         tc.read_cmx_edl(file)
         for edit in tc._edits:
-            print edit
+            logging.info(edit)
             for c in edit.pure_comments:
                 # Check that pure comments are pure and do not contain
                 # known keywords
@@ -127,15 +127,16 @@ class TestRead(unittest.TestCase):
     def test_frame_round_trip(self):
         # We need to make sure frame values aren't mutated when going back and
         # forth from frames to tc to frames
-        frame = 2394732
-        tc = timecode.timecode_from_frame(frame, fps=24)
-        new_frame = timecode.frame_from_timecode(tc, fps=24)
-        assert frame == new_frame
+        frames = [2394732, -2394732]
+        for frame in frames:
+            tc = timecode.timecode_from_frame(frame, fps=24)
+            new_frame = timecode.frame_from_timecode(tc, fps=24)
+            assert frame == new_frame
 
     def test_fps_types(self):
         # Testing input of effective int and establishing the fact that these
         # are valid input types
-        frame_rates = [24, 24.00, 60, 60.00]
+        frame_rates = [24, -24, 24.00, -24.00, 60, -60, 60.00, -60.00]
         for fps in frame_rates:
             _int = int(fps)
             _float = float(fps)
@@ -146,7 +147,7 @@ class TestRead(unittest.TestCase):
             tc_decimal = timecode.timecode_from_frame(frame, fps=_decimal)
             assert tc_int == tc_float == tc_decimal
         # Testing input of non-int
-        frame_rates = [23.976, 59.94]
+        frame_rates = [23.976, -23.976, 59.94, -59.94]
         for fps in frame_rates:
             _float = float(fps)
             _decimal = decimal.Decimal(fps)
