@@ -406,7 +406,7 @@ class EditList(object):
         self._fps = fps
         if file_path:
             _, ext = os.path.splitext(file_path)
-            if ext != ".edl":
+            if ext.lower() != ".edl":
                 raise NotImplementedError(
                     "Can't read %s : don't know how to read files with %s extension",
                     file_path,
