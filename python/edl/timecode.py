@@ -95,7 +95,7 @@ class Timecode(object):
         # Do some basic checks
         if self._frames >= self._fps:
             raise ValueError(
-                "Invalid frame value %d, it must be smaller than the framerate %d" % (
+                "Invalid frame value %d, it must be smaller than the specified framerate (%d fps)" % (
                 self._frames, self._fps)
             )
         if self._hours > 23:
