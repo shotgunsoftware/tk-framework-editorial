@@ -377,7 +377,7 @@ class EditList(object):
     """
     An Edit Decision List
 
-    Typical use of EditList could look like that :
+    Typical use of EditList could look like this:
 
     # Define a visitor to extract some extra information from comments or locators
     def edit_parser(edit):
@@ -413,7 +413,7 @@ class EditList(object):
             _, ext = os.path.splitext(file_path)
             if ext.lower() != ".edl":
                 raise NotImplementedError(
-                    "Can't read %s : don't know how to read files with %s extension",
+                    "Can't read %s: don't know how to read files with %s extension",
                     file_path,
                     ext
                 )
@@ -467,6 +467,7 @@ class EditList(object):
         with open(path, "rU") as handle:
             versions = []
             edit = None
+            audio_offset = 0
             try:
                 for line in handle:
                     # Not sure why we have to do that ...
@@ -475,7 +476,7 @@ class EditList(object):
                     if not line:
                         continue
 
-                    self.__logger.debug("Treating : [%s]" % line)
+                    self.__logger.debug("Treating: [%s]" % line)
                     line_tokens = line.split()
                     if line.startswith("TITLE:"):
                         if len(line_tokens) > 1:
@@ -497,10 +498,17 @@ class EditList(object):
                             )
                         edit.add_retime(line_tokens)
                     elif line_tokens[0].isdigit():
-                        id = int(line_tokens[0])
+                        media_type = line_tokens[2]
+                        event_type = line_tokens[3]
+                        # if we have an audio track, ignore it and adjust the
+                        # event id numbering to reflect that.
+                        if media_type == "AA":
+                            audio_offset += 1
+                            continue
+                        id = int(line_tokens[0]) - audio_offset
                         # New edit
-                        # Time to call the visitor ( if any ) with the previous
-                        # edit ( if any )
+                        # Time to call the visitor (if any) with the previous
+                        # edit (if any)
                         if edit:
                             if edit.id == id:
                                 # Duplicated id, it is an effect
@@ -509,8 +517,10 @@ class EditList(object):
                             if visitor:
                                 self.__logger.debug("Visiting : [%s]" % edit)
                                 visitor(edit, self.__logger)
-                        type = line_tokens[3]
-                        if type == "C":  # cut
+
+                        # Include our event if it's a Cut type and not and not
+                        # an audio track.
+                        if event_type == "C" and media_type != "AA":  # cut
                             # Number of tokens can vary in the middle
                             # so tokens at the end of the line are indexed with
                             # negative indexes
@@ -518,7 +528,7 @@ class EditList(object):
                                 fps         = fps,
                                 id          = id,
                                 reel        = line_tokens[1],
-                                channels    = line_tokens[2],
+                                channels    = media_type,
                                 source_in   = line_tokens[-4],
                                 source_out  = line_tokens[-3],
                                 record_in   = line_tokens[-2],
