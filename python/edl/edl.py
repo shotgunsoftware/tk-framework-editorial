@@ -1,11 +1,11 @@
-# Copyright (c) 2014 Shotgun Software Inc.
-# 
+# Copyright (c) 2016 Shotgun Software Inc.
+#
 # CONFIDENTIAL AND PROPRIETARY
-# 
-# This work is provided "AS IS" and subject to the Shotgun Pipeline Toolkit 
+#
+# This work is provided "AS IS" and subject to the Shotgun Pipeline Toolkit
 # Source Code License included in this distribution package. See LICENSE.
-# By accessing, using, copying or modifying this work you indicate your 
-# agreement to the Shotgun Pipeline Toolkit Source Code License. All rights 
+# By accessing, using, copying or modifying this work you indicate your
+# agreement to the Shotgun Pipeline Toolkit Source Code License. All rights
 # not expressly granted therein are reserved by Shotgun Software Inc.
 
 from .timecode import Timecode
@@ -22,12 +22,13 @@ _COMMENTS_KEYWORDS = [
 ]
 # Build a regular expression to match the keywords above, matching lines beginning
 # with :
-#* KEYWORD:
+# * KEYWORD:
 # The regexp is build with : "((?:" + keyword1 + ")|(?:" + keyword2 + ... + "))"
 # ")|(?:" being used to join the different keywords together
 _COMMENT_REGEXP = re.compile(
     "\*\s*(?P<type>(?:%s))\s*:\s+(?P<value>.*)" % ")|(?:".join(_COMMENTS_KEYWORDS)
 )
+
 
 class EditProcessor(object):
     """
@@ -44,8 +45,9 @@ class EditProcessor(object):
         Example : process the current edit and display previous and current one
         """
         process_edit(edit, logger, self._shot_regexp)
-        logger.info("Treated edit %s previous was %s" % ( edit, self._previous_edit))
+        logger.info("Treated edit %s previous was %s" % (edit, self._previous_edit))
         self._previous_edit = edit
+
 
 def process_edit(edit, logger, shot_regexp=None):
     """
@@ -84,7 +86,7 @@ def process_edit(edit, logger, shot_regexp=None):
 #    edit._version = None
     # Treat all comments
     for comment in edit.comments:
-        m= _COMMENT_REGEXP.match(comment)
+        m = _COMMENT_REGEXP.match(comment)
         if m:
             type = m.group("type")
             value = m.group("value")
@@ -115,12 +117,13 @@ def process_edit(edit, logger, shot_regexp=None):
         m = regexp.search(edit._name)
         if m:
             logger.debug("Matched groups : %s" % str(m.groups()))
-            if regexp.groups == 1: # Only one capturing group, use it for the shot name
+            if regexp.groups == 1:  # Only one capturing group, use it for the shot name
                 edit._shot_name = m.group(1)
             else:
                 grid = regexp.groupindex
                 if "shot_name" not in grid:
-                    raise ValueError("No 'shot_name' named group in regular expression %s" % regexp.pattern)
+                    raise ValueError(
+                        "No \"shot_name\" named group in regular expression %s" % regexp.pattern)
                 edit._shot_name = m.group("shot_name")
                 if "type" in grid:
                     edit._type = m.group("type")
@@ -129,16 +132,17 @@ def process_edit(edit, logger, shot_regexp=None):
                 if "version" in grid:
                     edit._version = m.group("version")
 
+
 class EditEvent(object):
     """
     An entry, or event, or edit from an edit list
-    
+
     New attributes can be added at runtime, provided that they don't
     clash with EditEvent regular attributes, by just setting their value, e.g.
     edit.my_own_attribute = "awesome"
     They then are accessible like other regular attributes, e.g.
     print edit.my_own_attribute
-    
+
     This implementation assume timecodes out are exclusive, meaning that a one
     frame long record would be 00:00:00:01 00:00:00:02 ( not 00:00:00:01 )
 
@@ -185,12 +189,12 @@ class EditEvent(object):
         :param record_out: Timecode out for the recorder, as a hh:mm:ss:ff string
         :param fps: Number of frames per second for this edit, as a hh:mm:ss:ff string
         """
-        
+
         # If new attributes are added here, their name should be added to the
         # __mine list as well, otherwise will end up in the meta data dictionary
         self._effect = []
         self._comments = []
-        self._meta_data = {} # A place holder where additional meta data can be stored
+        self._meta_data = {}  # A place holder where additional meta data can be stored
         self._retime = None
         self._id = int(id)
         self._reel = reel
@@ -230,7 +234,7 @@ class EditEvent(object):
         for comment in self._comments:
             if not _COMMENT_REGEXP.match(comment):
                 yield comment
-            
+
     @property
     def timecodes(self):
         """
@@ -303,7 +307,7 @@ class EditEvent(object):
         Later we might want to parse the tokens, and store some actual
         effects value on this edit
         """
-        self._effect.append( " ".join(tokens))
+        self._effect.append(" ".join(tokens))
 
     def add_comments(self, comments):
         """
@@ -345,7 +349,7 @@ class EditEvent(object):
         """
         Allow new attributes to be added on the fly, e.g. when parsing a file
         with a visitor
-        
+
         :param attr_name: Name of the attribute that needs setting
         :param value: The value the attribute should take
         """
@@ -359,7 +363,7 @@ class EditEvent(object):
     def __getattr__(self, attr_name):
         """
         Retrieve runtime attributes from meta_data dictionary
-        
+
         :param attr_name: An attribute name
         :return: The value for the given attribute name
         :raise: AttributeError if the attribute can't be found
@@ -368,12 +372,13 @@ class EditEvent(object):
             return self._meta_data[attr_name]
         raise AttributeError("EditEvent has no attribute %s" % attr_name)
 
+
 class EditList(object):
     """
     An Edit Decision List
-    
+
     Typical use of EditList could look like that :
-    
+
     # Define a visitor to extract some extra information from comments or locators
     def edit_parser(edit):
         # New attributes can be added on the fly
@@ -394,13 +399,13 @@ class EditList(object):
     def __init__(self, fps=24, file_path=None, visitor=None):
         """
         Instantiate a new Edit Decision List
-        
+
         :param fps: Number of frames per second for this EditList
         :param file_path: Full path to a file to read
-        :param visitor: A callable which will be called on every edit and should 
+        :param visitor: A callable which will be called on every edit and should
                         accept as input an EditEvent and a logger
         """
-        
+
         self._title = None
         self._edits = []
         self._fps = fps
@@ -451,7 +456,7 @@ class EditList(object):
         http://www.scottsimmons.tv/blog/2006/10/12/how-to-read-an-edl/
 
         :param path: Full path to a cmx compatible file to read
-        :param visitor: A callable which will be called on every edit and should 
+        :param visitor: A callable which will be called on every edit and should
                         accept as input an EditEvent and a logger
         """
         # Reset defaut values
@@ -483,9 +488,9 @@ class EditList(object):
                             )
                     elif line_tokens[0].startswith("*"):
                         # A comment
-                        if edit :
+                        if edit:
                             edit.add_comments(line)
-                    elif line_tokens[0] == "M2": # Retime
+                    elif line_tokens[0] == "M2":  # Retime
                         if not edit:
                             raise RuntimeError(
                                 "Found unexpected line"
@@ -496,7 +501,7 @@ class EditList(object):
                         # New edit
                         # Time to call the visitor ( if any ) with the previous
                         # edit ( if any )
-                        if edit :
+                        if edit:
                             if edit.id == id:
                                 # Duplicated id, it is an effect
                                 edit.add_effect(line_tokens)
@@ -505,7 +510,7 @@ class EditList(object):
                                 self.__logger.debug("Visiting : [%s]" % edit)
                                 visitor(edit, self.__logger)
                         type = line_tokens[3]
-                        if type == "C": # cut
+                        if type == "C":  # cut
                             # Number of tokens can vary in the middle
                             # so tokens at the end of the line are indexed with
                             # negative indexes
@@ -531,6 +536,7 @@ class EditList(object):
                     self.__logger.debug("Visiting : [%s]" % edit)
                     visitor(edit, self.__logger)
             except Exception, e:  # Catch the exception so we can add the current line contents
-                args = ["%s.\n\nError reported while parsing %s at line:\n\n%s" % (e.args[0], path, line)] + list(e.args[1:])
+                args = ["%s.\n\nError reported while parsing %s at line:\n\n%s" % (
+                    e.args[0], path, line)] + list(e.args[1:])
                 e.args = args
                 raise
