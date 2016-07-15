@@ -84,9 +84,12 @@ class Timecode(object):
         """
         fields = timecode_string.split(":")
         if len(fields) != 4:
-            raise ValueError(
-                "Given timecode %s is not in hh:mm:ss:ff format" % timecode_string
-            )
+            try:
+                fields = timecode_from_frame(int(timecode_string), fps).split(":")
+            except:
+                raise ValueError(
+                    "Given timecode %s can not be converted to hh:mm:ss:ff format." % timecode_string
+                )
         self._fps = fps
         self._hours = int(fields[0])
         self._minutes = int(fields[1])
