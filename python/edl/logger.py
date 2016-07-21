@@ -1,14 +1,15 @@
 # Copyright (c) 2014 Shotgun Software Inc.
-# 
+#
 # CONFIDENTIAL AND PROPRIETARY
-# 
-# This work is provided "AS IS" and subject to the Shotgun Pipeline Toolkit 
+#
+# This work is provided "AS IS" and subject to the Shotgun Pipeline Toolkit
 # Source Code License included in this distribution package. See LICENSE.
-# By accessing, using, copying or modifying this work you indicate your 
-# agreement to the Shotgun Pipeline Toolkit Source Code License. All rights 
+# By accessing, using, copying or modifying this work you indicate your
+# agreement to the Shotgun Pipeline Toolkit Source Code License. All rights
 # not expressly granted therein are reserved by Shotgun Software Inc.
 
 import logging
+
 
 class FrameworkLogHandler(logging.StreamHandler):
     """
@@ -17,7 +18,7 @@ class FrameworkLogHandler(logging.StreamHandler):
     def __init__(self, framework, *args, **kwargs):
         """
         Instantiante a new handler for the given Framework
-        
+
         :param framework: A Toolkit framework
         """
         super(FrameworkLogHandler, self).__init__(*args, **kwargs)
@@ -37,6 +38,7 @@ class FrameworkLogHandler(logging.StreamHandler):
                 self._framework.log_warning(record.getMessage())
             elif record.levelno == logging.ERROR:
                 self._framework.log_error(record.getMessage())
+
 
 def get_logger(level=logging.INFO):
     """
@@ -59,7 +61,7 @@ def get_logger(level=logging.INFO):
         import sgtk
         # Raising an exception will activate the except clause
         framework = sgtk.platform.current_bundle()
-        if not framework :
+        if not framework:
             raise Exception("No framework")
         logger.addHandler(FrameworkLogHandler(framework))
         logger.setLevel(level)

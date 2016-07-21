@@ -59,7 +59,7 @@ def process_edit(edit, logger, shot_regexp=None):
             '*ASC_SOP (1.0854 1.0451 0.9943)(0.0009 0.0022 -0.0292)(1.0163 1.0105 0.9424)'
             '*ASC_SAT 1.0000'
 
-    If a regular expression is given, it will be used to extract extra informations
+    If a regular expression is given, it will be used to extract extra information
     from the edit name.
         - a shot name
         - a type
@@ -83,7 +83,7 @@ def process_edit(edit, logger, shot_regexp=None):
     edit._asc_sat = None
     edit._type = None
     edit._format = None
-#    edit._version = None
+    # edit._version = None
     # Treat all comments
     for comment in edit.comments:
         m = _COMMENT_REGEXP.match(comment)
@@ -150,7 +150,7 @@ class EditEvent(object):
     # Our known attributes
     # Every other attributes will go into the _meta_data dictionary
     __mine = [
-        "_effect",
+        "_effects",
         "_comments",
         "_meta_data",
         "_retime",
@@ -192,10 +192,11 @@ class EditEvent(object):
 
         # If new attributes are added here, their name should be added to the
         # __mine list as well, otherwise will end up in the meta data dictionary
-        self._effect = []
+        self._effects = []
         self._comments = []
         self._meta_data = {}  # A place holder where additional meta data can be stored
         self._retime = None
+        self._fps = fps
         self._id = int(id)
         self._reel = reel
         self._channels = channels
@@ -203,6 +204,20 @@ class EditEvent(object):
         self._source_out = Timecode(source_out, fps=fps)
         self._record_in = Timecode(record_in, fps=fps)
         self._record_out = Timecode(record_out, fps=fps)
+
+    @property
+    def fps(self):
+        """
+        Return the fps for this edit
+        """
+        return self._fps
+
+    @property
+    def channels(self):
+        """
+        Return the channels for this edit
+        """
+        return self._channels
 
     @property
     def id(self):
@@ -295,7 +310,7 @@ class EditEvent(object):
         return self._record_out.to_frame() - self._record_in.to_frame()
 
     @property
-    def has_effect(self):
+    def has_effects(self):
         """
         Return True if this edit has some effect(s)
         """
@@ -307,7 +322,7 @@ class EditEvent(object):
         Later we might want to parse the tokens, and store some actual
         effects value on this edit
         """
-        self._effect.append(" ".join(tokens))
+        self._effects.append(" ".join(tokens))
 
     def add_comments(self, comments):
         """
@@ -483,7 +498,7 @@ class EditList(object):
                             self._title = " ".join(line_tokens[1:])
                     elif line.startswith("FCM:"):
                         # Can be DROP FRAME or NON DROP FRAME
-                        if line_tokens[1] == "DROP FRAME":
+                        if line_tokens[1] == "DROP" and line_tokens[2] == "FRAME":
                             raise NotImplementedError(
                                 "Drop frame is not handled by this module"
                             )
@@ -515,9 +530,8 @@ class EditList(object):
                                 edit.add_effect(line_tokens)
                                 continue
                             if visitor:
-                                self.__logger.debug("Visiting : [%s]" % edit)
+                                self.__logger.debug("Visiting: [%s]" % edit)
                                 visitor(edit, self.__logger)
-
                         # Include our event if it's a Cut type and not and not
                         # an audio track.
                         if event_type == "C" and media_type != "AA":  # cut
@@ -541,12 +555,35 @@ class EditList(object):
                                     "Found unexpected effect"
                                 )
                             edit.add_effect(line_tokens)
-                # Call the visitor ( if any ) with the last edit ( if any )
+                # Call the visitor (if any) with the last edit (if any)
                 if edit and visitor:
-                    self.__logger.debug("Visiting : [%s]" % edit)
+                    self.__logger.debug("Visiting: [%s]" % edit)
                     visitor(edit, self.__logger)
             except Exception, e:  # Catch the exception so we can add the current line contents
                 args = ["%s.\n\nError reported while parsing %s at line:\n\n%s" % (
                     e.args[0], path, line)] + list(e.args[1:])
                 e.args = args
                 raise
+        # Once we have our edits list, we can loop through it and adjust any
+        # timecode we like to account for effects (like transitions).
+        count_edits = 0
+        for edit in self._edits:
+            prev = count_edits - 1
+            for effect in edit._effects:
+                effect_tokens = effect.split()
+                # Modify some timecode if we have a cross-dissolve.
+                if effect_tokens[3] == "D":
+                    # Don't want to go negative here, else we'll grab edits from
+                    # the end of the list.
+                    if prev > -1:
+                        # Add the transition duration to the previous edit's source out.
+                        trans_duration = Timecode(effect_tokens[4], edit.fps).to_frame()
+                        self._edits[prev]._source_out = Timecode(
+                            str(self._edits[prev]._source_out.to_frame() + trans_duration),
+                            fps=self._edits[prev].fps)
+                    # Take the values from the Dissolve effect for the current edit.
+                    edit._source_in = Timecode(effect_tokens[5], edit.fps)
+                    edit._source_out = Timecode(effect_tokens[6], edit.fps)
+                    edit._record_in = Timecode(effect_tokens[7], edit.fps)
+                    edit._record_out = Timecode(effect_tokens[8], edit.fps)
+            count_edits += 1

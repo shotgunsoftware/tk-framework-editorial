@@ -78,9 +78,10 @@ class Timecode(object):
     """
     def __init__(self, timecode_string, fps=24):
         """
-        Instantiate a timecode from a timecode string
+        Instantiate a timecode from a timecode or frame string.
 
-        :param timecode_string: A timecode string in hh:mm:ss:ff format
+        :param timecode_string: A timecode string in hh:mm:ss:ff format or
+                                a frame number.
         """
         fields = timecode_string.split(":")
         if len(fields) != 4:
@@ -200,17 +201,3 @@ class Timecode(object):
         return "%02d:%02d:%02d:%02d" % (
             self._hours, self._minutes, self._seconds, self._frames
         )
-
-
-
-
-
-
-
-
-
-
-
-
-
-
