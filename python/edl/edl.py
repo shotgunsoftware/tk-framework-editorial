@@ -424,6 +424,7 @@ class EditList(object):
         self._title = None
         self._edits = []
         self._fps = fps
+        self._has_transitions = False
         if file_path:
             _, ext = os.path.splitext(file_path)
             if ext.lower() != ".edl":
@@ -441,6 +442,13 @@ class EditList(object):
         framework
         """
         cls.__logger = logger
+
+    @property
+    def has_transitions(self):
+        """
+        Return True if this edit has transitions.
+        """
+        return self._has_transitions
 
     @property
     def edits(self):
@@ -573,6 +581,7 @@ class EditList(object):
                 effect_tokens = effect.split()
                 # Modify some timecode if we have a cross-dissolve.
                 if effect_tokens[3] == "D":
+                    self._has_transitions = True
                     # Don't want to go negative here, else we'll grab edits from
                     # the end of the list.
                     if prev > -1:
