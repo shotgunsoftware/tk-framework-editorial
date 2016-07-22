@@ -208,14 +208,14 @@ class EditEvent(object):
     @property
     def fps(self):
         """
-        Return the fps for this edit
+        Return the fps for this edit.
         """
         return self._fps
 
     @property
     def channels(self):
         """
-        Return the channels for this edit
+        Return the channels for this edit.
         """
         return self._channels
 
@@ -312,7 +312,7 @@ class EditEvent(object):
     @property
     def has_effects(self):
         """
-        Return True if this edit has some effect(s)
+        Return True if this EditEvent has some effect(s)
         """
         return bool(self._effects)
 
@@ -446,7 +446,7 @@ class EditList(object):
     @property
     def has_transitions(self):
         """
-        Return True if this edit has transitions.
+        Return True if this EditEvent has transitions.
         """
         return self._has_transitions
 
@@ -490,7 +490,7 @@ class EditList(object):
         with open(path, "rU") as handle:
             versions = []
             edit = None
-            audio_offset = 0
+            id_offset = 0
             try:
                 for line in handle:
                     # Not sure why we have to do that ...
@@ -526,9 +526,9 @@ class EditList(object):
                         # if we have an audio track, ignore it and adjust the
                         # event id numbering to reflect that.
                         if media_type == "AA":
-                            audio_offset += 1
+                            id_offset += 1
                             continue
-                        id = int(line_tokens[0]) - audio_offset
+                        id = int(line_tokens[0]) - id_offset
                         # New edit
                         # Time to call the visitor (if any) with the previous
                         # edit (if any)
@@ -540,8 +540,8 @@ class EditList(object):
                             if visitor:
                                 self.__logger.debug("Visiting: [%s]" % edit)
                                 visitor(edit, self.__logger)
-                        # Include our event if it's a Cut type and not and not
-                        # an audio track.
+                        # Include our event if it's a Cut type (C) and not and
+                        # not an audio track (AA).
                         if event_type == "C" and media_type != "AA":  # cut
                             # Number of tokens can vary in the middle
                             # so tokens at the end of the line are indexed with
@@ -582,8 +582,8 @@ class EditList(object):
                 # Modify some timecode if we have a cross-dissolve.
                 if effect_tokens[3] == "D":
                     self._has_transitions = True
-                    # Don't want to go negative here, else we'll grab edits from
-                    # the end of the list.
+                    # We don't want to go negative here, else we'll grab edits
+                    # from the end of the list.
                     if prev > -1:
                         # Add the transition duration to the previous edit's source out.
                         trans_duration = Timecode(effect_tokens[4], edit.fps).to_frame()

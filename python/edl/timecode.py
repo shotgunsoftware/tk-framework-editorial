@@ -86,6 +86,10 @@ class Timecode(object):
         fields = timecode_string.split(":")
         if len(fields) != 4:
             try:
+                # If we can convert the timecode_string to an int, assume we
+                # have a frame and convert it to an absolute timecode using
+                # our fps value. All calculations, etc from this point on treat
+                # the input as if it was a timecode and not a frame.
                 fields = timecode_from_frame(int(timecode_string), fps).split(":")
             except:
                 raise ValueError(
