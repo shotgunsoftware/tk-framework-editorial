@@ -574,8 +574,7 @@ class EditList(object):
                 raise
         # Once we have our edits list, we can loop through it and adjust any
         # timecode we like to account for effects (like transitions).
-        count_edits = 0
-        for edit in self._edits:
+        for count_edits, edit in enumerate(self._edits):
             prev = count_edits - 1
             for effect in edit._effects:
                 effect_tokens = effect.split()
@@ -595,4 +594,3 @@ class EditList(object):
                     edit._source_out = Timecode(effect_tokens[6], edit.fps)
                     edit._record_in = Timecode(effect_tokens[7], edit.fps)
                     edit._record_out = Timecode(effect_tokens[8], edit.fps)
-            count_edits += 1
