@@ -29,6 +29,14 @@ _COMMENT_REGEXP = re.compile(
     "\*\s*(?P<type>(?:%s))\s*:\s+(?P<value>.*)" % ")|(?:".join(_COMMENTS_KEYWORDS)
 )
 
+_ERROR_BL = "%s has a black slug (BL) event. Currently, the Import Cut app \
+will not accept EDLs with these events. Support for black slug (BL) events \
+will be added in a future release."
+
+_ERROR_DROP_FRAME = "%s uses non-drop frame timecode. Currently, the Import \
+Cut app only accepts EDLs with drop frame timecode.  Support for non-drop \
+timecode will be added in a future release."
+
 
 class EditProcessor(object):
     """
@@ -507,9 +515,9 @@ class EditList(object):
                     elif line.startswith("FCM:"):
                         # Can be DROP FRAME or NON DROP FRAME
                         if line_tokens[1] == "DROP" and line_tokens[2] == "FRAME":
-                            raise NotImplementedError(
-                                "Drop frame is not handled by this module"
-                            )
+                            raise NotImplementedError(_ERROR_DROP_FRAME % os.path.basename(path))
+                    elif line_tokens[1] == "BL":
+                        raise NotImplementedError(_ERROR_BL % os.path.basename(path))
                     elif line_tokens[0].startswith("*"):
                         # A comment
                         if edit:
@@ -567,6 +575,8 @@ class EditList(object):
                 if edit and visitor:
                     self.__logger.debug("Visiting: [%s]" % edit)
                     visitor(edit, self.__logger)
+            except NotImplementedError, e:
+                raise NotImplementedError(e)
             except Exception, e:  # Catch the exception so we can add the current line contents
                 args = ["%s.\n\nError reported while parsing %s at line:\n\n%s" % (
                     e.args[0], path, line)] + list(e.args[1:])
