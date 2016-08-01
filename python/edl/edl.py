@@ -516,7 +516,7 @@ class EditList(object):
                         # Can be DROP FRAME or NON DROP FRAME
                         if line_tokens[1] == "DROP" and line_tokens[2] == "FRAME":
                             raise NotImplementedError(_ERROR_DROP_FRAME % os.path.basename(path))
-                    elif line_tokens[1] == "BL":
+                    elif len(line_tokens) > 1 and line_tokens[1] == "BL":
                         raise NotImplementedError(_ERROR_BL % os.path.basename(path))
                     elif line_tokens[0].startswith("*"):
                         # A comment
