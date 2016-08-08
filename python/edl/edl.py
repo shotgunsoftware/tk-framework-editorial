@@ -26,7 +26,7 @@ _COMMENTS_KEYWORDS = [
 # The regexp is build with : "((?:" + keyword1 + ")|(?:" + keyword2 + ... + "))"
 # ")|(?:" being used to join the different keywords together
 _COMMENT_REGEXP = re.compile(
-    "\*\s*(?P<type>(?:%s))\s*:\s+(?P<value>.*)" % ")|(?:".join(_COMMENTS_KEYWORDS)
+    "\*?\s*(?P<type>(?:%s))\s*:\s+(?P<value>.*)" % ")|(?:".join(_COMMENTS_KEYWORDS)
 )
 
 _ERROR_BL = "%s has a black slug (BL) event. Currently, the Import Cut app \
@@ -98,7 +98,7 @@ def process_edit(edit, logger, shot_regexp=None):
         if m:
             type = m.group("type")
             value = m.group("value")
-            logger.debug("Found in comments [%s] : %s" % (type, value))
+            logger.debug("Found in comments [%s]: %s" % (type, value))
             if type == "LOC":
                 tokens = value.split()
                 if len(tokens) > 2:
@@ -124,7 +124,7 @@ def process_edit(edit, logger, shot_regexp=None):
         logger.debug("Parsing %s with %s" % (edit._name, str(regexp)))
         m = regexp.search(edit._name)
         if m:
-            logger.debug("Matched groups : %s" % str(m.groups()))
+            logger.debug("Matched groups: %s" % str(m.groups()))
             if regexp.groups == 1:  # Only one capturing group, use it for the shot name
                 edit._shot_name = m.group(1)
             else:
@@ -518,10 +518,6 @@ class EditList(object):
                             raise NotImplementedError(_ERROR_DROP_FRAME % os.path.basename(path))
                     elif len(line_tokens) > 1 and line_tokens[1] == "BL":
                         raise NotImplementedError(_ERROR_BL % os.path.basename(path))
-                    elif line_tokens[0].startswith("*"):
-                        # A comment
-                        if edit:
-                            edit.add_comments(line)
                     elif line_tokens[0] == "M2":  # Retime
                         if not edit:
                             raise RuntimeError(
@@ -571,6 +567,10 @@ class EditList(object):
                                     "Found unexpected effect"
                                 )
                             edit.add_effect(line_tokens)
+                    else:
+                        # A comment
+                        if edit:
+                            edit.add_comments(line)
                 # Call the visitor (if any) with the last edit (if any)
                 if edit and visitor:
                     self.__logger.debug("Visiting: [%s]" % edit)
