@@ -38,6 +38,20 @@ app only accepts EDLs with non-drop frame timecode. Support for drop timecode \
 will be added in a future release."
 
 
+class BadFrameRate(ValueError):
+    """
+    Helper class for raising Settings exceptions.
+    """
+    def __init__(self, *args, **kwargs):
+        """
+        Instantiate a new BadFrameRate.
+
+        :param args: Usual Exception parameters list.
+        :param kwargs: Usual Exception parameters dictionary.
+        """
+        super(BadFrameRate, self).__init__(*args, **kwargs)
+
+
 class EditProcessor(object):
     """
     An example of keeping previous parsed edit event around, while using the process
@@ -577,6 +591,8 @@ class EditList(object):
                     visitor(edit, self.__logger)
             except NotImplementedError, e:
                 raise NotImplementedError(e)
+            except BadFrameRate, e:
+                raise BadFrameRate(e)
             except Exception, e:  # Catch the exception so we can add the current line contents
                 args = ["%s.\n\nError reported while parsing %s at line:\n\n%s" % (
                     e.args[0], path, line)] + list(e.args[1:])

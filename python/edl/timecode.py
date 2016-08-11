@@ -15,6 +15,20 @@ specified frame rate [%d]. You can modify the frame rate used by Import Cut \
 by clicking on the Settings button and going to the Timecode/Frames tab."
 
 
+class BadFrameRate(ValueError):
+    """
+    Helper class for raising Settings exceptions.
+    """
+    def __init__(self, *args, **kwargs):
+        """
+        Instantiate a new BadFrameRate.
+
+        :param args: Usual Exception parameters list.
+        :param kwargs: Usual Exception parameters dictionary.
+        """
+        super(BadFrameRate, self).__init__(*args, **kwargs)
+
+
 # Some helpers to convert timecodes to frames, back and forth
 def frame_from_timecode(timecode, fps=24):
     """
@@ -106,7 +120,7 @@ class Timecode(object):
         self._frames = int(fields[3])
         # Do some basic checks
         if self._frames >= self._fps:
-            raise ValueError(_ERROR_FRAME_RATE % (self._frames, self._fps))
+            raise BadFrameRate(_ERROR_FRAME_RATE % (self._frames, self._fps))
         if self._hours > 23:
             raise ValueError(
                 "Invalid hours value %d, it must be smaller than 24" % self._hours
