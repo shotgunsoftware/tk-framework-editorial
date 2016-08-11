@@ -33,9 +33,9 @@ _ERROR_BL = "%s has a black slug (BL) event. Currently, the Import Cut app \
 will not accept EDLs with these events. Support for black slug (BL) events \
 will be added in a future release."
 
-_ERROR_DROP_FRAME = "%s uses non-drop frame timecode. Currently, the Import \
-Cut app only accepts EDLs with drop frame timecode.  Support for non-drop \
-timecode will be added in a future release."
+_ERROR_DROP_FRAME = "%s uses drop frame timecode. Currently, the Import Cut \
+app only accepts EDLs with non-drop frame timecode. Support for drop timecode \
+will be added in a future release."
 
 
 class EditProcessor(object):
