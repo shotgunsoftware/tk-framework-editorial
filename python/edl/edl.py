@@ -32,15 +32,13 @@ _COMMENT_REGEXP = re.compile(
     "\*?\s*(?P<type>(?:%s))\s*:\s+(?P<value>.*)" % ")|(?:".join(_COMMENTS_KEYWORDS)
 )
 
-_ERROR_BL = "%s has a black slug (BL) event, which are not supported. Support \
-for black slug (BL) events will be added in a future release."
+_ERROR_BL = "%s has a black slug (BL) event, which are not supported."
 
 _ERROR_DROP_FRAME = "%s uses drop frame timecode. Currently, only non-drop \
-frame timecodes are supported. Support for drop timecode will be added in a \
-future release."
+frame timecodes are supported."
 
 
-class BadBLError(NotImplementedError):
+class BadBLError(ValueError):
     """
     Thin wrapper around NotImplementedError for BL errors, allowing them
     to be caught easily.
@@ -48,7 +46,7 @@ class BadBLError(NotImplementedError):
     pass
 
 
-class BadDropFrameError(NotImplementedError):
+class BadDropFrameError(ValueError):
     """
     Thin wrapper around NotImplementedError for drop frame errors, allowing them
     to be caught easily
