@@ -481,16 +481,16 @@ class EditList(object):
         http://www.scottsimmons.tv/blog/2006/10/12/how-to-read-an-edl/
 
         :param path: Full path to a cmx compatible file to read
+        :param fps: Number of frames per-second for this EditList
         :param visitor: A callable which will be called on every edit and should
                         accept as input an EditEvent and a logger
         """
-        # Reset defaut values
+        # Reset default values
         self._title = None
         self._edits = []
         # And read the file
         self.__logger.info("Parsing EDL %s" % path)
         with open(path, "rU") as handle:
-            versions = []
             edit = None
             id_offset = 0
             try:
@@ -538,8 +538,8 @@ class EditList(object):
                             if visitor:
                                 self.__logger.debug("Visiting: [%s]" % edit)
                                 visitor(edit, self.__logger)
-                        # Include our event if it's a Cut type (C) and not and
-                        # not an audio track (AA).
+                        # Include our event if it's a Cut type (C) and not
+                        # an audio track (AA).
                         if event_type == "C" and media_type != "AA":  # cut
                             # Number of tokens can vary in the middle
                             # so tokens at the end of the line are indexed with
