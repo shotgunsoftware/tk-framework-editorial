@@ -12,7 +12,7 @@ import os
 import decimal
 import unittest2 as unittest
 from edl import edl
-from edl import timecode
+from edl import timecode, BadDropFrameError, BadBLError, UnsupportedEDLFeature, BadFrameRateError
 import logging
 import re
 
@@ -21,12 +21,19 @@ class TestRead(unittest.TestCase):
     def __init__(self, *args, **kwargs):
         super(TestRead, self).__init__(*args, **kwargs)
         self._edl_examples = []
+        self._unsupported_examples = []
+        self._unsupported_dir = None
 
     def setUp(self):
         resources_dir = os.path.join(os.path.dirname(__file__), "resources")
         for f in os.listdir(resources_dir):
             if f.endswith(".edl"):
                 self._edl_examples.append(os.path.join(resources_dir, f))
+
+        self._unsupported_dir = os.path.join(resources_dir, "unsupported")
+        for f in os.listdir(self._unsupported_dir):
+            if f.endswith(".edl"):
+                self._unsupported_examples.append(os.path.join(self._unsupported_dir, f))
 
     def read_edl_file(self, file):
         logging.info("Reading %s" % file)
@@ -147,7 +154,7 @@ class TestRead(unittest.TestCase):
             path = os.path.join(os.path.dirname(__file__), "resources", comment_edl)
             tc = edl.EditList(file_path=path)
             for edit, item in enumerate(tc.edits):
-                assert item.comments == comment_edls[comment_edl]
+                self.assertEqual(item.comments, comment_edls[comment_edl])
                 break
 
     def test_transitions(self):
@@ -161,10 +168,10 @@ class TestRead(unittest.TestCase):
             tc = edl.EditList(file_path=path)
             for edit, item in enumerate(tc.edits):
                 if item.id == 2:
-                    assert item.source_in.__str__() == timecode.Timecode("00:59:59:09").__str__()
-                    assert item.source_out.__str__() == timecode.Timecode("01:00:05:15").__str__()
-                    assert item.record_in.__str__() == timecode.Timecode("01:00:07:23").__str__()
-                    assert item.record_out.__str__() == timecode.Timecode("01:00:12:23").__str__()
+                    self.assertEqual(str(item.source_in), str(timecode.Timecode("00:59:59:09")))
+                    self.assertEqual(str(item.source_out), str(timecode.Timecode("01:00:05:15")))
+                    self.assertEqual(str(item.record_in), str(timecode.Timecode("01:00:07:23")))
+                    self.assertEqual(str(item.record_out), str(timecode.Timecode("01:00:12:23")))
 
     def test_frames_input(self):
         """
@@ -177,8 +184,8 @@ class TestRead(unittest.TestCase):
             path = os.path.join(os.path.dirname(__file__), "resources", frame_edl)
             tc = edl.EditList(file_path=path)
             for edit, item in enumerate(tc.edits):
-                assert item.source_in.__str__() == timecode.Timecode("00:00:00:09").__str__()
-                assert item.source_out.__str__() == timecode.Timecode("00:00:02:16").__str__()
+                self.assertEqual(str(item.source_in), str(timecode.Timecode("00:00:00:09")))
+                self.assertEqual(str(item.source_out), str(timecode.Timecode("00:00:02:16")))
                 break
 
     def test_ignore_audio(self):
@@ -211,7 +218,7 @@ class TestRead(unittest.TestCase):
         tc = "01:02:03:04"
         frame = timecode.frame_from_timecode(tc, fps=24)
         new_tc = timecode.timecode_from_frame(frame, fps=24)
-        assert tc == new_tc
+        self.assertEqual(tc, new_tc)
 
     def test_frame_round_trip(self):
         # We need to make sure frame values aren't mutated when going back and
@@ -220,7 +227,7 @@ class TestRead(unittest.TestCase):
         for frame in frames:
             tc = timecode.timecode_from_frame(frame, fps=24)
             new_frame = timecode.frame_from_timecode(tc, fps=24)
-            assert frame == new_frame
+            self.assertEqual(frame, new_frame)
 
     def test_fps_types(self):
         # Testing input of effective int and establishing the fact that these
@@ -234,7 +241,9 @@ class TestRead(unittest.TestCase):
             tc_int = timecode.timecode_from_frame(frame, fps=_int)
             tc_float = timecode.timecode_from_frame(frame, fps=_float)
             tc_decimal = timecode.timecode_from_frame(frame, fps=_decimal)
-            assert tc_int == tc_float == tc_decimal
+            self.assertEqual(tc_int, tc_float)
+            self.assertEqual(tc_int, tc_decimal)
+            self.assertEqual(tc_float, tc_decimal)
         # Testing input of non-int
         frame_rates = [23.976, -23.976, 59.94, -59.94]
         for fps in frame_rates:
@@ -243,4 +252,16 @@ class TestRead(unittest.TestCase):
             frame = 2394732
             tc_float = timecode.timecode_from_frame(frame, fps=_float)
             tc_decimal = timecode.timecode_from_frame(frame, fps=_decimal)
-            assert tc_float == tc_decimal
+            self.assertEqual(tc_float, tc_decimal)
+
+    def test_unsupported_features(self):
+        """
+        Test unsupported features are correctly caught
+        """
+        path = os.path.join(self._unsupported_dir, "drop-frame.edl")
+        # Check we get expected exception
+        with self.assertRaises(BadDropFrameError):
+            tc = edl.EditList(file_path=path)
+        path = os.path.join(self._unsupported_dir, "raphe_temp1_rfe_R01_v01.edl")
+        with self.assertRaises(BadFrameRateError):
+            tc = edl.EditList(file_path=path)

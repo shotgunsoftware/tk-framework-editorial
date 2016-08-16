@@ -10,10 +10,9 @@
 
 from .timecode import Timecode
 from . import logger
+from . errors import BadBLError, BadDropFrameError
 import os
 import re
-
-from .timecode import BadFrameRateError
 
 # A list of keywords we will be looking for in comments
 _COMMENTS_KEYWORDS = [
@@ -31,27 +30,6 @@ _COMMENTS_KEYWORDS = [
 _COMMENT_REGEXP = re.compile(
     "\*?\s*(?P<type>(?:%s))\s*:\s+(?P<value>.*)" % ")|(?:".join(_COMMENTS_KEYWORDS)
 )
-
-_ERROR_BL = "%s has a black slug (BL) event, which are not supported."
-
-_ERROR_DROP_FRAME = "%s uses drop frame timecode. Currently, only non-drop \
-frame timecodes are supported."
-
-
-class BadBLError(ValueError):
-    """
-    Thin wrapper around NotImplementedError for BL errors, allowing them
-    to be caught easily.
-    """
-    pass
-
-
-class BadDropFrameError(ValueError):
-    """
-    Thin wrapper around NotImplementedError for drop frame errors, allowing them
-    to be caught easily
-    """
-    pass
 
 
 class EditProcessor(object):
@@ -531,9 +509,9 @@ class EditList(object):
                     elif line.startswith("FCM:"):
                         # Can be DROP FRAME or NON DROP FRAME
                         if line_tokens[1] == "DROP" and line_tokens[2] == "FRAME":
-                            raise BadDropFrameError(_ERROR_DROP_FRAME % os.path.basename(path))
+                            raise BadDropFrameError(os.path.basename(path))
                     elif len(line_tokens) > 1 and line_tokens[1] == "BL":
-                        raise BadBLError(_ERROR_BL % os.path.basename(path))
+                        raise BadBLError(os.path.basename(path))
                     elif line_tokens[0] == "M2":  # Retime
                         if not edit:
                             raise RuntimeError(
@@ -591,10 +569,6 @@ class EditList(object):
                 if edit and visitor:
                     self.__logger.debug("Visiting: [%s]" % edit)
                     visitor(edit, self.__logger)
-            except NotImplementedError, e:
-                raise NotImplementedError(e)
-            except BadFrameRateError, e:
-                raise BadFrameRateError(e)
             except Exception, e:  # Catch the exception so we can add the current line contents
                 args = ["%s.\n\nError reported while parsing %s at line:\n\n%s" % (
                     e.args[0], path, line)] + list(e.args[1:])
