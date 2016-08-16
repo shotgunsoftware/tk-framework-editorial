@@ -19,7 +19,7 @@ class BadFrameRateError(ValueError):
     """
     # Standard error message for bad frame rate errors
     __ERROR_MSG = ( "Invalid frame value [%d], it must be smaller than the "
-                    "specified frame rate [%d]." )
+                    "specified frame rate [%d]" )
 
     def __init__(self, frame_value, frame_rate, *args, **kwargs):
         """
@@ -35,7 +35,27 @@ class BadFrameRateError(ValueError):
             *args,
             **kwargs
             )
+        # Store value internally, in case some apps want to retrieve them
+        self._frame_value = frame_value
+        self._frame_rate = frame_rate
 
+    @property
+    def frame_value(self):
+        """
+        Return the frame value which caused the error.
+
+        :returns: An integer
+        """
+        return self._frame_value
+
+    @property
+    def frame_rate(self):
+        """
+        Return the frame rate value for which the frame value caused the error.
+
+        :returns: An integer
+        """
+        return self._frame_rate
 
 
 class UnsupportedEDLFeature(NotImplementedError):
@@ -46,7 +66,6 @@ class UnsupportedEDLFeature(NotImplementedError):
     If needed, more specific Exceptions can be implemented by just deriving from
     this class and changing the error message.
     """
-    __ERROR_MSG = "%s uses some EDL features which are not currently supported"
     def __init__(self, edl_name, *args, **kwargs):
         """
         Instantiate a new UnsupportedFeature.
@@ -54,10 +73,21 @@ class UnsupportedEDLFeature(NotImplementedError):
         :param edl_name: A string, the EDL file name.
         """
         super(UnsupportedEDLFeature, self).__init__(
-            self.__ERROR_MSG % edl_name,
+            self._error_message() % edl_name,
             *args,
             **kwargs
         )
+
+    def _error_message(self):
+        """
+        Return a standard error message to use as the exception message.
+
+        Deriving classes can return any arbitrary string, as long as it includes
+        '%s' to receive the EDL file name.
+
+        :returns: A string
+        """
+        return "%s uses some EDL features which are not currently supported"
 
 # Some specific exceptions for most common missing features encoutered in production
 class BadBLError(UnsupportedEDLFeature):
@@ -65,14 +95,27 @@ class BadBLError(UnsupportedEDLFeature):
     Thin wrapper around UnsupportedEDLFeature for BL errors, allowing them
     to be caught easily.
     """
-    __ERROR_MSG = "%s has a black slug (BL) event, which are not supported."
 
+    def _error_message(self):
+        """"
+        Return a standard error message to use as the exception message.
+
+        :returns: A string
+        """
+        return "%s has a black slug (BL) event, which are not supported."
 
 class BadDropFrameError(UnsupportedEDLFeature):
     """
     Thin wrapper around UnsupportedEDLFeature for drop frame errors, allowing them
     to be caught easily
     """
-    __ERROR_MSG = ( "%s uses drop frame timecode. Currently, only non-drop "
-                    "frame timecodes are supported." )
+
+    def _error_message(self):
+        """"
+        Return a standard error message to use as the exception message.
+
+        :returns: A string
+        """
+        return ( "%s uses drop frame timecode. Currently, only non-drop "
+                 "frame timecodes are supported." )
 
