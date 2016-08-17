@@ -1,4 +1,4 @@
-# Copyright (c) 2014 Shotgun Software Inc.
+# Copyright (c) 2016 Shotgun Software Inc.
 #
 # CONFIDENTIAL AND PROPRIETARY
 #
@@ -9,7 +9,7 @@
 # not expressly granted therein are reserved by Shotgun Software Inc.
 
 import decimal
-
+from .errors import BadFrameRateError
 
 # Some helpers to convert timecodes to frames, back and forth
 def frame_from_timecode(timecode, fps=24):
@@ -102,10 +102,7 @@ class Timecode(object):
         self._frames = int(fields[3])
         # Do some basic checks
         if self._frames >= self._fps:
-            raise ValueError(
-                "Invalid frame value %d, it must be smaller than the specified framerate (%d fps)" % (
-                self._frames, self._fps)
-            )
+            raise BadFrameRateError(self._frames, self._fps)
         if self._hours > 23:
             raise ValueError(
                 "Invalid hours value %d, it must be smaller than 24" % self._hours

@@ -1,0 +1,57 @@
+TITLE: TEST_EDITORIAL_tor16stro_str_C01_v05_cc01_mix03_v01_01-49_FINAL
+FCM: NON-DROP FRAME
+
+001  AX       V     C        00:00:08:00 00:00:11:00 00:59:57:00 01:00:00:00
+* FROM CLIP NAME: UniversalCountingLeader-2997-1920x1920_v02.mov
+
+002  AX       V     C        00:00:17:10 00:00:22:04 01:00:00:00 01:00:04:54
+* FROM CLIP NAME: str0010_edit_slapcomp_v02.mov
+
+003  AX       V     C        00:00:00:30 00:00:08:30 01:00:04:54 01:00:12:54
+* FROM CLIP NAME: str0020_compIH_v01.mov
+
+004  AX       V     C        00:00:00:32 00:00:16:14 01:00:12:54 01:00:28:36
+* FROM CLIP NAME: str0030_plate_bg1_src_v02-clp3431-highquality-stereo_prores.mov
+
+005  AX       V     C        00:00:00:32 00:00:03:46 01:00:28:36 01:00:31:50
+* FROM CLIP NAME: str0040_plate_bg1_src_v01-clp3315-highquality-stereo_prores.mov
+
+006  AX       V     C        00:00:00:33 00:00:02:43 01:00:31:50 01:00:34:00
+* FROM CLIP NAME: str0050_plate_bg1_src_v01-clp3317-highquality-stereo_prores.mov
+
+007  AX       V     C        00:00:00:34 00:00:03:05 01:00:34:00 01:00:36:31
+* FROM CLIP NAME: str0060_plate_bg1_src_v01-clp3319-highquality-stereo_prores.mov
+
+008  AX       V     C        00:00:00:30 00:00:01:44 01:00:36:31 01:00:37:45
+* FROM CLIP NAME: str0070_plate_bg1_src_v01-clp3321-highquality-stereo_prores.mov
+
+009  AX       V     C        00:00:00:33 00:00:02:17 01:00:37:45 01:00:39:29
+* FROM CLIP NAME: str0080_plate_bg1_src_v01-clp3323-highquality-stereo_prores.mov
+
+010  AX       V     C        00:00:00:34 00:00:01:42 01:00:39:29 01:00:40:37
+* FROM CLIP NAME: str0090_plate_bg1_src_v01-clp3325-highquality-stereo_prores.mov
+
+011  AX       V     C        00:00:00:32 00:00:11:11 01:00:40:37 01:00:51:16
+* FROM CLIP NAME: str0100_plate_bg1_src_v01-clp3327-highquality-stereo_prores.mov
+
+012  AX       V     C        00:00:00:32 00:00:02:32 01:00:51:16 01:00:53:16
+* FROM CLIP NAME: str0110_plate_bg1_src_v02-clp3428-highquality-stereo_prores.mov
+
+013  AX       V     C        00:00:17:12 00:00:31:26 01:00:53:16 01:01:07:34
+* FROM CLIP NAME: str0120_plate_bg1_src_v01-clp3335_editR09_ret_v01.mov
+
+014  AX       V     C        00:00:00:34 00:00:06:16 01:01:07:34 01:01:13:16
+* FROM CLIP NAME: str0130_plate_bg1_src_v01-clp3333-highquality-stereo_prores.mov
+
+015  AX       V     C        00:00:18:10 00:00:26:12 01:01:13:16 01:01:21:18
+* FROM CLIP NAME: str0135_edit_slapcomp_v02_trim3767.mov
+
+016  AX       V     C        00:00:02:12 00:00:12:18 01:01:21:18 01:01:31:24
+* FROM CLIP NAME: str0140_plate_bg1_src_v01-clp3337-highquality-stereo_prores.mov
+
+017  AX       V     C        00:00:17:10 00:00:22:41 01:01:31:24 01:01:36:55
+* FROM CLIP NAME: str0150_edit_slapcomp_v02.mov
+
+018  AX       V     C        00:00:17:08 00:00:27:40 01:01:36:55 01:01:49:25
+* FROM CLIP NAME: str0160_plate_bg1_src_v01-clp3347_editR09_ret_v01.mov
+M2   AX       050.5                      00:00:17:08 

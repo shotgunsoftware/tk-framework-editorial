@@ -1,4 +1,4 @@
-# Copyright (c) 2014 Shotgun Software Inc.
+# Copyright (c) 2016 Shotgun Software Inc.
 #
 # CONFIDENTIAL AND PROPRIETARY
 #
@@ -9,3 +9,4 @@
 # not expressly granted therein are reserved by Shotgun Software Inc.
 from .edl import EditList, EditEvent, process_edit, EditProcessor
 from .timecode import Timecode, frame_from_timecode, timecode_from_frame
+from .errors import UnsupportedEDLFeature, BadBLError, BadDropFrameError, BadFrameRateError

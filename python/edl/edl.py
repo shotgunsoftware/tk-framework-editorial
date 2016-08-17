@@ -10,8 +10,10 @@
 
 from .timecode import Timecode
 from . import logger
+from .errors import BadBLError, BadDropFrameError
 import os
 import re
+
 # A list of keywords we will be looking for in comments
 _COMMENTS_KEYWORDS = [
     "LOC",
@@ -26,16 +28,8 @@ _COMMENTS_KEYWORDS = [
 # The regexp is build with : "((?:" + keyword1 + ")|(?:" + keyword2 + ... + "))"
 # ")|(?:" being used to join the different keywords together
 _COMMENT_REGEXP = re.compile(
-    "\*\s*(?P<type>(?:%s))\s*:\s+(?P<value>.*)" % ")|(?:".join(_COMMENTS_KEYWORDS)
+    "\*?\s*(?P<type>(?:%s))\s*:\s+(?P<value>.*)" % ")|(?:".join(_COMMENTS_KEYWORDS)
 )
-
-_ERROR_BL = "%s has a black slug (BL) event. Currently, the Import Cut app \
-will not accept EDLs with these events. Support for black slug (BL) events \
-will be added in a future release."
-
-_ERROR_DROP_FRAME = "%s uses non-drop frame timecode. Currently, the Import \
-Cut app only accepts EDLs with drop frame timecode.  Support for non-drop \
-timecode will be added in a future release."
 
 
 class EditProcessor(object):
@@ -96,20 +90,20 @@ def process_edit(edit, logger, shot_regexp=None):
     for comment in edit.comments:
         m = _COMMENT_REGEXP.match(comment)
         if m:
-            type = m.group("type")
+            comment_type = m.group("type")
             value = m.group("value")
-            logger.debug("Found in comments [%s] : %s" % (type, value))
-            if type == "LOC":
+            logger.debug("Found in comments [%s]: %s" % (comment_type, value))
+            if comment_type == "LOC":
                 tokens = value.split()
                 if len(tokens) > 2:
                     edit._name = tokens[2]
-            elif type == "SOURCE FILE":
+            elif comment_type == "SOURCE FILE":
                 edit._tape = value.split()[-1]
-            elif type == "FROM CLIP NAME":
+            elif comment_type == "FROM CLIP NAME":
                 edit._clip_name = value
-            elif type == "ASC_SOP":
+            elif comment_type == "ASC_SOP":
                 edit._asc_sop = value
-            elif type == "ASC_SAT":
+            elif comment_type == "ASC_SAT":
                 edit._asc_sat = value
 
     # Extract a shot name
@@ -124,7 +118,7 @@ def process_edit(edit, logger, shot_regexp=None):
         logger.debug("Parsing %s with %s" % (edit._name, str(regexp)))
         m = regexp.search(edit._name)
         if m:
-            logger.debug("Matched groups : %s" % str(m.groups()))
+            logger.debug("Matched groups: %s" % str(m.groups()))
             if regexp.groups == 1:  # Only one capturing group, use it for the shot name
                 edit._shot_name = m.group(1)
             else:
@@ -487,16 +481,16 @@ class EditList(object):
         http://www.scottsimmons.tv/blog/2006/10/12/how-to-read-an-edl/
 
         :param path: Full path to a cmx compatible file to read
+        :param fps: Number of frames per-second for this EditList
         :param visitor: A callable which will be called on every edit and should
                         accept as input an EditEvent and a logger
         """
-        # Reset defaut values
+        # Reset default values
         self._title = None
         self._edits = []
         # And read the file
         self.__logger.info("Parsing EDL %s" % path)
         with open(path, "rU") as handle:
-            versions = []
             edit = None
             id_offset = 0
             try:
@@ -515,13 +509,9 @@ class EditList(object):
                     elif line.startswith("FCM:"):
                         # Can be DROP FRAME or NON DROP FRAME
                         if line_tokens[1] == "DROP" and line_tokens[2] == "FRAME":
-                            raise NotImplementedError(_ERROR_DROP_FRAME % os.path.basename(path))
+                            raise BadDropFrameError(os.path.basename(path))
                     elif len(line_tokens) > 1 and line_tokens[1] == "BL":
-                        raise NotImplementedError(_ERROR_BL % os.path.basename(path))
-                    elif line_tokens[0].startswith("*"):
-                        # A comment
-                        if edit:
-                            edit.add_comments(line)
+                        raise BadBLError(os.path.basename(path))
                     elif line_tokens[0] == "M2":  # Retime
                         if not edit:
                             raise RuntimeError(
@@ -548,8 +538,8 @@ class EditList(object):
                             if visitor:
                                 self.__logger.debug("Visiting: [%s]" % edit)
                                 visitor(edit, self.__logger)
-                        # Include our event if it's a Cut type (C) and not and
-                        # not an audio track (AA).
+                        # Include our event if it's a Cut type (C) and not
+                        # an audio track (AA).
                         if event_type == "C" and media_type != "AA":  # cut
                             # Number of tokens can vary in the middle
                             # so tokens at the end of the line are indexed with
@@ -571,12 +561,14 @@ class EditList(object):
                                     "Found unexpected effect"
                                 )
                             edit.add_effect(line_tokens)
+                    else:
+                        # A comment
+                        if edit:
+                            edit.add_comments(line)
                 # Call the visitor (if any) with the last edit (if any)
                 if edit and visitor:
                     self.__logger.debug("Visiting: [%s]" % edit)
                     visitor(edit, self.__logger)
-            except NotImplementedError, e:
-                raise NotImplementedError(e)
             except Exception, e:  # Catch the exception so we can add the current line contents
                 args = ["%s.\n\nError reported while parsing %s at line:\n\n%s" % (
                     e.args[0], path, line)] + list(e.args[1:])
