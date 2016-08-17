@@ -10,7 +10,7 @@
 
 from .timecode import Timecode
 from . import logger
-from . errors import BadBLError, BadDropFrameError
+from .errors import BadBLError, BadDropFrameError
 import os
 import re
 
@@ -90,20 +90,20 @@ def process_edit(edit, logger, shot_regexp=None):
     for comment in edit.comments:
         m = _COMMENT_REGEXP.match(comment)
         if m:
-            type = m.group("type")
+            comment_type = m.group("type")
             value = m.group("value")
-            logger.debug("Found in comments [%s]: %s" % (type, value))
-            if type == "LOC":
+            logger.debug("Found in comments [%s]: %s" % (comment_type, value))
+            if comment_type == "LOC":
                 tokens = value.split()
                 if len(tokens) > 2:
                     edit._name = tokens[2]
-            elif type == "SOURCE FILE":
+            elif comment_type == "SOURCE FILE":
                 edit._tape = value.split()[-1]
-            elif type == "FROM CLIP NAME":
+            elif comment_type == "FROM CLIP NAME":
                 edit._clip_name = value
-            elif type == "ASC_SOP":
+            elif comment_type == "ASC_SOP":
                 edit._asc_sop = value
-            elif type == "ASC_SAT":
+            elif comment_type == "ASC_SAT":
                 edit._asc_sat = value
 
     # Extract a shot name

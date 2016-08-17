@@ -68,7 +68,7 @@ class UnsupportedEDLFeature(NotImplementedError):
     """
     def __init__(self, edl_name, *args, **kwargs):
         """
-        Instantiate a new UnsupportedFeature.
+        Instantiate a new UnsupportedEDLFeature.
 
         :param edl_name: A string, the EDL file name.
         """
@@ -87,9 +87,10 @@ class UnsupportedEDLFeature(NotImplementedError):
 
         :returns: A string
         """
-        return "%s uses some EDL features which are not currently supported"
+        return "%s uses some EDL features which are not currently supported."
 
-# Some specific exceptions for most common missing features encoutered in production
+
+# Some specific exceptions for most common missing features encountered in production
 class BadBLError(UnsupportedEDLFeature):
     """
     Thin wrapper around UnsupportedEDLFeature for BL errors, allowing them
@@ -102,12 +103,13 @@ class BadBLError(UnsupportedEDLFeature):
 
         :returns: A string
         """
-        return "%s has a black slug (BL) event, which are not supported."
+        return "%s has a black slug (BL) event, which is not supported."
+
 
 class BadDropFrameError(UnsupportedEDLFeature):
     """
     Thin wrapper around UnsupportedEDLFeature for drop frame errors, allowing them
-    to be caught easily
+    to be caught easily.
     """
 
     def _error_message(self):

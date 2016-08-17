@@ -176,7 +176,7 @@ class TestRead(unittest.TestCase):
     def test_frames_input(self):
         """
         Parses a file with source_in and source_out represented as frames and
-        not timecode. Checks to makes sure frames have been converted to the
+        not timecode. Checks to make sure frames have been converted to the
         expected value.
         """
         frames_edls = ["jrun_demo_relative_frames1.edl"]
@@ -199,7 +199,7 @@ class TestRead(unittest.TestCase):
             path = os.path.join(os.path.dirname(__file__), "resources", audio_edl)
             tc = edl.EditList(file_path=path)
             for edit, item in enumerate(tc.edits):
-                assert edit < 2
+                self.assertLess(edit, 2)
 
     def failing_property_override(self, edit, logger):
         edit.id = "foo"
