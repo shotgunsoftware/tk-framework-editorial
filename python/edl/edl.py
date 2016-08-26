@@ -21,6 +21,8 @@ _COMMENTS_KEYWORDS = [
     "FROM CLIP NAME",
     "ASC_SOP",
     "ASC_SAT",
+    "JAUNT_IN",
+    "JAUNT_OUT"
 ]
 # Build a regular expression to match the keywords above, matching lines beginning
 # with :
@@ -85,6 +87,8 @@ def process_edit(edit, logger, shot_regexp=None):
     edit._asc_sat = None
     edit._type = None
     edit._format = None
+    edit._jaunt_in = None
+    edit._jaunt_out = None
     # edit._version = None
     # Treat all comments
     for comment in edit.comments:
@@ -105,6 +109,10 @@ def process_edit(edit, logger, shot_regexp=None):
                 edit._asc_sop = value
             elif comment_type == "ASC_SAT":
                 edit._asc_sat = value
+            elif comment_type == "JAUNT_IN":
+                edit._jaunt_in = Timecode(value, fps=60).to_frame()
+            elif comment_type == "JAUNT_OUT":
+                edit._jaunt_out = Timecode(value, fps=60).to_frame()
 
     # Extract a shot name
     # Default assignment
@@ -162,7 +170,7 @@ class EditEvent(object):
         "_source_in",
         "_source_out",
         "_record_in",
-        "_record_out",
+        "_record_out"
     ]
     # Protect accessors clashes by building a list of them
     # from internal attributes
@@ -262,7 +270,9 @@ class EditEvent(object):
             self._source_in,
             self._source_out,
             self._record_in,
-            self._record_out
+            self._record_out,
+            self._jaunt_in,
+            self._jaunt_out
         )
 
     @property
@@ -359,7 +369,7 @@ class EditEvent(object):
             str(self._source_in),
             str(self._source_out),
             str(self._record_in),
-            str(self._record_out),
+            str(self._record_out)
         )
 
     def __setattr__(self, attr_name, value):
