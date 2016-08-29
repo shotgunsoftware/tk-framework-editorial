@@ -110,9 +110,9 @@ def process_edit(edit, logger, shot_regexp=None):
             elif comment_type == "ASC_SAT":
                 edit._asc_sat = value
             elif comment_type == "JAUNT_IN":
-                edit._jaunt_in = Timecode(value, fps=60).to_frame()
+                edit._jaunt_in = Timecode(value, fps=edit.fps).to_frame()
             elif comment_type == "JAUNT_OUT":
-                edit._jaunt_out = Timecode(value, fps=60).to_frame()
+                edit._jaunt_out = Timecode(value, fps=edit.fps).to_frame()
 
     # Extract a shot name
     # Default assignment

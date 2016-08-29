@@ -11,6 +11,7 @@
 import decimal
 from .errors import BadFrameRateError
 
+
 # Some helpers to convert timecodes to frames, back and forth
 def frame_from_timecode(timecode, fps=24):
     """
