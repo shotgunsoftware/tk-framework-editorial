@@ -19,10 +19,9 @@ _COMMENTS_KEYWORDS = [
     "LOC",
     "SOURCE FILE",
     "FROM CLIP NAME",
+    "CLIP NAME",
     "ASC_SOP",
-    "ASC_SAT",
-    "JAUNT_IN",
-    "JAUNT_OUT"
+    "ASC_SAT"
 ]
 # Build a regular expression to match the keywords above, matching lines beginning
 # with :
@@ -87,8 +86,6 @@ def process_edit(edit, logger, shot_regexp=None):
     edit._asc_sat = None
     edit._type = None
     edit._format = None
-    edit._jaunt_in = None
-    edit._jaunt_out = None
     # edit._version = None
     # Treat all comments
     for comment in edit.comments:
@@ -105,14 +102,12 @@ def process_edit(edit, logger, shot_regexp=None):
                 edit._tape = value.split()[-1]
             elif comment_type == "FROM CLIP NAME":
                 edit._clip_name = value
+            elif comment_type == "CLIP NAME":
+                edit._clip_name = value
             elif comment_type == "ASC_SOP":
                 edit._asc_sop = value
             elif comment_type == "ASC_SAT":
                 edit._asc_sat = value
-            elif comment_type == "JAUNT_IN":
-                edit._jaunt_in = Timecode(value, fps=edit.fps).to_frame()
-            elif comment_type == "JAUNT_OUT":
-                edit._jaunt_out = Timecode(value, fps=edit.fps).to_frame()
 
     # Extract a shot name
     # Default assignment
@@ -270,9 +265,7 @@ class EditEvent(object):
             self._source_in,
             self._source_out,
             self._record_in,
-            self._record_out,
-            self._jaunt_in,
-            self._jaunt_out
+            self._record_out
         )
 
     @property
