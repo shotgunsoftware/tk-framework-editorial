@@ -18,6 +18,7 @@ import re
 _COMMENTS_KEYWORDS = [
     "LOC",
     "SOURCE FILE",
+    "TO CLIP NAME",
     "FROM CLIP NAME",
     "CLIP NAME",
     "ASC_SOP",
@@ -104,9 +105,14 @@ def process_edit(edit, logger, shot_regexp=None):
                     edit._name = tokens[2]
             elif comment_type == "SOURCE FILE":
                 edit._tape = value.split()[-1]
-            elif comment_type == "FROM CLIP NAME":
-                edit._clip_name = value
+            # The clip name can either be explicitly called out with CLIP NAME or if we only
+            # have FROM CLIP NAME, then we use that. For transitions, we'll have FROM CLIP NAME
+            # and TO CLIP NAME in which case we want to use TO CLIP NAME.
             elif comment_type == "CLIP NAME":
+                edit._clip_name = value
+            elif comment_type == "TO CLIP NAME":
+                edit._clip_name = value
+            elif comment_type == "FROM CLIP NAME":
                 edit._clip_name = value
             elif comment_type == "ASC_SOP":
                 edit._asc_sop = value
