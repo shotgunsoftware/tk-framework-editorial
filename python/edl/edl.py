@@ -54,28 +54,32 @@ class EditProcessor(object):
 
 def process_edit(edit, logger, shot_regexp=None):
     """
-    Extract standard meta data from comments for an Edit :
-        - name from '* LOC: 01:00:00:12 YELLOW  MR0200'
-        - clip name from '* FROM CLIP NAME:  246AA-6'
-        - tape from '* SOURCE FILE: LR9907610'
-        - asc_sop and asc_sat from :
-            '*ASC_SOP (1.0854 1.0451 0.9943)(0.0009 0.0022 -0.0292)(1.0163 1.0105 0.9424)'
-            '*ASC_SAT 1.0000'
+    Extract standard meta data from comments for an Edit:
+    
+    - name from ``* LOC: 01:00:00:12 YELLOW  MR0200``
+    - clip name from ``* FROM CLIP NAME:  246AA-6``
+    - tape from ``* SOURCE FILE: LR9907610``
+    - asc_sop and asc_sat from::
+    
+        ASC_SOP (1.0854 1.0451 0.9943)(0.0009 0.0022 -0.0292)(1.0163 1.0105 0.9424)
+        ASC_SAT 1.0000
 
     If a regular expression is given, it will be used to extract extra information
     from the edit name.
-        - a shot name
-        - a type
-        - a format
+    
+    - a shot name
+    - a type
+    - a format
+    
     Typical values for the regular expression would be as simple as a single group
-    to extract the shot name, e.g. ^(\w+)_.+$
+    to extract the shot name, e.g. ``^(\w+)_.+$``
     or more advanced regular expression with named groups to extract additional
-    informations, e.g. : (?P<shot_name>\w+)_(?P<type>\w\w\d\d)_(?P<version>[V,v]\d+)$
+    informations, e.g. ``(?P<shot_name>\w+)_(?P<type>\w\w\d\d)_(?P<version>[V,v]\d+)$``
 
-    :param edit: An Edit instance
-    :param logger: A standard logger
+    :param edit: An Edit instance.
+    :param logger: A standard logger.
     :param shot_regexp: A regular expression to extract extra information from the
-                        edit name
+                        edit name.
     """
     # Add our runtime attributes
     edit._name = None
@@ -143,13 +147,13 @@ class EditEvent(object):
     An entry, or event, or edit from an edit list
 
     New attributes can be added at runtime, provided that they don't
-    clash with EditEvent regular attributes, by just setting their value, e.g.
-    edit.my_own_attribute = "awesome"
+    clash with :class:`EditEvent` regular attributes, by just setting their value, e.g.
+    ``edit.my_own_attribute = "awesome"``
     They then are accessible like other regular attributes, e.g.
-    print edit.my_own_attribute
+    ``print edit.my_own_attribute``
 
     This implementation assume timecodes out are exclusive, meaning that a one
-    frame long record would be 00:00:00:01 00:00:00:02 ( not 00:00:00:01 )
+    frame long record would be ``00:00:00:01 00:00:00:02`` ( not ``00:00:00:01`` )
 
     """
     # Our known attributes
@@ -227,21 +231,21 @@ class EditEvent(object):
     @property
     def id(self):
         """
-        Return the id for this edit
+        Return the id for this edit.
         """
         return self._id
 
     @property
     def reel(self):
         """
-        Return the reel for this edit
+        Return the reel for this edit.
         """
         return self._reel
 
     @property
     def comments(self):
         """
-        Return the comments for this edit, as a list
+        Return the comments for this edit, as a list.
         """
         return self._comments
 
@@ -249,7 +253,7 @@ class EditEvent(object):
     def pure_comments(self):
         """
         An iterator over "pure" comments, that is comments which
-        do not contain known keywords
+        do not contain known keywords.
         """
         for comment in self._comments:
             if not _COMMENT_REGEXP.match(comment):
@@ -271,21 +275,21 @@ class EditEvent(object):
     @property
     def source_in(self):
         """
-        Return the source in timecode for this edit
+        Return the source in timecode for this edit.
         """
         return self._source_in
 
     @property
     def source_out(self):
         """
-        Return the source out timecode for this edit
+        Return the source out timecode for this edit.
         """
         return self._source_out
 
     @property
     def source_duration(self):
         """
-        Return the source duration, in frames
+        Return the source duration, in frames.
         """
         # Timecode out are exclusive, e.g.
         # 00:00:00:01 -> 00:00:00:02 is only one frame long
@@ -294,21 +298,21 @@ class EditEvent(object):
     @property
     def record_in(self):
         """
-        Return the record in timecode for this edit
+        Return the record in timecode for this edit.
         """
         return self._record_in
 
     @property
     def record_out(self):
         """
-        Return the record out timecode for this edit
+        Return the record out timecode for this edit.
         """
         return self._record_out
 
     @property
     def record_duration(self):
         """
-        Return the record duration, in frames
+        Return the record duration, in frames.
         """
         # Timecode out are exclusive, e.g.
         # 00:00:00:01 -> 00:00:00:02 is only one frame long
@@ -317,42 +321,42 @@ class EditEvent(object):
     @property
     def has_effects(self):
         """
-        Return True if this EditEvent has some effect(s)
+        Return ``True`` if this :class:`EditEvent` has some effect(s).
         """
         return bool(self._effects)
 
     def add_effect(self, tokens):
         """
-        For now, just register the effect line
+        For now, just register the effect line.
         Later we might want to parse the tokens, and store some actual
-        effects value on this edit
+        effects value on this edit.
         """
         self._effects.append(" ".join(tokens))
 
     def add_comments(self, comments):
         """
-        Associate a comment line to this edit
+        Associate a comment line to this edit.
         """
         self._comments.append(comments)
 
     @property
     def has_retime(self):
         """
-        Return True if this edit has some retime
+        Return ``True`` if this edit has some retime.
         """
         return bool(self._retime)
 
     def add_retime(self, tokens):
         """
-        For now, just register the retime line
+        For now, just register the retime line.
         Later we might want to parse the tokens, and store some actual
-        retime values
+        retime values.
         """
         self._retime = " ".join(tokens)
 
     def __str__(self):
         """
-        String representation for this EditEvent
+        String representation for this :class:`EditEvent`
         """
         return "%03d %s %s %s %s %s %s %s" % (
             self._id,
@@ -368,10 +372,10 @@ class EditEvent(object):
     def __setattr__(self, attr_name, value):
         """
         Allow new attributes to be added on the fly, e.g. when parsing a file
-        with a visitor
+        with a visitor.
 
-        :param attr_name: Name of the attribute that needs setting
-        :param value: The value the attribute should take
+        :param attr_name: Name of the attribute that needs setting.
+        :param value: The value the attribute should take.
         """
         if attr_name in self.__protected:
             raise AttributeError("EditEvent %s attribute can't be redefined" % attr_name)
@@ -382,11 +386,11 @@ class EditEvent(object):
 
     def __getattr__(self, attr_name):
         """
-        Retrieve runtime attributes from meta_data dictionary
+        Retrieve runtime attributes from meta_data dictionary.
 
-        :param attr_name: An attribute name
-        :return: The value for the given attribute name
-        :raise: AttributeError if the attribute can't be found
+        :param attr_name: An attribute name.
+        :return: The value for the given attribute name.
+        :raise: ``AttributeError`` if the attribute can't be found.
         """
         if attr_name in self._meta_data:
             return self._meta_data[attr_name]
@@ -395,37 +399,36 @@ class EditEvent(object):
 
 class EditList(object):
     """
-    An Edit Decision List
+    An Edit Decision List.
 
-    Typical use of EditList could look like this:
+    Typical use of EditList could look like this::
 
-    # Define a visitor to extract some extra information from comments or locators
-    def edit_parser(edit):
-        # New attributes can be added on the fly
-        if edit.id % 2:
-            edit.is_even = False
-        else:
-            edit.is_even = True
+        # Define a visitor to extract some extra information from comments or locators
+        def edit_parser(edit):
+            # New attributes can be added on the fly
+            if edit.id % 2:
+                edit.is_even = False
+            else:
+                edit.is_even = True
 
-    edl = EditList(file_path="/tmp/my_edl.edl", visitor=edit_parser)
-    for edit in edl.entries:
-        print str(edit)
-        # Added attributes are reachable like regular ones
-        print edit.is_even
+        edl = EditList(file_path="/tmp/my_edl.edl", visitor=edit_parser)
+        for edit in edl.edits:
+            print str(edit)
+            # Added attributes are reachable like regular ones
+            print edit.is_even
     """
 
     __logger = logger.get_logger()
 
     def __init__(self, fps=24, file_path=None, visitor=None):
         """
-        Instantiate a new Edit Decision List
+        Instantiate a new Edit Decision List.
 
-        :param fps: Number of frames per second for this EditList
-        :param file_path: Full path to a file to read
+        :param fps: Number of frames per second for this EditList.
+        :param file_path: Full path to a file to read.
         :param visitor: A callable which will be called on every edit and should
-                        accept as input an EditEvent and a logger
+                        accept as input an :class:`EditEvent` and a logger.
         """
-
         self._title = None
         self._edits = []
         self._fps = fps
@@ -444,49 +447,51 @@ class EditList(object):
     def set_logger(cls, logger):
         """
         Allow to use another logger than the default one provided in this
-        framework
+        framework.
         """
         cls.__logger = logger
 
     @property
     def has_transitions(self):
         """
-        Return True if this EditEvent has transitions.
+        Return ``True`` if this EditEvent has transitions.
         """
         return self._has_transitions
 
     @property
     def edits(self):
         """
-        Return a list of all edit events in this EditList
+        Return a list of all edit events in this :class:`EditList`.
         """
         return self._edits
 
     @property
     def title(self):
         """
-        Return this EditList's title
+        Return this :class:`EditList`'s title
         """
         return self._title
 
     @property
     def fps(self):
         """
-        Return the number of frame per seconds used by this EditList
+        Return the number of frame per seconds used by this :class:`EditList`.
         """
         return self._fps
 
     def read_cmx_edl(self, path, fps=24, visitor=None):
         """
         Parse the given edl file, extract a list of versions that need to be
-        created
-        http://xmil.biz/EDL-X/CMX3600.pdf
-        http://www.scottsimmons.tv/blog/2006/10/12/how-to-read-an-edl/
+        created.
 
-        :param path: Full path to a cmx compatible file to read
-        :param fps: Number of frames per-second for this EditList
+        .. seealso::
+            - http://xmil.biz/EDL-X/CMX3600.pdf
+            - http://www.scottsimmons.tv/blog/2006/10/12/how-to-read-an-edl/
+
+        :param path: Full path to a cmx compatible file to read.
+        :param fps: Number of frames per-second for this :class:`EditList`.
         :param visitor: A callable which will be called on every edit and should
-                        accept as input an EditEvent and a logger
+                        accept as input an :class:`EditEvent` and a logger.
         """
         # Reset default values
         self._title = None
