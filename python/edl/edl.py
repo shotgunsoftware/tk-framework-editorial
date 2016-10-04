@@ -605,6 +605,9 @@ class EditList(object):
                         self._edits[prev]._source_out = Timecode(
                             str(self._edits[prev]._source_out.to_frame() + trans_duration),
                             fps=self._edits[prev].fps)
+                        self._edits[prev]._record_out = Timecode(
+                            str(self._edits[prev]._record_out.to_frame() + trans_duration),
+                            fps=self._edits[prev].fps)
                     # Take the values from the Dissolve effect for the current edit.
                     edit._source_in = Timecode(effect_tokens[5], edit.fps)
                     edit._source_out = Timecode(effect_tokens[6], edit.fps)
