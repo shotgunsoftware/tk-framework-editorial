@@ -19,6 +19,7 @@ class TestRead(unittest.TestCase):
         self._edl_examples = []
         self._unsupported_examples = []
         self._unsupported_dir = None
+        self._unique_dir = None
 
     def setUp(self):
         resources_dir = os.path.join(os.path.dirname(__file__), "resources")
@@ -30,6 +31,8 @@ class TestRead(unittest.TestCase):
         for f in os.listdir(self._unsupported_dir):
             if f.endswith(".edl"):
                 self._unsupported_examples.append(os.path.join(self._unsupported_dir, f))
+
+        self._unique_dir = os.path.join(resources_dir, "unique")
 
         # Set up some reference data that we'll compare against in our conversion tests.
         # Note: drop frame timecode uses ; as the frame delimiter
@@ -319,3 +322,15 @@ class TestRead(unittest.TestCase):
         for fps, drop, expected_frame, tc in self._frames_timecode_map:
             frame = timecode.frame_from_timecode(tc, fps, drop)
             self.assertEqual(frame, expected_frame)
+
+    def test_clip_names_with_transitions(self):
+        """
+        Test that clip names are correctly assigned when dealing with transitions.
+
+        todo: need more input edls to test for this so we can test comments with CLIP NAME
+        """
+        expected_names = ["rfe0020", "rfe0030", "rfe0040", "rfe0050"]
+        path = os.path.join(self._unique_dir, "springtrain_transitions.edl")
+        tc = edl.EditList(file_path=path, fps=59.97, visitor=edl.process_edit)
+        for idx, edit in enumerate(tc.edits):
+            self.assertEqual(edit._clip_name, expected_names[idx])

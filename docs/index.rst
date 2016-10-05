@@ -1,7 +1,7 @@
 The Editorial Framework
 ####################################################
 
-The Editorial Framework contains a collection of re-usable Editorial and Cut related components.
+The Editorial Framework contains a collection of reusable Editorial and Cut related components.
 
 Contents:
 

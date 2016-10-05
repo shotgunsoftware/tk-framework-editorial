@@ -405,9 +405,9 @@ class EditList(object):
 
     Typical use of EditList could look like this::
 
-        # Define a visitor to extract some extra information from comments or locators
+        # Define a visitor to extract some extra information from comments or locators.
         def edit_parser(edit):
-            # New attributes can be added on the fly
+            # New attributes can be added on the fly.
             if edit.id % 2:
                 edit.is_even = False
             else:
@@ -416,7 +416,7 @@ class EditList(object):
         edl = EditList(file_path="/tmp/my_edl.edl", visitor=edit_parser)
         for edit in edl.edits:
             print str(edit)
-            # Added attributes are reachable like regular ones
+            # Added attributes are reachable like regular ones.
             print edit.is_even
     """
 
