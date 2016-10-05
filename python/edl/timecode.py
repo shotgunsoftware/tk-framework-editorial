@@ -7,12 +7,7 @@
 # By accessing, using, copying or modifying this work you indicate your
 # agreement to the Shotgun Pipeline Toolkit Source Code License. All rights
 # not expressly granted therein are reserved by Shotgun Software Inc.
-#
-# Portions of this code are based on the original PyTimecode module published by
-# Joshua Banton. Currently maintained as the timecode module:
-# https://github.com/eoyilmaz/timecode
-# https://pypi.python.org/pypi/timecode
-# Copyright (c) 2014 Joshua Banton and PyTimeCode developers
+
 
 import decimal
 import re
@@ -20,10 +15,6 @@ from .errors import BadFrameRateError
 
 DROP_FRAME_DELIMITER = ";"
 NON_DROP_FRAME_DELIMITER = ":"
-
-FRAMES_IN_ONE_MINUTE = 1800 - 2
-
-FRAMES_IN_TEN_MINUTES = (FRAMES_IN_ONE_MINUTE * 10) - 2
 
 
 # Some helpers to convert timecodes to frames, back and forth.
@@ -42,48 +33,49 @@ def frame_from_timecode(timecode, fps=24, drop=False):
                                   "calculations for 29.97 and 59.94 fps.")
 
     if isinstance(timecode, str):
-        hour, minute, second, frame = re.findall(r"\d{2}", timecode)
+        # This supports timecode up to 999:59:59:59.
+        hour, minute, second, frame = Timecode.parse_timecode(timecode)
     else:  # Assume a 4 elements tuple
         hour, minute, second, frame = timecode
     hours = int(hour)
     minutes = int(minute)
     seconds = int(second)
     frames = int(frame)
-    ffps = float(fps)
 
     if drop:
-        # Number of drop frames is 6% of framerate rounded to nearest integer.
-        drop_frames = int(round(ffps * .066666))
+        # Number of drop frames per minute is 6% of framerate rounded to nearest integer.
+        drop_frames_per_minute = int(round(fps * .066666))
     else:
-        drop_frames = 0
+        drop_frames_per_minute = 0
 
-    # We don't need the exact framerate anymore, we just need it rounded to the
-    # nearest integer.
-    ifps = int(ffps)
-
+    # We don't need the exact framerate anymore if we're using drop frame, we just need it
+    # rounded to nearest integer. Non-drop frame will return the same value.
+    fps_int = int(round(fps))
     # Number of frames per hour (non-drop)
-    hour_frames = ifps * 60 * 60
-
+    frames_per_hour = fps_int * 60 * 60
     # Number of frames per minute (non-drop)
-    minute_frames = ifps * 60
-
-    # Total number of minutes
+    frames_per_minute = fps_int * 60
+    # Total number of minutes (non-drop)
     total_minutes = (60 * hours) + minutes
 
-    frame_number = ((hour_frames * hours) + (minute_frames * minutes) +
-                    (ifps * seconds) + frames) - \
-                   (drop_frames * (total_minutes - (total_minutes // 10)))
+    # Put it all together.
+    frame_number = (frames_per_hour * hours) + (frames_per_minute * minutes) + \
+        (fps_int * seconds) + frames
+    # If we're using drop frame, calculate the total frames to drop by multiplying the number of
+    # frames we drop each minute, by the total number of minutes MINUS the number of 10-minute
+    # intervals.
+    frames_to_drop = drop_frames_per_minute * (total_minutes - (total_minutes / 10))
+    # Subtract any frames to drop to get our final frame number.
+    frame_number -= frames_to_drop
 
-    frames = frame_number + 1
-
-    return frames
+    return frame_number
 
 
-def timecode_from_frame(total_frames, fps=24, drop=False):
+def timecode_from_frame(frame_number, fps=24, drop=False):
     """
     Return the timecode corresponding to the given frame.
 
-    :param total_frames: A frame number, as an int.
+    :param frame_number: A frame number, as an int.
     :param fps: Number of frames per seconds, as an int.
     :param drop: Boolean determining whether timecode should use drop frame or not.
     :returns: Timecode as string, e.g. '01:02:12:32' (non-drop frame) or
@@ -105,84 +97,117 @@ def timecode_from_frame(total_frames, fps=24, drop=False):
     #
     # For another good explanation, see
     # https://documentation.apple.com/en/finalcutpro/usermanual/index.html#chapter=D%26section=6
-    fps = int(round(fps))
+    fps_int = int(round(fps))
 
     if drop:
         # drop-frame-mode
-        # add two 'fake' frames every minute but not every 10 minutes
+        # for 30 fps jump 2 frames every minute but not every 10 minutes
+        # for 60 fps jump 4 frames every minute but not every 10 minutes
         #
-        # example at the one minute mark:
+        # D = Drop Frame
+        # ND = Non-Drop Frame
         #
-        # frame: 1795 non-drop: 00:00:59:25 drop: 00:00:59;25
-        # frame: 1796 non-drop: 00:00:59:26 drop: 00:00:59;26
-        # frame: 1797 non-drop: 00:00:59:27 drop: 00:00:59;27
-        # frame: 1798 non-drop: 00:00:59:28 drop: 00:00:59;28
-        # frame: 1799 non-drop: 00:00:59:29 drop: 00:00:59;29
-        # frame: 1800 non-drop: 00:01:00:00 drop: 00:01:00;02
-        # frame: 1801 non-drop: 00:01:00:01 drop: 00:01:00;03
-        # frame: 1802 non-drop: 00:01:00:02 drop: 00:01:00;04
-        # frame: 1803 non-drop: 00:01:00:03 drop: 00:01:00;05
-        # frame: 1804 non-drop: 00:01:00:04 drop: 00:01:00;06
-        # frame: 1805 non-drop: 00:01:00:05 drop: 00:01:00;07
+        # Example at the one minute / 30-sec mark:
+        #             30 fps                         60 fps
+        # -------------------------------------------------------------------------
+        # frame: 1798 ND: 00:00:59:28 D: 00:00:59;28 ND: 00:00:29:58 D: 00:00:29;58
+        # frame: 1799 ND: 00:00:59:29 D: 00:00:59;29 ND: 00:00:29:59 D: 00:00:29;59
+        # frame: 1800 ND: 00:01:00:00 D: 00:01:00;02 ND: 00:00:30:00 D: 00:00:30;00
+        # frame: 1801 ND: 00:01:00:01 D: 00:01:00;03 ND: 00:00:30:01 D: 00:00:30;01
+        # frame: 1802 ND: 00:01:00:02 D: 00:01:00;04 ND: 00:00:30:02 D: 00:00:30;02
         #
-        # example at the ten minute mark:
+        # example at the two minute / one minute mark:
         #
-        # frame: 17977 non-drop: 00:09:59:07 drop: 00:09:59;25
-        # frame: 17978 non-drop: 00:09:59:08 drop: 00:09:59;26
-        # frame: 17979 non-drop: 00:09:59:09 drop: 00:09:59;27
-        # frame: 17980 non-drop: 00:09:59:10 drop: 00:09:59;28
-        # frame: 17981 non-drop: 00:09:59:11 drop: 00:09:59;29
-        # frame: 17982 non-drop: 00:09:59:12 drop: 00:10:00;00
-        # frame: 17983 non-drop: 00:09:59:13 drop: 00:10:00;01
-        # frame: 17984 non-drop: 00:09:59:14 drop: 00:10:00;02
-        # frame: 17985 non-drop: 00:09:59:15 drop: 00:10:00;03
-        # frame: 17986 non-drop: 00:09:59:16 drop: 00:10:00;04
-        # frame: 17987 non-drop: 00:09:59:17 drop: 00:10:00;05
+        # frame: 3598 ND: 00:01:59:28 D: 00:01:59;28 ND: 00:00:59:58 D: 00:00:59:58
+        # frame: 3599 ND: 00:01:59:29 D: 00:01:59;29 ND: 00:00:00:59 D: 00:00:59:59
+        # frame: 3600 ND: 00:02:00:00 D: 00:02:00;02 ND: 00:01:00:00 D: 00:01:00;04
+        # frame: 3601 ND: 00:02:00:01 D: 00:02:00;03 ND: 00:01:00:01 D: 00:01:00;05
+        # frame: 3602 ND: 00:02:00:02 D: 00:02:00;04 ND: 00:01:00:02 D: 00:01:00;06
+        #
+        # examples at the ten minute / 5 minute marks:
+        #
+        # frame: 17980 ND: 00:09:59:10 D: 00:09:59;28  ND: 00:04:59:40 D: 00:04:59;56
+        # frame: 17981 ND: 00:09:59:11 D: 00:09:59;29  ND: 00:04:59:41 D: 00:04:59;57
+        # frame: 17982 ND: 00:09:59:12 D: 00:10:00;00  ND: 00:04:59:42 D: 00:04:59;58
+        # frame: 17983 ND: 00:09:59:13 D: 00:10:00;01  ND: 00:04:59:43 D: 00:04:59;59
+        # frame: 17984 ND: 00:09:59:14 D: 00:10:00;02  ND: 00:04:59:44 D: 00:05:00;04
 
-        # Calculate number of drop frames for a 29.97 standard NTSC workflow.
-        ten_minute_chunks = total_frames / FRAMES_IN_TEN_MINUTES
-        one_minute_chunks = total_frames % FRAMES_IN_TEN_MINUTES
+        # frame: 17998 ND: 00:09:59:58 D: 00:10:00;16  ND: 00:04:59:58 D: 00:05:00;18
+        # frame: 17999 ND: 00:09:59:59 D: 00:10:00;17  ND: 00:04:59:59 D: 00:05:00;19
+        # frame: 18000 ND: 00:10:00:00 D: 00:10:00;18  ND: 00:05:00:00 D: 00:05:00;20
+        # frame: 18001 ND: 00:10:00:01 D: 00:10:00;19  ND: 00:05:00:01 D: 00:05:00;21
+        # frame: 18002 ND: 00:10:00:02 D: 00:10:00;20  ND: 00:05:00:02 D: 00:05:00;22
 
-        ten_minute_part = 18 * ten_minute_chunks
-        one_minute_part = 2 * ((one_minute_chunks - 2) / FRAMES_IN_ONE_MINUTE)
+        # Number of frames to drop on the minute marks is the nearest integer to 6%
+        # of the framerate.
+        # 30fps: 2
+        # 60fps: 4
+        drop_frames = int(round(fps * .066666))
 
-        if one_minute_part < 0:
-            one_minute_part = 0
+        # Number of NON-DROP frames per ten minutes
+        # 30fps: 30 * 60 * 10 = 17982
+        # 60fps: 60 * 60 * 10 = 35964
+        frames_per_10_mins = int(round(fps * 60 * 10))
 
-        # Add extra frames
-        total_frames += ten_minute_part + one_minute_part
+        # Total number of DROP frames per minute
+        # fps * 60 (seconds) - (# drop frames per minute)
+        # 30fps: 30 * 60 - 2 = 1798
+        # 60fps: 60 * 60 - 4 = 3596
+        frames_per_min = (int(round(fps)) * 60) - drop_frames
 
-        # for 60 fps drop frame calculations, we add twice the number of frames
-        if fps == 60:
-            total_frames *= 2
+        # Number of frames to add per 10 minute chunk
+        # (# frames to drop per minute) * 9 (9 minutes since every 10th minute we *don't* drop)
+        # 30fps: 2 * 9 = 18
+        # 60fps: 4 * 9 = 36
+        additional_frames_per_10m = drop_frames * 9
 
-        # time codes are on the form 12:12:12;12
+        # number of frames to add per 1 minute chunk
+        # 30fps: 2
+        # 60fps: 4
+        additional_frames_per_1m = drop_frames
+
+        # Number of 10-minute chunks of frames
+        ten_minute_chunks = frame_number / frames_per_10_mins
+        # Remainder of frames after splitting into 10 minute chunks
+        remaining_frames = frame_number % frames_per_10_mins
+
+        if remaining_frames > drop_frames:
+            add_frames = (additional_frames_per_10m * ten_minute_chunks) + \
+                (additional_frames_per_1m *
+                    ((remaining_frames - drop_frames) / frames_per_min))
+        else:
+            add_frames = additional_frames_per_10m * ten_minute_chunks
+
+        # The final result!
+        frame_number += add_frames
+
+        # Drop frame time codes use a ; to delimit the frames by convention.
         frames_token = DROP_FRAME_DELIMITER
 
     else:
-        # time codes are on the form 12:12:12:12
+        # Non-drop frame time codes use a : to delimit the frames by convention.
         frames_token = NON_DROP_FRAME_DELIMITER
 
-    # now split our frames into time code
-    hours = int(total_frames / (3600 * fps))
-    minutes = int(total_frames / (60 * fps) % 60)
-    seconds = int(total_frames / fps % 60)
-    frames = int(total_frames % fps)
+    # Now split our frames into timecode.
+    hours = int(frame_number / (3600 * fps_int))
+    minutes = int(frame_number / (60 * fps_int) % 60)
+    seconds = int(frame_number / fps_int % 60)
+    frames = int(frame_number % fps_int)
 
     return "%02d:%02d:%02d%s%02d" % (hours, minutes, seconds, frames_token, frames)
 
 
 class Timecode(object):
     """
-    A non-drop frame timecode.
+    A non-drop frame timecode object.
     """
     def __init__(self, timecode_string, fps=24, drop=False):
         """
-        Instantiate a timecode from a timecode or frame string.
+        Instantiate a Timecode from a timecode or frame string.
 
         :param timecode_string: A timecode string in ``hh:mm:ss:ff`` format or
                                 a frame number.
-        :param fps: Frames per second setting
+        :param fps: Frames per second setting as an int or float.
         :param drop: Boolean indicating whether to use drop frame or not.
         """
         # Split the timecode_string by any non-numeric delimiter.
@@ -192,26 +217,23 @@ class Timecode(object):
         #   00:12:34.21 NON-DROP FRAME variation 2
         #   00:12:34;21 DROP FRAME variation 1
         #   00:12:34,21 DROP FRAME variation 2
-        fields = re.findall(r"\d{2}", timecode_string)
-
-        if len(fields) != 4:
+        try:
+            self._hours, self._minutes, self._seconds, self._frames = \
+                self.parse_timecode(timecode_string)
+        except ValueError:
+            # If we can convert the timecode_string to an int, we assume we
+            # have a frame number and convert it to an absolute timecode using
+            # our fps value. All calculations, etc. from this point on treat
+            # the input as if it was a timecode and not a frame.
             try:
-                # If we can convert the timecode_string to an int, we assume we
-                # have a frame number and convert it to an absolute timecode using
-                # our fps value. All calculations, etc. from this point on treat
-                # the input as if it was a timecode and not a frame.
                 new_timecode_string = timecode_from_frame(int(timecode_string), fps, drop)
-                fields = re.findall(r"\d{2}", new_timecode_string)
+                self._hours, self._minutes, self._seconds, self._frames = \
+                    self.parse_timecode(new_timecode_string)
             except ValueError:
-                raise ValueError(
-                    "Given timecode %s can not be converted to hh:mm:ss:ff format." %
-                    timecode_string
-                )
+                raise ValueError("Timecode %s can not be converted to hh:mm:ss:ff format." %
+                                 timecode_string)
+
         self._fps = fps
-        self._hours = int(fields[0])
-        self._minutes = int(fields[1])
-        self._seconds = int(fields[2])
-        self._frames = int(fields[3])
         self._drop = drop
         # use the "correct" frame token delimiter
         if self._drop:
@@ -220,12 +242,13 @@ class Timecode(object):
             self._frame_delimiter = NON_DROP_FRAME_DELIMITER
 
         # Do some basic checks
-        if self._frames >= self._fps:
-            raise BadFrameRateError(self._frames, self._fps)
-        if self._hours > 23:
-            raise ValueError(
-                "Invalid hours value %d, it must be smaller than 24" % self._hours
-            )
+        # Note: I think we need to support non-standard timecodes > 24 hours for
+        #       example 103:12:33:07. Assuming this is confirmed, we should remove the
+        #       code below.
+        # if self._hours > 23:
+        #     raise ValueError(
+        #         "Invalid hours value %d, it must be smaller than 24" % self._hours
+        #     )
         if self._minutes > 59:
             raise ValueError(
                 "Invalid minutes value %d, it must be smaller than 60" % self._minutes
@@ -234,6 +257,29 @@ class Timecode(object):
             raise ValueError(
                 "Invalid seconds value %d, it must be smaller than 60" % self._seconds
             )
+        if self._frames >= self._fps:
+            raise BadFrameRateError(self._frames, self._fps)
+
+    @classmethod
+    def parse_timecode(cls, timecode_str):
+        """
+        Parse a timecode string to valid hour, minute, second, and frame values.
+
+        :param timecode_str: A timecode string in ``hh:mm:ss:ff`` format.
+        :return: tuple of (hours, minutes, seconds, frames) where all values are ints.
+        :raises: ValueError if string cannot be parsed.
+        """
+        fields = re.findall(r"\d{2,3}", timecode_str)
+
+        if len(fields) != 4:
+            raise ValueError("Timecode is not in a valid hh:mm:ss:ff format.")
+
+        try:
+            tc_tuple = (int(fields[0]), int(fields[1]), int(fields[2]), int(fields[3]),)
+        except IndexError:
+            raise ValueError("Timecode is not in a valid hh:mm:ss:ff format.")
+
+        return tc_tuple
 
     @classmethod
     def from_frame(cls, frame, fps=24, drop=False):
@@ -330,3 +376,13 @@ class Timecode(object):
         return "%02d:%02d:%02d%s%02d" % (
             self._hours, self._minutes, self._seconds, self._frame_delimiter, self._frames
         )
+
+    def __repr__(self):
+        """
+        Code representation of this :class:`Timecode` instance.
+        """
+        drop = "ND"
+        if self._drop:
+            drop = "D"
+        return "<class %s %02d:%02d:%02d%s%02d (%sfps %s)>" % (self.__class__.__name__, self._hours, self._minutes,
+               self._seconds, self._frame_delimiter, self._frames, self._fps, drop)

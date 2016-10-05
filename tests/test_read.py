@@ -35,6 +35,31 @@ class TestRead(unittest.TestCase):
             if f.endswith(".edl"):
                 self._unsupported_examples.append(os.path.join(self._unsupported_dir, f))
 
+        # Set up some reference data that we'll compare against in our conversion tests.
+        # Note: drop frame timecode uses ; as the frame delimiter
+        self._frames_timecode_map = [
+            (24, False, 1234567, "14:17:20:07"),
+            (24, False, 2345678, "27:08:56:14"),
+            (24, False, 12345678, "142:53:23:06"),
+            (24, False, 23456789, "271:29:26:05"),
+            (30, False, 1234567, "11:25:52:07"),
+            (30, False, 2345678, "21:43:09:08"),
+            (30, False, 12345678, "114:18:42:18"),
+            (30, False, 23456789, "217:11:32:29"),
+            (60, False, 1234567, "05:42:56:07"),
+            (60, False, 2345678, "10:51:34:38"),
+            (60, False, 12345678, "57:09:21:18"),
+            (60, False, 23456789, "108:35:46:29"),
+            (29.97, True, 1234567, "11:26:33;13"),
+            (29.97, True, 2345678, "21:44:27;16"),
+            (29.97, True, 12345678, "114:25:34;16"),
+            (29.97, True, 23456789, "217:24:35;19"),
+            (59.94, True, 1234567, "05:43:16;43"),
+            (59.94, True, 2345678, "10:52:13;46"),
+            (59.94, True, 12345678, "57:12:47;14"),
+            (59.94, True, 23456789, "108:42:17;49"),
+        ]
+
     def read_edl_file(self, file):
         logging.info("Reading %s" % file)
         tc = edl.EditList()
@@ -171,7 +196,7 @@ class TestRead(unittest.TestCase):
                     self.assertEqual(str(item.source_in), str(timecode.Timecode("00:59:59:09")))
                     self.assertEqual(str(item.source_out), str(timecode.Timecode("01:00:05:15")))
                     self.assertEqual(str(item.record_in), str(timecode.Timecode("01:00:07:23")))
-                    self.assertEqual(str(item.record_out), str(timecode.Timecode("01:00:12:23")))
+                    self.assertEqual(str(item.record_out), str(timecode.Timecode("01:00:14:05")))
 
     def test_frames_input(self):
         """
@@ -207,7 +232,7 @@ class TestRead(unittest.TestCase):
     def test_accessor_overrides(self):
         with self.assertRaises(AttributeError) as cm:
             for f in self._edl_examples:
-                tc = edl.EditList(
+                edl.EditList(
                     file_path=f,
                     visitor=self.failing_property_override,
                 )
@@ -220,19 +245,36 @@ class TestRead(unittest.TestCase):
         new_tc = timecode.timecode_from_frame(frame, fps=24)
         self.assertEqual(tc, new_tc)
 
+        # try some drop frame versions of this
+        df_tc = "02:03:04;05"
+        frame = timecode.frame_from_timecode(df_tc, fps=29.97, drop=True)
+        new_tc = timecode.timecode_from_frame(frame, fps=29.97, drop=True)
+        self.assertEqual(df_tc, new_tc)
+        frame = timecode.frame_from_timecode(df_tc, fps=59.94, drop=True)
+        new_tc = timecode.timecode_from_frame(frame, fps=59.94, drop=True)
+        self.assertEqual(df_tc, new_tc)
+
     def test_frame_round_trip(self):
         # We need to make sure frame values aren't mutated when going back and
         # forth from frames to tc to frames
-        frames = [2394732, -2394732]
+        frames = [2394732, 12332, 8599999, 8640005]
         for frame in frames:
             tc = timecode.timecode_from_frame(frame, fps=24)
             new_frame = timecode.frame_from_timecode(tc, fps=24)
             self.assertEqual(frame, new_frame)
 
+            # try some drop frame versions of this
+            tc = timecode.timecode_from_frame(frame, fps=29.97, drop=True)
+            new_frame = timecode.frame_from_timecode(tc, fps=29.97, drop=True)
+            self.assertEqual(frame, new_frame)
+            tc = timecode.timecode_from_frame(frame, fps=59.94, drop=True)
+            new_frame = timecode.frame_from_timecode(tc, fps=59.94, drop=True)
+            self.assertEqual(frame, new_frame)
+
     def test_fps_types(self):
         # Testing input of effective int and establishing the fact that these
         # are valid input types
-        frame_rates = [24, -24, 24.00, -24.00, 60, -60, 60.00, -60.00]
+        frame_rates = [24, 24.00, 60, 60.00]
         for fps in frame_rates:
             _int = int(fps)
             _float = float(fps)
@@ -245,7 +287,7 @@ class TestRead(unittest.TestCase):
             self.assertEqual(tc_int, tc_decimal)
             self.assertEqual(tc_float, tc_decimal)
         # Testing input of non-int
-        frame_rates = [23.976, -23.976, 59.94, -59.94]
+        frame_rates = [23.976, 59.94]
         for fps in frame_rates:
             _float = float(fps)
             _decimal = decimal.Decimal(fps)
@@ -261,7 +303,23 @@ class TestRead(unittest.TestCase):
         path = os.path.join(self._unsupported_dir, "drop-frame.edl")
         # Check we get expected exception
         with self.assertRaises(BadDropFrameError):
-            tc = edl.EditList(file_path=path)
+            edl.EditList(file_path=path)
         path = os.path.join(self._unsupported_dir, "raphe_temp1_rfe_R01_v01.edl")
         with self.assertRaises(BadFrameRateError):
-            tc = edl.EditList(file_path=path)
+            edl.EditList(file_path=path)
+
+    def test_frames_to_timecode(self):
+        """
+        Test we return the correct timecodes for various frame, fps, and drop frame settings.
+        """
+        for fps, drop, frame, expected_tc in self._frames_timecode_map:
+            tc = timecode.timecode_from_frame(frame, fps=fps, drop=drop)
+            self.assertEqual(str(tc), expected_tc)
+
+    def test_timecode_to_frames(self):
+        """
+        Test we return the correct frames for various timecode, fps, and drop frame settings.
+        """
+        for fps, drop, expected_frame, tc in self._frames_timecode_map:
+            frame = timecode.frame_from_timecode(tc, fps, drop)
+            self.assertEqual(frame, expected_frame)
