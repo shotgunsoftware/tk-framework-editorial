@@ -57,21 +57,21 @@ def process_edit(edit, logger, shot_regexp=None):
     - clip name from ``* FROM CLIP NAME:  246AA-6``
     - tape from ``* SOURCE FILE: LR9907610``
     - asc_sop and asc_sat from::
-    
+
         ASC_SOP (1.0854 1.0451 0.9943)(0.0009 0.0022 -0.0292)(1.0163 1.0105 0.9424)
         ASC_SAT 1.0000
 
     If a regular expression is given, it will be used to extract extra information
     from the edit name.
-    
+
     - a shot name
     - a type
     - a format
-    
+
     Typical values for the regular expression would be as simple as a single group
     to extract the shot name, e.g. ``^(\w+)_.+$``
     or more advanced regular expression with named groups to extract additional
-    informations, e.g. ``(?P<shot_name>\w+)_(?P<type>\w\w\d\d)_(?P<version>[V,v]\d+)$``
+    information, e.g. ``(?P<shot_name>\w+)_(?P<type>\w\w\d\d)_(?P<version>[V,v]\d+)$``
 
     :param edit: An Edit instance.
     :param logger: A standard logger.
@@ -186,7 +186,7 @@ class EditEvent(object):
         source_out  = None,
         record_in   = None,
         record_out  = None,
-        fps         =  24,
+        fps         = 24,
     ):
         """
         Instantiate a new EditEvent

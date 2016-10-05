@@ -380,5 +380,7 @@ class Timecode(object):
         drop = "ND"
         if self._drop:
             drop = "D"
-        return "<class %s %02d:%02d:%02d%s%02d (%sfps %s)>" % (self.__class__.__name__, self._hours, self._minutes,
-               self._seconds, self._frame_delimiter, self._frames, self._fps, drop)
+        return "<class %s %02d:%02d:%02d%s%02d (%sfps %s)>" % (
+            self.__class__.__name__, self._hours, self._minutes, self._seconds,
+            self._frame_delimiter, self._frames, self._fps, drop
+        )
