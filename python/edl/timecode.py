@@ -14,17 +14,17 @@ NON_DROP_FRAME_DELIMITER = ":"
 
 
 # Some helpers to convert timecodes to frames, back and forth.
-def frame_from_timecode(timecode, fps=24, drop=False):
+def frame_from_timecode(timecode, fps=24, drop_frame=False):
     """
     Return the frame number for the given timecode.
 
     :param timecode: A timecode, either as a string in hh:mm:ss:ff format
                      or as a (hours, minutes, seconds, frames) tuple.
     :param fps: Number of frames per second.
-    :param drop: Boolean determining whether timecode should use drop frame or not.
+    :param drop_frame: Boolean determining whether timecode should use drop frame or not.
     :return: Corresponding frame number, as an int.
     """
-    if drop and fps not in [29.97, 59.94]:
+    if drop_frame and fps not in [29.97, 59.94]:
         raise NotImplementedError("Time code calculation logic only supports drop frame "
                                   "calculations for 29.97 and 59.94 fps.")
 
@@ -38,7 +38,7 @@ def frame_from_timecode(timecode, fps=24, drop=False):
     seconds = int(second)
     frames = int(frame)
 
-    if drop:
+    if drop_frame:
         # Number of drop frames per minute is 6% of framerate rounded to nearest integer.
         drop_frames_per_minute = int(round(fps * .066666))
     else:
@@ -67,17 +67,17 @@ def frame_from_timecode(timecode, fps=24, drop=False):
     return frame_number
 
 
-def timecode_from_frame(frame_number, fps=24, drop=False):
+def timecode_from_frame(frame_number, fps=24, drop_frame=False):
     """
     Return the timecode corresponding to the given frame.
 
     :param frame_number: A frame number, as an int.
     :param fps: Number of frames per seconds, as an int.
-    :param drop: Boolean determining whether timecode should use drop frame or not.
+    :param drop_frame: Boolean determining whether timecode should use drop frame or not.
     :returns: Timecode as string, e.g. '01:02:12:32' (non-drop frame) or
               '01:02:12;32' (drop frame)
     """
-    if drop and fps not in [29.97, 59.94]:
+    if drop_frame and fps not in [29.97, 59.94]:
         raise NotImplementedError("Time code calculation logic only supports drop frame "
                                   "calculations for 29.97 and 59.94 fps.")
 
@@ -95,7 +95,7 @@ def timecode_from_frame(frame_number, fps=24, drop=False):
     # https://documentation.apple.com/en/finalcutpro/usermanual/index.html#chapter=D%26section=6
     fps_int = int(round(fps))
 
-    if drop:
+    if drop_frame:
         # drop-frame-mode
         # for 30 fps jump 2 frames every minute but not every 10 minutes
         # for 60 fps jump 4 frames every minute but not every 10 minutes
@@ -197,7 +197,7 @@ class Timecode(object):
     """
     A non-drop frame timecode object.
     """
-    def __init__(self, timecode_string, fps=24, drop=False):
+    def __init__(self, timecode_string, fps=24, drop_frame=False):
         """
         Instantiate a Timecode from a timecode or frame string.
 
@@ -222,7 +222,7 @@ class Timecode(object):
             # our fps value. All calculations, etc. from this point on treat
             # the input as if it was a timecode and not a frame.
             try:
-                new_timecode_string = timecode_from_frame(int(timecode_string), fps, drop)
+                new_timecode_string = timecode_from_frame(int(timecode_string), fps, drop_frame)
                 self._hours, self._minutes, self._seconds, self._frames = \
                     self.parse_timecode(new_timecode_string)
             except ValueError:
@@ -230,9 +230,9 @@ class Timecode(object):
                                  timecode_string)
 
         self._fps = fps
-        self._drop = drop
+        self._drop_frame = drop_frame
         # use the "correct" frame token delimiter
-        if self._drop:
+        if self._drop_frame:
             self._frame_delimiter = DROP_FRAME_DELIMITER
         else:
             self._frame_delimiter = NON_DROP_FRAME_DELIMITER
@@ -278,16 +278,17 @@ class Timecode(object):
         return tc_tuple
 
     @classmethod
-    def from_frame(cls, frame, fps=24, drop=False):
+    def from_frame(cls, frame, fps=24, drop_frame=False):
         """
         Return a new :class:`Timecode` for the given frame, at the given fps.
 
         :param frame: A frame number, as an :obj:`int`.
         :param fps: Number of frames per second, as an :obj:`int`.
-        :param drop: Boolean indicating whether to use drop frame or not.
+        :param drop_frame: Boolean indicating whether to use drop frame or not.
         :return: A :class:`Timecode` instance.
         """
-        return Timecode(timecode_from_frame(frame, fps, drop), fps=fps, drop=drop)
+        timecode = timecode_from_frame(frame, fps, drop_frame)
+        return Timecode(timecode, fps=fps, drop_frame=drop_frame)
 
     def to_frame(self):
         """
@@ -296,7 +297,7 @@ class Timecode(object):
         :return: A frame number, as an :obj:`int`.
         """
         return frame_from_timecode(
-            (self._hours, self._minutes, self._seconds, self._frames), self._fps, self._drop
+            (self._hours, self._minutes, self._seconds, self._frames), self._fps, self._drop_frame
         )
 
     def to_seconds(self):
@@ -320,9 +321,9 @@ class Timecode(object):
                  addition.
         """
         if isinstance(right, Timecode):
-            return self.from_frame(self.to_frame() + right.to_frame(), self._fps, self._drop)
+            return self.from_frame(self.to_frame() + right.to_frame(), self._fps, self._drop_frame)
         if isinstance(right, int):
-            return self.from_frame(self.to_frame() + right, self._fps, self._drop)
+            return self.from_frame(self.to_frame() + right, self._fps, self._drop_frame)
         raise TypeError("Unsupported operand type %s for +" % type(right))
 
     def __radd__(self, left):
@@ -348,9 +349,9 @@ class Timecode(object):
                  subtraction.
         """
         if isinstance(right, Timecode):
-            return self.from_frame(self.to_frame() - right.to_frame(), self._fps, self._drop)
+            return self.from_frame(self.to_frame() - right.to_frame(), self._fps, self._drop_frame)
         if isinstance(right, int):
-            return self.from_frame(self.to_frame() - right, self._fps, self._drop)
+            return self.from_frame(self.to_frame() - right, self._fps, self._drop_frame)
         raise TypeError("Unsupported operand type %s for -" % type(right))
 
     def __rsub__(self, left):
@@ -378,7 +379,7 @@ class Timecode(object):
         Code representation of this :class:`Timecode` instance.
         """
         drop = "ND"
-        if self._drop:
+        if self._drop_frame:
             drop = "D"
         return "<class %s %02d:%02d:%02d%s%02d (%sfps %s)>" % (
             self.__class__.__name__, self._hours, self._minutes, self._seconds,
