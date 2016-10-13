@@ -52,7 +52,7 @@ class EditProcessor(object):
 def process_edit(edit, logger, shot_regexp=None):
     """
     Extract standard meta data from comments for an Edit:
-    
+
     - name from ``* LOC: 01:00:00:12 YELLOW  MR0200``
     - clip name from ``* FROM CLIP NAME:  246AA-6``
     - tape from ``* SOURCE FILE: LR9907610``
@@ -187,18 +187,20 @@ class EditEvent(object):
         record_in   = None,
         record_out  = None,
         fps         = 24,
+        drop_frame  = False
     ):
         """
         Instantiate a new EditEvent
 
-        :param id: The edit id in a Edit Decision list, as an int
-        :param reel: The reel for this edit
+        :param id: The edit id in a Edit Decision list, as an int.
+        :param reel: The reel for this edit.
         :param channels: Channels for this edit, video, audio, etc ...
-        :param source_in: Timecode in for the source, as a hh:mm:ss:ff string
-        :param source_out: Timecode out for the source, as a hh:mm:ss:ff string
-        :param record_in: Timecode in for the recorder, as a hh:mm:ss:ff string
-        :param record_out: Timecode out for the recorder, as a hh:mm:ss:ff string
-        :param fps: Number of frames per second for this edit, as a hh:mm:ss:ff string
+        :param source_in: Timecode in for the source, as a hh:mm:ss:ff string.
+        :param source_out: Timecode out for the source, as a hh:mm:ss:ff string.
+        :param record_in: Timecode in for the recorder, as a hh:mm:ss:ff string.
+        :param record_out: Timecode out for the recorder, as a hh:mm:ss:ff string.
+        :param fps: Number of frames per second for this edit, as a hh:mm:ss:ff string.
+        :param drop_frame: Boolean indicating whether this edit uses drop frame or not.
         """
 
         # If new attributes are added here, their name should be added to the
@@ -208,13 +210,14 @@ class EditEvent(object):
         self._meta_data = {}  # A place holder where additional meta data can be stored
         self._retime = None
         self._fps = fps
+        self._drop_frame = drop_frame
         self._id = int(id)
         self._reel = reel
         self._channels = channels
-        self._source_in = Timecode(source_in, fps=fps)
-        self._source_out = Timecode(source_out, fps=fps)
-        self._record_in = Timecode(record_in, fps=fps)
-        self._record_out = Timecode(record_out, fps=fps)
+        self._source_in = Timecode(source_in, fps=fps, drop_frame=drop_frame)
+        self._source_out = Timecode(source_out, fps=fps, drop_frame=drop_frame)
+        self._record_in = Timecode(record_in, fps=fps, drop_frame=drop_frame)
+        self._record_out = Timecode(record_out, fps=fps, drop_frame=drop_frame)
 
     @property
     def fps(self):
@@ -222,6 +225,13 @@ class EditEvent(object):
         Return the fps for this edit.
         """
         return self._fps
+
+    @property
+    def drop_frame(self):
+        """
+        Return the drop frame value for this edit.
+        """
+        return self._drop_frame
 
     @property
     def channels(self):
@@ -435,6 +445,7 @@ class EditList(object):
         self._edits = []
         self._fps = fps
         self._has_transitions = False
+        self._drop_frame = False
         if file_path:
             _, ext = os.path.splitext(file_path)
             if ext.lower() != ".edl":
@@ -456,9 +467,16 @@ class EditList(object):
     @property
     def has_transitions(self):
         """
-        Return ``True`` if this EditEvent has transitions.
+        Return ``True`` if this EditList contains events with transitions.
         """
         return self._has_transitions
+
+    @property
+    def drop_frame(self):
+        """
+        Return ``True`` if this EditList is drop frame.
+        """
+        return self._drop_frame
 
     @property
     def edits(self):
@@ -517,8 +535,13 @@ class EditList(object):
                         if len(line_tokens) > 1:
                             self._title = " ".join(line_tokens[1:])
                     elif line.startswith("FCM:"):
-                        # Can be DROP FRAME or NON DROP FRAME
+                        # Frame Code Mode: Can be DROP FRAME or NON DROP FRAME. If it's 
+                        # something else, raise an error.
                         if line_tokens[1] == "DROP" and line_tokens[2] == "FRAME":
+                            self._drop_frame = True
+                        elif line_tokens[1] == "NON-DROP" and line_tokens[2] == "FRAME":
+                            self._drop_frame = False
+                        else:
                             raise BadDropFrameError(os.path.basename(path))
                     elif len(line_tokens) > 1 and line_tokens[1] == "BL":
                         raise BadBLError(os.path.basename(path))
@@ -531,7 +554,7 @@ class EditList(object):
                     elif line_tokens[0].isdigit():
                         media_type = line_tokens[2]
                         event_type = line_tokens[3]
-                        # if we have an audio track, ignore it and adjust the
+                        # If we have an audio track, ignore it and adjust the
                         # event id numbering to reflect that.
                         if media_type == "AA":
                             id_offset += 1
@@ -600,10 +623,12 @@ class EditList(object):
                         trans_duration = Timecode(effect_tokens[4], edit.fps).to_frame()
                         self._edits[prev]._source_out = Timecode(
                             str(self._edits[prev]._source_out.to_frame() + trans_duration),
-                            fps=self._edits[prev].fps)
+                            fps=self._edits[prev].fps,
+                            drop_frame=self._drop_frame)
                         self._edits[prev]._record_out = Timecode(
                             str(self._edits[prev]._record_out.to_frame() + trans_duration),
-                            fps=self._edits[prev].fps)
+                            fps=self._edits[prev].fps,
+                            drop_frame=self._drop_frame)
                     # Take the values from the Dissolve effect for the current edit.
                     edit._source_in = Timecode(effect_tokens[5], edit.fps)
                     edit._source_out = Timecode(effect_tokens[6], edit.fps)
