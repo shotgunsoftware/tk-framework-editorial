@@ -246,11 +246,11 @@ class TestRead(unittest.TestCase):
 
         # try some drop frame versions of this
         df_tc = "02:03:04;05"
-        frame = timecode.frame_from_timecode(df_tc, fps=29.97, drop=True)
-        new_tc = timecode.timecode_from_frame(frame, fps=29.97, drop=True)
+        frame = timecode.frame_from_timecode(df_tc, fps=29.97, drop_frame=True)
+        new_tc = timecode.timecode_from_frame(frame, fps=29.97, drop_frame=True)
         self.assertEqual(df_tc, new_tc)
-        frame = timecode.frame_from_timecode(df_tc, fps=59.94, drop=True)
-        new_tc = timecode.timecode_from_frame(frame, fps=59.94, drop=True)
+        frame = timecode.frame_from_timecode(df_tc, fps=59.94, drop_frame=True)
+        new_tc = timecode.timecode_from_frame(frame, fps=59.94, drop_frame=True)
         self.assertEqual(df_tc, new_tc)
 
     def test_frame_round_trip(self):
@@ -263,11 +263,11 @@ class TestRead(unittest.TestCase):
             self.assertEqual(frame, new_frame)
 
             # try some drop frame versions of this
-            tc = timecode.timecode_from_frame(frame, fps=29.97, drop=True)
-            new_frame = timecode.frame_from_timecode(tc, fps=29.97, drop=True)
+            tc = timecode.timecode_from_frame(frame, fps=29.97, drop_frame=True)
+            new_frame = timecode.frame_from_timecode(tc, fps=29.97, drop_frame=True)
             self.assertEqual(frame, new_frame)
-            tc = timecode.timecode_from_frame(frame, fps=59.94, drop=True)
-            new_frame = timecode.frame_from_timecode(tc, fps=59.94, drop=True)
+            tc = timecode.timecode_from_frame(frame, fps=59.94, drop_frame=True)
+            new_frame = timecode.frame_from_timecode(tc, fps=59.94, drop_frame=True)
             self.assertEqual(frame, new_frame)
 
     def test_fps_types(self):
@@ -299,7 +299,7 @@ class TestRead(unittest.TestCase):
         """
         Test unsupported features are correctly caught
         """
-        path = os.path.join(self._unsupported_dir, "drop-frame.edl")
+        path = os.path.join(self._unsupported_dir, "bad-drop-frame.edl")
         # Check we get expected exception
         with self.assertRaises(BadDropFrameError):
             edl.EditList(file_path=path)
@@ -311,16 +311,16 @@ class TestRead(unittest.TestCase):
         """
         Test we return the correct timecodes for various frame, fps, and drop frame settings.
         """
-        for fps, drop, frame, expected_tc in self._frames_timecode_map:
-            tc = timecode.timecode_from_frame(frame, fps=fps, drop=drop)
+        for fps, drop_frame, frame, expected_tc in self._frames_timecode_map:
+            tc = timecode.timecode_from_frame(frame, fps=fps, drop_frame=drop_frame)
             self.assertEqual(str(tc), expected_tc)
 
     def test_timecode_to_frames(self):
         """
         Test we return the correct frames for various timecode, fps, and drop frame settings.
         """
-        for fps, drop, expected_frame, tc in self._frames_timecode_map:
-            frame = timecode.frame_from_timecode(tc, fps, drop)
+        for fps, drop_frame, expected_frame, tc in self._frames_timecode_map:
+            frame = timecode.frame_from_timecode(tc, fps, drop_frame)
             self.assertEqual(frame, expected_frame)
 
     def test_clip_names_with_transitions(self):
