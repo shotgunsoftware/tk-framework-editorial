@@ -5,6 +5,14 @@
 # this software in either electronic or hard copy form.
 #
 
+# The following sites were referenced for determining the best way to formulate
+# the calculations in this module and are provided as a reference for future
+# development work:
+# - http://andrewduncan.net/timecodes/
+# - http://www.davidheidelberger.com/blog/?p=29
+# - https://documentation.apple.com/en/finalcutpro/usermanual/index.html#chapter=D%26section=6
+# 
+
 import decimal
 import re
 from .errors import BadFrameRateError
