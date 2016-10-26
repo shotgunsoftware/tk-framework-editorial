@@ -15,7 +15,7 @@
 
 import decimal
 import re
-from .errors import BadFrameRateError
+from .errors import BadFrameRateError, BadDropFrameError
 
 DROP_FRAME_DELIMITER = ";"
 NON_DROP_FRAME_DELIMITER = ":"

@@ -11,11 +11,11 @@
 class BadFrameRateError(ValueError):
     """
     Thin wrapper around ValueError for frame rate errors, allowing them to be
-    caught easily
+    caught easily.
     """
     # Standard error message for bad frame rate errors
-    __ERROR_MSG = ( "Invalid frame value [%d], it must be smaller than the "
-                    "specified frame rate [%d]" )
+    __ERROR_MSG = ("Invalid frame value [%d], it must be smaller than the "
+                   "specified frame rate [%d]")
 
     def __init__(self, frame_value, frame_rate, *args, **kwargs):
         """
@@ -52,6 +52,65 @@ class BadFrameRateError(ValueError):
         :returns: An integer
         """
         return self._frame_rate
+
+
+class BadDropFrameError(ValueError):
+    """
+    Thin wrapper around ValueError for drop frame errors, allowing them to be
+    caught easily.
+    """
+    # Standard error message for bad frame rate errors
+    __ERROR_MSG = ("Timecode format \"%s\" indicates drop frame which conflicts with the "
+                   "explicit drop_frame parameter setting \"%s\". Drop frame timecodes are "
+                   "delimited with a ; or , between the seconds and frames. To fix this, either "
+                   "call this function with drop_frame=True or modify your timecode format to use "
+                   "only non-drop frame delimiters: %s.")
+
+    def __init__(self, timecode_str, drop_frame, valid_delimiters, *args, **kwargs):
+        """
+        Instantiate a new BadFrameRateError, setting a standard error message from
+        the given frame value and frame rate.
+
+        :param frame_value: An integer, the frame value which caused the error.
+        :param frame_rate: An integer, the frame rate for which the frame value
+                           caused the error.
+        """
+        super(BadDropFrameError, self).__init__(
+            self.__ERROR_MSG % (timecode_str, drop_frame, valid_delimiters),
+            *args,
+            **kwargs
+            )
+        # Store value internally, in case some apps want to retrieve them
+        self._timecode_str = timecode_str
+        self._drop_frame = drop_frame
+        self._valid_delimiters = valid_delimiters
+
+    @property
+    def timecode_str(self):
+        """
+        Return the timecode string which contributed to the error.
+
+        :returns: Timecode as a string.
+        """
+        return self._timecode_str
+
+    @property
+    def drop_frame(self):
+        """
+        Return the drop frame value that contributed to the error.
+
+        :returns: Boolean
+        """
+        return self._drop_frame
+
+    @property
+    def valid_delimiters(self):
+        """
+        Return the valid delimiters for drop frame notation.
+
+        :returns: List of strings representing valid drop frame notation delimiters.
+        """
+        return self._valid_delimiters
 
 
 class UnsupportedEDLFeature(NotImplementedError):
@@ -102,7 +161,7 @@ class BadBLError(UnsupportedEDLFeature):
         return "%s has a black slug (BL) event, which is not supported."
 
 
-class BadDropFrameError(UnsupportedEDLFeature):
+class BadFCMError(UnsupportedEDLFeature):
     """
     Thin wrapper around UnsupportedEDLFeature for drop frame errors, allowing them
     to be caught easily.
@@ -114,6 +173,6 @@ class BadDropFrameError(UnsupportedEDLFeature):
 
         :returns: A string
         """
-        return ( "%s uses drop frame timecode. Currently, only non-drop "
-                 "frame timecodes are supported." )
+        return ("Unknown FCM setting found in EDL %s. Unable to determine "
+                "drop frame setting.")
 

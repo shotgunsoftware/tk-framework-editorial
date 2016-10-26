@@ -6,7 +6,7 @@
 #
 from .timecode import Timecode
 from . import logger
-from .errors import BadBLError, BadDropFrameError
+from .errors import BadBLError, BadFCMError
 import os
 import re
 
@@ -606,7 +606,7 @@ class EditList(object):
                         elif line_tokens[1] == "NON-DROP" and line_tokens[2] == "FRAME":
                             self._drop_frame = False
                         else:
-                            raise BadDropFrameError(os.path.basename(path))
+                            raise BadFCMError(os.path.basename(path))
                     elif len(line_tokens) > 1 and line_tokens[1] == "BL":
                         raise BadBLError(os.path.basename(path))
                     elif line_tokens[0] == "M2":  # Retime

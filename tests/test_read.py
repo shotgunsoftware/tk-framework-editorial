@@ -8,7 +8,7 @@ import os
 import decimal
 import unittest2 as unittest
 from edl import edl
-from edl import timecode, BadDropFrameError, BadBLError, UnsupportedEDLFeature, BadFrameRateError
+from edl import timecode, BadDropFrameError, BadBLError, UnsupportedEDLFeature, BadFrameRateError, BadFCMError
 import logging
 import re
 
@@ -301,7 +301,7 @@ class TestRead(unittest.TestCase):
         """
         path = os.path.join(self._unsupported_dir, "bad-drop-frame.edl")
         # Check we get expected exception
-        with self.assertRaises(BadDropFrameError):
+        with self.assertRaises(BadFCMError):
             edl.EditList(file_path=path)
         path = os.path.join(self._unsupported_dir, "raphe_temp1_rfe_R01_v01.edl")
         with self.assertRaises(BadFrameRateError):
