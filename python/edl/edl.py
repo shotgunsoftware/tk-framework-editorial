@@ -187,7 +187,7 @@ class EditEvent(object):
         record_in   = None,
         record_out  = None,
         fps         = 24,
-        drop_frame  = False
+        drop_frame  = None
     ):
         """
         Instantiate a new EditEvent
@@ -204,7 +204,8 @@ class EditEvent(object):
         :param record_out: Timecode out for the recorder, as a string formatted as
                           hh:mm:ss:ff for non-drop frame or hh:mm:ss;ff for drop frame.
         :param fps: Number of frames per second for this edit, as an int or float.
-        :param drop_frame: Boolean indicating whether this edit uses drop frame or not.
+        :param drop_frame: Boolean indicating whether this edit uses drop frame or not or None 
+                           if it's not specified. Default is None.
         """
 
         # If new attributes are added here, their name should be added to the
@@ -493,7 +494,7 @@ class EditList(object):
         self._edits = []
         self._fps = fps
         self._has_transitions = False
-        self._drop_frame = False
+        self._drop_frame = None
         if file_path:
             _, ext = os.path.splitext(file_path)
             if ext.lower() != ".edl":
@@ -596,17 +597,21 @@ class EditList(object):
                     elif line.startswith("FCM:"):
                         # Frame Code Mode: Can be DROP FRAME or NON DROP FRAME. If it's 
                         # something else, raise an error.
-                        # todo: This may show up more than once for edit events that have
-                        #       effects and could be different than the EDL's DF setting.
-                        if self._drop_frame is not None:
-                            # handle EditEvent drop frame setting here.
-                            pass
                         if line_tokens[1] == "DROP" and line_tokens[2] == "FRAME":
-                            self._drop_frame = True
+                            drop_frame = True
                         elif line_tokens[1] == "NON-DROP" and line_tokens[2] == "FRAME":
-                            self._drop_frame = False
+                            drop_frame = False
                         else:
                             raise BadFCMError(os.path.basename(path))
+                        # If we haven't set the EDL value, then we do that first. Otherwise
+                        # the drop_frame setting is for a specific edit.
+                        # @todo: Need to validate that this it's valid to have edit events with
+                        # differing drop frame settings and if so, it's something we really want
+                        # to track.
+                        if self._drop_frame is None:
+                            self._drop_frame = drop_frame
+                        elif edit:
+                            edit._drop_frame = drop_frame
                     elif len(line_tokens) > 1 and line_tokens[1] == "BL":
                         raise BadBLError(os.path.basename(path))
                     elif line_tokens[0] == "M2":  # Retime
