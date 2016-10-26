@@ -11,7 +11,9 @@
 # - http://andrewduncan.net/timecodes/
 # - http://www.davidheidelberger.com/blog/?p=29
 # - https://documentation.apple.com/en/finalcutpro/usermanual/index.html#chapter=D%26section=6
-# 
+# - http://www.connect.ecuad.ca/~mrose/pdf_documents/timecode.pdf
+# - http://www.evertz.com/resources/The-Right-Time.pdf
+
 
 import decimal
 import re
