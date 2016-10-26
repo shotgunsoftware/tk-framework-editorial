@@ -13,7 +13,7 @@ class FrameworkLogHandler(logging.StreamHandler):
     """
     def __init__(self, framework, *args, **kwargs):
         """
-        Instantiante a new handler for the given Framework
+        Instantiate a new handler for the given Framework
 
         :param framework: A Toolkit framework
         """
