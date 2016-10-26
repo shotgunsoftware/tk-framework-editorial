@@ -34,13 +34,28 @@ class TestRead(unittest.TestCase):
 
         self._unique_dir = os.path.join(resources_dir, "unique")
 
+        # Define some useful valid frame rates to test with
+        self._frame_rates = [23.97, 24, 29.97, 30, 59.94, 60]
+        # Define the supported drop frame rates
+        self._drop_frame_rates = [29.97, 59.94]
+
         # Set up some reference data that we'll compare against in our conversion tests.
         # Note: drop frame timecode uses ; as the frame delimiter
         self._frames_timecode_map = [
+            # should be the same as 24fps
+            (23.98, False, 1234567, "14:17:20:07"),
+            (23.98, False, 2345678, "27:08:56:14"),
+            (23.98, False, 12345678, "142:53:23:06"),
+            (23.98, False, 23456789, "271:29:26:05"),
             (24, False, 1234567, "14:17:20:07"),
             (24, False, 2345678, "27:08:56:14"),
             (24, False, 12345678, "142:53:23:06"),
             (24, False, 23456789, "271:29:26:05"),
+            # should be the same as 30fps
+            (29.97, False, 1234567, "11:25:52:07"),
+            (29.97, False, 2345678, "21:43:09:08"),
+            (29.97, False, 12345678, "114:18:42:18"),
+            (29.97, False, 23456789, "217:11:32:29"),
             (30, False, 1234567, "11:25:52:07"),
             (30, False, 2345678, "21:43:09:08"),
             (30, False, 12345678, "114:18:42:18"),
@@ -239,36 +254,38 @@ class TestRead(unittest.TestCase):
     def test_tc_round_trip(self):
         # We need to make sure tc values aren't mutated when going back and
         # forth from tc to frames to tc
-        tc = "01:02:03:04"
-        frame = timecode.frame_from_timecode(tc, fps=24)
-        new_tc = timecode.timecode_from_frame(frame, fps=24)
-        self.assertEqual(tc, new_tc)
+        # NDF tests
+        timecodes = ["01:02:03:04", "02:03:04:05"]
+        for tc in timecodes:
+            for fps in self._frame_rates:
+                frame = timecode.frame_from_timecode(tc, fps=fps, drop_frame=False)
+                new_tc = timecode.timecode_from_frame(frame, fps=fps, drop_frame=False)
+                self.assertEqual(tc, new_tc)
 
-        # try some drop frame versions of this
-        df_tc = "02:03:04;05"
-        frame = timecode.frame_from_timecode(df_tc, fps=29.97, drop_frame=True)
-        new_tc = timecode.timecode_from_frame(frame, fps=29.97, drop_frame=True)
-        self.assertEqual(df_tc, new_tc)
-        frame = timecode.frame_from_timecode(df_tc, fps=59.94, drop_frame=True)
-        new_tc = timecode.timecode_from_frame(frame, fps=59.94, drop_frame=True)
-        self.assertEqual(df_tc, new_tc)
+        # DF tests
+        df_timecodes = ["01:02:03;04", "02:03:04;05"]
+        for tc in df_timecodes:
+            for fps in self._drop_frame_rates:
+                frame = timecode.frame_from_timecode(tc, fps=fps, drop_frame=True)
+                new_tc = timecode.timecode_from_frame(frame, fps=fps, drop_frame=True)
+                self.assertEqual(tc, new_tc)
 
     def test_frame_round_trip(self):
         # We need to make sure frame values aren't mutated when going back and
-        # forth from frames to tc to frames
+        # forth from frames to tc to frames.
         frames = [2394732, 12332, 8599999, 8640005]
         for frame in frames:
-            tc = timecode.timecode_from_frame(frame, fps=24)
-            new_frame = timecode.frame_from_timecode(tc, fps=24)
-            self.assertEqual(frame, new_frame)
+            # NDF
+            for fps in self._frame_rates: 
+                tc = timecode.timecode_from_frame(frame, fps=fps, drop_frame=False)
+                new_frame = timecode.frame_from_timecode(tc, fps=fps, drop_frame=False)
+                self.assertEqual(frame, new_frame)
+            # DF
+            for fps in self._drop_frame_rates:
+                tc = timecode.timecode_from_frame(frame, fps=fps, drop_frame=True)
+                new_frame = timecode.frame_from_timecode(tc, fps=fps, drop_frame=True)
+                self.assertEqual(frame, new_frame)
 
-            # try some drop frame versions of this
-            tc = timecode.timecode_from_frame(frame, fps=29.97, drop_frame=True)
-            new_frame = timecode.frame_from_timecode(tc, fps=29.97, drop_frame=True)
-            self.assertEqual(frame, new_frame)
-            tc = timecode.timecode_from_frame(frame, fps=59.94, drop_frame=True)
-            new_frame = timecode.frame_from_timecode(tc, fps=59.94, drop_frame=True)
-            self.assertEqual(frame, new_frame)
 
     def test_fps_types(self):
         # Testing input of effective int and establishing the fact that these
@@ -320,7 +337,11 @@ class TestRead(unittest.TestCase):
         Test we return the correct frames for various timecode, fps, and drop frame settings.
         """
         for fps, drop_frame, expected_frame, tc in self._frames_timecode_map:
-            frame = timecode.frame_from_timecode(tc, fps, drop_frame)
+            frame = timecode.frame_from_timecode(tc, fps=fps, drop_frame=drop_frame)
+            self.assertEqual(frame, expected_frame)
+            # Same test but let the framework figure out the correct drop frame setting since
+            # we're using the correct drop frame notation.
+            frame = timecode.frame_from_timecode(tc, fps)
             self.assertEqual(frame, expected_frame)
 
     def test_clip_names_with_transitions(self):
@@ -334,3 +355,39 @@ class TestRead(unittest.TestCase):
         tc = edl.EditList(file_path=path, fps=59.97, visitor=edl.process_edit)
         for idx, edit in enumerate(tc.edits):
             self.assertEqual(edit._clip_name, expected_names[idx])
+
+    def test_drop_frame_notation(self):
+        """
+        Test we correctly determine drop frame from drop frame notation
+        """
+        df_timecodes = ["11:22:33;22", "11:22:33,22", "11;22;33;22", "11,22,33,22"]
+        for tc_str in df_timecodes:
+            tc = timecode.Timecode(tc_str, fps=29.97)
+            self.assertTrue(tc._drop_frame)
+
+        ndf_timecodes = ["11:22:33:22", "11:22:33.22", "11.22.33.22"]
+        for tc_str in ndf_timecodes:
+            tc = timecode.Timecode(tc_str)
+            self.assertFalse(tc._drop_frame)
+
+    def test_conflicting_drop_frame(self):
+        """
+        Test we raise an exception when providing conflicting drop frame values. Eg. timecode 
+        with drop frame notation while specifying non-drop frame.
+        """
+        df_timecodes = ["11:22:33;22", "11:22:33,22", "11;22;33;22", "11,22,33,22"]
+        for tc_str in df_timecodes:
+            with self.assertRaises(BadDropFrameError):
+                timecode.Timecode(tc_str, drop_frame=False)
+
+    def test_invalid_drop_frame_fps(self):
+        """
+        Test we raise NotImplementedError when trying to use drop frame on unsupported 
+        frame rates.
+        """
+        invalid_drop_fps = [23.97, 30, 60, 29.976]
+        for fps in invalid_drop_fps:
+            with self.assertRaises(NotImplementedError):
+                timecode.Timecode("12345", fps=fps, drop_frame=True)
+            with self.assertRaises(NotImplementedError):
+                timecode.Timecode("01:23:21:01", fps=fps, drop_frame=True)
