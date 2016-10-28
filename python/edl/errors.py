@@ -71,16 +71,17 @@ class BadDropFrameError(ValueError):
         Instantiate a new BadFrameRateError, setting a standard error message from
         the given frame value and frame rate.
 
-        :param frame_value: An integer, the frame value which caused the error.
-        :param frame_rate: An integer, the frame rate for which the frame value
-                           caused the error.
+        :param timecode_str: Timecode string that contributed to the error.
+        :param drop_frame: Boolean value indicating the use of drop frame or not that conflicts 
+                           with timecode string format.
+        :param valid_delimiters: List of valid delimiters for drop frame notation.
         """
         super(BadDropFrameError, self).__init__(
             self.__ERROR_MSG % (timecode_str, drop_frame, valid_delimiters),
             *args,
             **kwargs
             )
-        # Store value internally, in case some apps want to retrieve them
+        # Store values internally, in case some apps want to retrieve them.
         self._timecode_str = timecode_str
         self._drop_frame = drop_frame
         self._valid_delimiters = valid_delimiters
@@ -173,6 +174,7 @@ class BadFCMError(UnsupportedEDLFeature):
 
         :returns: A string
         """
-        return ("Unknown FCM setting found in EDL %s. Unable to determine "
-                "drop frame setting.")
+        return (
+            "Unknown FCM setting found in %s. Unable to determine drop frame setting."
+        )
 

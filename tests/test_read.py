@@ -18,21 +18,22 @@ class TestRead(unittest.TestCase):
         super(TestRead, self).__init__(*args, **kwargs)
         self._edl_examples = []
         self._unsupported_examples = []
+        self._resources_dir = None
+        self._multiple_tests_dir = None
         self._unsupported_dir = None
-        self._unique_dir = None
 
     def setUp(self):
-        resources_dir = os.path.join(os.path.dirname(__file__), "resources")
-        for f in os.listdir(resources_dir):
-            if f.endswith(".edl"):
-                self._edl_examples.append(os.path.join(resources_dir, f))
+        self._resources_dir = os.path.join(os.path.dirname(__file__), "resources")
 
-        self._unsupported_dir = os.path.join(resources_dir, "unsupported")
+        self._multiple_tests_dir = os.path.join(self._resources_dir, "multiple_tests")
+        for f in os.listdir(self._multiple_tests_dir):
+            if f.endswith(".edl"):
+                self._edl_examples.append(os.path.join(self._multiple_tests_dir, f))
+
+        self._unsupported_dir = os.path.join(self._resources_dir, "unsupported")
         for f in os.listdir(self._unsupported_dir):
             if f.endswith(".edl"):
                 self._unsupported_examples.append(os.path.join(self._unsupported_dir, f))
-
-        self._unique_dir = os.path.join(resources_dir, "unique")
 
         # Define some useful valid frame rates to test with
         self._frame_rates = [23.97, 24, 29.97, 30, 59.94, 60]
@@ -42,7 +43,7 @@ class TestRead(unittest.TestCase):
         # Set up some reference data that we'll compare against in our conversion tests.
         # Note: drop frame timecode uses ; as the frame delimiter
         self._frames_timecode_map = [
-            # should be the same as 24fps
+            # Should be the same as 24fps
             (23.98, False, 1234567, "14:17:20:07"),
             (23.98, False, 2345678, "27:08:56:14"),
             (23.98, False, 12345678, "142:53:23:06"),
@@ -51,7 +52,7 @@ class TestRead(unittest.TestCase):
             (24, False, 2345678, "27:08:56:14"),
             (24, False, 12345678, "142:53:23:06"),
             (24, False, 23456789, "271:29:26:05"),
-            # should be the same as 30fps
+            # Should be the same as 30fps
             (29.97, False, 1234567, "11:25:52:07"),
             (29.97, False, 2345678, "21:43:09:08"),
             (29.97, False, 12345678, "114:18:42:18"),
@@ -64,6 +65,7 @@ class TestRead(unittest.TestCase):
             (60, False, 2345678, "10:51:34:38"),
             (60, False, 12345678, "57:09:21:18"),
             (60, False, 23456789, "108:35:46:29"),
+            # Drop frame with DF notation
             (29.97, True, 1234567, "11:26:33;13"),
             (29.97, True, 2345678, "21:44:27;16"),
             (29.97, True, 12345678, "114:25:34;16"),
@@ -71,7 +73,22 @@ class TestRead(unittest.TestCase):
             (59.94, True, 1234567, "05:43:16;43"),
             (59.94, True, 2345678, "10:52:13;46"),
             (59.94, True, 12345678, "57:12:47;14"),
-            (59.94, True, 23456789, "108:42:17;49"),
+            (59.94, True, 23456789, "108:42:17;49")
+        ]
+
+        # Data for testing drop frame without drop frame notation.
+        # Since Timecode objects automatically use drop frame notation for drop
+        # frame timecodes, we don't use this set in them roundtrip tests or 
+        # frames_to_timecode tests.
+        self._frames_timecode_df_no_notation_map = [
+            (29.97, True, 1234567, "11:26:33:13"), 
+            (29.97, True, 2345678, "21:44:27:16"), 
+            (29.97, True, 12345678, "114:25:34:16"),
+            (29.97, True, 23456789, "217:24:35:19"),
+            (59.94, True, 1234567, "05:43:16:43"), 
+            (59.94, True, 2345678, "10:52:13:46"), 
+            (59.94, True, 12345678, "57:12:47:14"),
+            (59.94, True, 23456789, "108:42:17:49")
         ]
 
     def read_edl_file(self, file):
@@ -125,7 +142,7 @@ class TestRead(unittest.TestCase):
     def test_advanced_visitor(self):
         # Check we are able to extract expected information from a well known
         # example
-        path = os.path.join(os.path.dirname(__file__), "resources", "scan_request_test.edl")
+        path = os.path.join(self._multiple_tests_dir, "scan_request_test.edl")
         tc = edl.EditList(
             file_path=path,
             visitor=self.advanced_visitor,
@@ -143,7 +160,7 @@ class TestRead(unittest.TestCase):
                 edit.pure_comments.next()
 
     def test_pure_comments(self):
-        path = os.path.join(os.path.dirname(__file__), "resources", "ER_00119_with_comments.edl")
+        path = os.path.join(self._multiple_tests_dir, "ER_00119_with_comments.edl")
         tc = edl.EditList(file_path=path)
         for edit in tc.edits:
             for c in edit.pure_comments:
@@ -190,7 +207,7 @@ class TestRead(unittest.TestCase):
                                                   "* LOC: 00:00:02:19 YELLOW  053_CSC_0750_PC01_V0001 997 // 8-8 Match to edit"]
                         }
         for comment_edl in comment_edls:
-            path = os.path.join(os.path.dirname(__file__), "resources", comment_edl)
+            path = os.path.join(self._multiple_tests_dir, comment_edl)
             tc = edl.EditList(file_path=path)
             for edit, item in enumerate(tc.edits):
                 self.assertEqual(item.comments, comment_edls[comment_edl])
@@ -203,7 +220,7 @@ class TestRead(unittest.TestCase):
         """
         trans_edls = ["raphe_temp1_rfe_R01_v01_TRANSITIONS.edl"]
         for trans_edl in trans_edls:
-            path = os.path.join(os.path.dirname(__file__), "resources", trans_edl)
+            path = os.path.join(self._multiple_tests_dir, trans_edl)
             tc = edl.EditList(file_path=path)
             for edit, item in enumerate(tc.edits):
                 if item.id == 2:
@@ -220,7 +237,7 @@ class TestRead(unittest.TestCase):
         """
         frames_edls = ["jrun_demo_relative_frames1.edl"]
         for frame_edl in frames_edls:
-            path = os.path.join(os.path.dirname(__file__), "resources", frame_edl)
+            path = os.path.join(self._multiple_tests_dir, frame_edl)
             tc = edl.EditList(file_path=path)
             for edit, item in enumerate(tc.edits):
                 self.assertEqual(str(item.source_in), str(timecode.Timecode("00:00:00:09")))
@@ -235,7 +252,7 @@ class TestRead(unittest.TestCase):
         """
         audio_edls = ["audio-at-end.edl", "audio-follows-video.edl", "audio-separately.edl"]
         for audio_edl in audio_edls:
-            path = os.path.join(os.path.dirname(__file__), "resources", audio_edl)
+            path = os.path.join(self._multiple_tests_dir, audio_edl)
             tc = edl.EditList(file_path=path)
             for edit, item in enumerate(tc.edits):
                 self.assertLess(edit, 2)
@@ -344,6 +361,15 @@ class TestRead(unittest.TestCase):
             frame = timecode.frame_from_timecode(tc, fps)
             self.assertEqual(frame, expected_frame)
 
+    def test_timecode_to_frames_df_without_notation(self):
+        """
+        Test we return the correct frames for timecode and fps using drop frame without
+        drop frame notation.
+        """
+        for fps, drop_frame, expected_frame, tc in self._frames_timecode_df_no_notation_map:
+            frame = timecode.frame_from_timecode(tc, fps=fps, drop_frame=drop_frame)
+            self.assertEqual(frame, expected_frame)
+
     def test_clip_names_with_transitions(self):
         """
         Test that clip names are correctly assigned when dealing with transitions.
@@ -351,38 +377,52 @@ class TestRead(unittest.TestCase):
         todo: need more input edls to test for this so we can test comments with CLIP NAME
         """
         expected_names = ["rfe0020", "rfe0030", "rfe0040", "rfe0050"]
-        path = os.path.join(self._unique_dir, "springtrain_transitions.edl")
+        path = os.path.join(self._resources_dir, "springtrain_transitions.edl")
         tc = edl.EditList(file_path=path, fps=59.97, visitor=edl.process_edit)
         for idx, edit in enumerate(tc.edits):
             self.assertEqual(edit._clip_name, expected_names[idx])
 
     def test_drop_frame_notation(self):
         """
-        Test we correctly determine drop frame from drop frame notation
+        Test that we correctly determine drop frame from drop frame notation.
         """
-        df_timecodes = ["11:22:33;22", "11:22:33,22", "11;22;33;22", "11,22,33,22"]
+        df_timecodes = ["11:22:33;22", "11:22:33,22", "11:22:33.22"]
         for tc_str in df_timecodes:
             tc = timecode.Timecode(tc_str, fps=29.97)
             self.assertTrue(tc._drop_frame)
 
-        ndf_timecodes = ["11:22:33:22", "11:22:33.22", "11.22.33.22"]
+        ndf_timecodes = ["11:22:33:22", "112:22:33:22"]
+        for tc_str in ndf_timecodes:
+            tc = timecode.Timecode(tc_str)
+            self.assertFalse(tc._drop_frame)
+
+    def test_drop_frame_without_notation(self):
+        """
+        Test that we correctly determine drop frame when not using DF notation.
+        """
+        for fps, drop_frame, expected_frame, tc_str in self._frames_timecode_df_no_notation_map:
+            # check we get a drop frame Timecode object
+            tc = timecode.Timecode(tc_str, fps=fps, drop_frame=drop_frame)
+            self.assertTrue(tc._drop_frame)
+
+        ndf_timecodes = ["11:22:33:22", "112:22:33:22"]
         for tc_str in ndf_timecodes:
             tc = timecode.Timecode(tc_str)
             self.assertFalse(tc._drop_frame)
 
     def test_conflicting_drop_frame(self):
         """
-        Test we raise an exception when providing conflicting drop frame values. Eg. timecode 
+        Test that we raise an exception when providing conflicting drop frame values. Eg. timecode 
         with drop frame notation while specifying non-drop frame.
         """
-        df_timecodes = ["11:22:33;22", "11:22:33,22", "11;22;33;22", "11,22,33,22"]
+        df_timecodes = ["11:22:33;22", "11:22:33,22", "11:22:33.22"]
         for tc_str in df_timecodes:
             with self.assertRaises(BadDropFrameError):
                 timecode.Timecode(tc_str, drop_frame=False)
 
     def test_invalid_drop_frame_fps(self):
         """
-        Test we raise NotImplementedError when trying to use drop frame on unsupported 
+        Test that we raise NotImplementedError when trying to use drop frame on unsupported 
         frame rates.
         """
         invalid_drop_fps = [23.97, 30, 60, 29.976]

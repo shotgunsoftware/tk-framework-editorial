@@ -603,15 +603,21 @@ class EditList(object):
                             drop_frame = False
                         else:
                             raise BadFCMError(os.path.basename(path))
-                        # If we haven't set the EDL value, then we do that first. Otherwise
-                        # the drop_frame setting is for a specific edit.
-                        # @todo: Need to validate that this it's valid to have edit events with
-                        # differing drop frame settings and if so, it's something we really want
-                        # to track.
+                        # Only set the EDL drop frame value once.
+                        # Some EDLS contain additional FCM notes for transitions. It's 
+                        # unclear if these can conflict with the EDL setting or not but for
+                        # now we will ignore it if that happens and issue a warning. 
                         if self._drop_frame is None:
                             self._drop_frame = drop_frame
-                        elif edit:
-                            edit._drop_frame = drop_frame
+                        else:
+                            if self._drop_frame != drop_frame:
+                                self.__logger.warning(
+                                    "Found an FCM note \"%s\" that conflicts with the EDL's "
+                                    "drop frame setting. Only one FCM note is supported for "
+                                    "setting the drop frame mode for the entire EDL. Any "
+                                    "additional FCM notes will be ignored." 
+                                    % line
+                                )
                     elif len(line_tokens) > 1 and line_tokens[1] == "BL":
                         raise BadBLError(os.path.basename(path))
                     elif line_tokens[0] == "M2":  # Retime

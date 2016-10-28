@@ -39,8 +39,8 @@ VALID_DROP_FRAME_FPS = DROP_FRAME.keys()
 DROP_FRAME_DELIMITER = ";"
 NON_DROP_FRAME_DELIMITER = ":"
 
-VALID_DROP_FRAME_DELIMITERS = [";", ","]
-VALID_NON_DROP_FRAME_DELIMITERS = [":", "."]
+VALID_DROP_FRAME_DELIMITERS = [";", ",", "."]
+VALID_NON_DROP_FRAME_DELIMITERS = [":"]
 VALID_TIMECODE_DELIMITERS = VALID_DROP_FRAME_DELIMITERS + VALID_NON_DROP_FRAME_DELIMITERS
 
 
@@ -262,7 +262,6 @@ def _compute_drop_frame_setting(timecode_str, drop_frame):
     # Infer drop frame setting from the timecode.
     tc_drop_frame = Timecode.str_is_drop_frame(timecode_str)
 
-    # This is a little tricky. 
     if drop_frame is not None:
         if drop_frame is False and tc_drop_frame:
             raise BadDropFrameError(timecode_str, drop_frame, VALID_NON_DROP_FRAME_DELIMITERS)
@@ -362,14 +361,14 @@ class Timecode(object):
                  be parsed correctly.
         """ 
         # Find the delimited being used between the seconds and frames entry.
-        try:
-            frame_delimiter = re.match(".*([:.;,])\d{2}$", timecode_str).group(1)
-        except IndexError:
+        m = re.match(".*(%s)\d{2}$" % VALID_TIMECODE_DELIMITERS, timecode_str)
+        if not m:
             raise ValueError(
                 "Timecode \"%s\" is not in a valid format (eg. hh:mm:ss:ff or hh:mm:ss;ff). "
                 "The timecode must be delimited by one of the following characters: %s"
                 % (timecode_str, VALID_TIMECODE_DELIMITERS)
             )
+        frame_delimiter = m.group(1)
         # Check the delimiter with those that indicate drop frame notation.
         if frame_delimiter in VALID_DROP_FRAME_DELIMITERS:
             return True
@@ -394,21 +393,14 @@ class Timecode(object):
         :return: Tuple of (hours, minutes, seconds, frames) where all values are ints.
         :raises: ValueError if string cannot be parsed.
         """
-        fields = re.findall(r"\d{2,3}", timecode_str)
-
-        if len(fields) != 4:
+        m = re.match(r"(\d{2,3}):(\d{2}):(\d{2})[:;\.,](\d{2})", timecode_str)
+        if not m:
             raise ValueError(
                 "Timecode \"%s\" is not in a valid format (eg. hh:mm:ss:ff or hh:mm:ss;ff)."
                 % timecode_str
             )
 
-        try:
-            tc_tuple = (int(fields[0]), int(fields[1]), int(fields[2]), int(fields[3]),)
-        except IndexError:
-            raise ValueError(
-                "Timecode \"%s\" is not in a valid format (eg. hh:mm:ss:ff or hh:mm:ss;ff)."
-                % timecode_str
-            )
+        tc_tuple = (int(m.group(1)), int(m.group(2)), int(m.group(3)), int(m.group(4)),)
 
         return tc_tuple
 
