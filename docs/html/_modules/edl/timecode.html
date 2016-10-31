@@ -574,11 +574,13 @@
 <span class="sd">        Splits the timecode string by any non-alphanumeric character. This ensures that that </span>
 <span class="sd">        we can support various formats of delimiting timecode strings. </span>
 <span class="sd">        For example::</span>
-<span class="sd">            00:12:34:21 NON-DROP FRAME variation 1</span>
-<span class="sd">            00:12:34.21 NON-DROP FRAME variation 2</span>
-<span class="sd">            00:12:34;21 DROP FRAME variation 1</span>
-<span class="sd">            00:12:34,21 DROP FRAME variation 2</span>
-<span class="sd">            00;12;34;56 DROP FRAME variation 3</span>
+
+<span class="sd">            00:12:34:21 # NON-DROP FRAME variation 1</span>
+<span class="sd">            00:12:34.21 # NON-DROP FRAME variation 2</span>
+<span class="sd">            00:12:34;21 # DROP FRAME variation 1</span>
+<span class="sd">            00:12:34,21 # DROP FRAME variation 2</span>
+<span class="sd">            00;12;34;56 # DROP FRAME variation 3</span>
+
 <span class="sd">        :param timecode_str: A timecode string (eg. ``hh:mm:ss:ff`` for non-drop frame </span>
 <span class="sd">                             or ``hh:mm:ss;ff`` for drop frame).</span>
 <span class="sd">        :return: Tuple of (hours, minutes, seconds, frames) where all values are ints.</span>

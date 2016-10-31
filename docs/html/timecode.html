@@ -249,11 +249,11 @@ be parsed correctly.</td>
 <p>Splits the timecode string by any non-alphanumeric character. This ensures that that 
 we can support various formats of delimiting timecode strings. 
 For example:</p>
-<div class="highlight-default"><div class="highlight"><pre><span></span><span class="mi">00</span><span class="p">:</span><span class="mi">12</span><span class="p">:</span><span class="mi">34</span><span class="p">:</span><span class="mi">21</span> <span class="n">NON</span><span class="o">-</span><span class="n">DROP</span> <span class="n">FRAME</span> <span class="n">variation</span> <span class="mi">1</span>
-<span class="mi">00</span><span class="p">:</span><span class="mi">12</span><span class="p">:</span><span class="mf">34.21</span> <span class="n">NON</span><span class="o">-</span><span class="n">DROP</span> <span class="n">FRAME</span> <span class="n">variation</span> <span class="mi">2</span>
-<span class="mi">00</span><span class="p">:</span><span class="mi">12</span><span class="p">:</span><span class="mi">34</span><span class="p">;</span><span class="mi">21</span> <span class="n">DROP</span> <span class="n">FRAME</span> <span class="n">variation</span> <span class="mi">1</span>
-<span class="mi">00</span><span class="p">:</span><span class="mi">12</span><span class="p">:</span><span class="mi">34</span><span class="p">,</span><span class="mi">21</span> <span class="n">DROP</span> <span class="n">FRAME</span> <span class="n">variation</span> <span class="mi">2</span>
-<span class="mi">00</span><span class="p">;</span><span class="mi">12</span><span class="p">;</span><span class="mi">34</span><span class="p">;</span><span class="mi">56</span> <span class="n">DROP</span> <span class="n">FRAME</span> <span class="n">variation</span> <span class="mi">3</span>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="mi">00</span><span class="p">:</span><span class="mi">12</span><span class="p">:</span><span class="mi">34</span><span class="p">:</span><span class="mi">21</span> <span class="c1"># NON-DROP FRAME variation 1</span>
+<span class="mi">00</span><span class="p">:</span><span class="mi">12</span><span class="p">:</span><span class="mf">34.21</span> <span class="c1"># NON-DROP FRAME variation 2</span>
+<span class="mi">00</span><span class="p">:</span><span class="mi">12</span><span class="p">:</span><span class="mi">34</span><span class="p">;</span><span class="mi">21</span> <span class="c1"># DROP FRAME variation 1</span>
+<span class="mi">00</span><span class="p">:</span><span class="mi">12</span><span class="p">:</span><span class="mi">34</span><span class="p">,</span><span class="mi">21</span> <span class="c1"># DROP FRAME variation 2</span>
+<span class="mi">00</span><span class="p">;</span><span class="mi">12</span><span class="p">;</span><span class="mi">34</span><span class="p">;</span><span class="mi">56</span> <span class="c1"># DROP FRAME variation 3</span>
 </pre></div>
 </div>
 <table class="docutils field-list" frame="void" rules="none">
