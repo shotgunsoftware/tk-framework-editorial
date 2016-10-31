@@ -393,11 +393,13 @@ class Timecode(object):
         Splits the timecode string by any non-alphanumeric character. This ensures that that 
         we can support various formats of delimiting timecode strings. 
         For example::
-            00:12:34:21 NON-DROP FRAME variation 1
-            00:12:34.21 NON-DROP FRAME variation 2
-            00:12:34;21 DROP FRAME variation 1
-            00:12:34,21 DROP FRAME variation 2
-            00;12;34;56 DROP FRAME variation 3
+
+            00:12:34:21 # NON-DROP FRAME variation 1
+            00:12:34.21 # NON-DROP FRAME variation 2
+            00:12:34;21 # DROP FRAME variation 1
+            00:12:34,21 # DROP FRAME variation 2
+            00;12;34;56 # DROP FRAME variation 3
+
         :param timecode_str: A timecode string (eg. ``hh:mm:ss:ff`` for non-drop frame 
                              or ``hh:mm:ss;ff`` for drop frame).
         :return: Tuple of (hours, minutes, seconds, frames) where all values are ints.
