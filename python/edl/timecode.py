@@ -535,9 +535,9 @@ class Timecode(object):
         """
         Code representation of this :class:`Timecode` instance.
         """
-        drop = "ND"
+        drop = "NDF"
         if self._drop_frame:
-            drop = "D"
+            drop = "DF"
         return "<class %s %02d:%02d:%02d%s%02d (%sfps %s)>" % (
             self.__class__.__name__, self._hours, self._minutes, self._seconds,
             self._frame_delimiter, self._frames, self._fps, drop
