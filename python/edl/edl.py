@@ -661,6 +661,7 @@ class EditList(object):
                                 source_out  = line_tokens[-3],
                                 record_in   = line_tokens[-2],
                                 record_out  = line_tokens[-1],
+                                drop_frame  = self._drop_frame,
                             )
                             self._edits.append(edit)
                         else:
@@ -695,7 +696,11 @@ class EditList(object):
                     # from the end of the list.
                     if prev > -1:
                         # Add the transition duration to the previous edit's source out.
-                        trans_duration = Timecode(effect_tokens[4], edit.fps).to_frame()
+                        trans_duration = Timecode(
+                                effect_tokens[4],
+                                fps=edit.fps,
+                                drop_frame=self._drop_frame
+                        ).to_frame()
                         self._edits[prev]._source_out = Timecode(
                             str(self._edits[prev]._source_out.to_frame() + trans_duration),
                             fps=self._edits[prev].fps,
@@ -707,7 +712,23 @@ class EditList(object):
                             drop_frame=self._drop_frame
                         )
                     # Take the values from the Dissolve effect for the current edit.
-                    edit._source_in = Timecode(effect_tokens[5], edit.fps)
-                    edit._source_out = Timecode(effect_tokens[6], edit.fps)
-                    edit._record_in = Timecode(effect_tokens[7], edit.fps)
-                    edit._record_out = Timecode(effect_tokens[8], edit.fps)
+                    edit._source_in = Timecode(
+                            effect_tokens[5],
+                            fps=edit.fps,
+                            drop_frame=self._drop_frame
+                    )
+                    edit._source_out = Timecode(
+                            effect_tokens[6],
+                            fps=edit.fps,
+                            drop_frame=self._drop_frame
+                    )
+                    edit._record_in = Timecode(
+                            effect_tokens[7],
+                            fps=edit.fps,
+                            drop_frame=self._drop_frame
+                    )
+                    edit._record_out = Timecode(
+                            effect_tokens[8],
+                            fps=edit.fps,
+                            drop_frame=self._drop_frame
+                    )
