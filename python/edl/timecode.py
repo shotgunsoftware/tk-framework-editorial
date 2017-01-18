@@ -6,6 +6,7 @@
 #
 import decimal
 import re
+import functools
 from .errors import BadFrameRateError, BadDropFrameError
 
 
@@ -274,6 +275,7 @@ def _compute_drop_frame_setting(timecode_str, drop_frame):
     return tc_drop_frame
 
 
+@functools.total_ordering
 class Timecode(object):
     """
     A Timecode object.
@@ -536,6 +538,22 @@ class Timecode(object):
         if isinstance(other, self.__class__):
             return not self.__eq__(other)
         return NotImplemented
+
+    def __lt__(self, other):
+        """
+        Override less-than comparison behavior.
+
+        functools.total_ordering is used to supply the rest of the methods to compliment this.
+
+        :param other: Object to see if we are less than.
+        :return: Boolean True if we're less than other, False if not.
+        """
+        if isinstance(other, self.__class__):
+            return self.to_frame() < other.to_frame()
+        elif isinstance(other, int):
+            return self.to_frame() < other
+        else:
+            return NotImplemented
 
     def __hash__(self):
         """Override the default hash behavior (that returns the id or the object)"""
