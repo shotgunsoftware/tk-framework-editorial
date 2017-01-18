@@ -477,7 +477,7 @@ class Timecode(object):
         :return: A new :class:`Timecode` instance, in this :class:`Timecode` fps, result of the 
                  addition.
         """
-        if isinstance(right, Timecode):
+        if isinstance(right, self.__class__):
             return self.from_frame(self.to_frame() + right.to_frame(), self._fps, self._drop_frame)
         if isinstance(right, int):
             return self.from_frame(self.to_frame() + right, self._fps, self._drop_frame)
@@ -505,11 +505,13 @@ class Timecode(object):
         :return: A new :class:`Timecode` instance, in this :class:`Timecode` fps, result of the 
                  subtraction.
         """
-        if isinstance(right, Timecode):
+        if isinstance(right, self.__class__):
             return self.from_frame(self.to_frame() - right.to_frame(), self._fps, self._drop_frame)
         if isinstance(right, int):
             return self.from_frame(self.to_frame() - right, self._fps, self._drop_frame)
-        raise TypeError("Unsupported operand type %s for -" % type(right))
+        else:
+            return NotImplemented
+        # raise TypeError("Unsupported operand type %s for -" % type(right))
 
     def __rsub__(self, left):
         """
@@ -522,6 +524,22 @@ class Timecode(object):
                  subtraction.
         """
         return self.__sub__(left)
+
+    def __eq__(self, other):
+        """Override the default Equals behavior"""
+        if isinstance(other, self.__class__):
+            return self.__dict__ == other.__dict__
+        return NotImplemented
+
+    def __ne__(self, other):
+        """Define a non-equality test"""
+        if isinstance(other, self.__class__):
+            return not self.__eq__(other)
+        return NotImplemented
+
+    def __hash__(self):
+        """Override the default hash behavior (that returns the id or the object)"""
+        return hash(tuple(sorted(self.__dict__.items())))
 
     def __str__(self):
         """
