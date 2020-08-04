@@ -310,7 +310,7 @@ class Timecode(object):
                 self._hours, self._minutes, self._seconds, self._frames = \
                     self.parse_timecode(new_timecode_string)
                 self._drop_frame = drop_frame
-            except ValueError, e:
+            except ValueError as e:
                 raise ValueError(
                     "Frame number \"%s\" can not be converted to a Timecode: %s"
                     % (timecode_string, e)
