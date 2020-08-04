@@ -10,6 +10,7 @@ import os
 from optparse import OptionParser
 import unittest2 as unittest
 import logging
+
 logging.basicConfig(level=logging.INFO)
 
 # prepend tank_vendor location to PYTHONPATH to make sure we are running
@@ -43,6 +44,7 @@ class TestRunner(object):
 
     def run_tests_with_coverage(self, test_name):
         import coverage
+
         cov = coverage.coverage(source=["edl"])
         cov.start()
         self.setup_suite(test_name)
@@ -59,10 +61,12 @@ class TestRunner(object):
 
 if __name__ == "__main__":
     parser = OptionParser()
-    parser.add_option("--with-coverage",
-                      action="store_true",
-                      dest="coverage",
-                      help="run with coverage (requires coverage is installed)")
+    parser.add_option(
+        "--with-coverage",
+        action="store_true",
+        dest="coverage",
+        help="run with coverage (requires coverage is installed)",
+    )
     (options, args) = parser.parse_args()
     test_name = None
     if args:

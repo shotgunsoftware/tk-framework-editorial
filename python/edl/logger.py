@@ -11,6 +11,7 @@ class FrameworkLogHandler(logging.StreamHandler):
     """
     A logging Handler to log messages with the Framework log_xxxx methods
     """
+
     def __init__(self, framework, *args, **kwargs):
         """
         Instantiate a new handler for the given Framework
@@ -55,6 +56,7 @@ def get_logger(level=logging.INFO):
     # imports
     try:
         import sgtk
+
         # Raising an exception will activate the except clause
         framework = sgtk.platform.current_bundle()
         if not framework:

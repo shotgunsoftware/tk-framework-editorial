@@ -10,7 +10,7 @@ Required packages
 
 Running the test suite
 -----------------------
-To run the tests on windows run the core/tests/run_tests.bat. To run on linux run the script run_tests.sh. 
+To run the tests on windows run the core/tests/run_tests.bat. To run on linux run the script run_tests.sh.
 Add "-h" to see options.
 To run specific test(s), specify module, or module.class or module.class.test:
 
@@ -19,10 +19,10 @@ To run specific test(s), specify module, or module.class or module.class.test:
 
 To run tests without using run_tests script:
 
-* Add the tank packages directory ( core/python ) to the PYTHONPATH 
+* Add the tank packages directory ( core/python ) to the PYTHONPATH
 * Use the test runner of your choice:
 
-    `$ nosetests core/tests/` 
+    `$ nosetests core/tests/`
 
     or
 
@@ -42,12 +42,12 @@ TankTestBase
 There is a tank tests module, `tank_test.tank_test_base.py` which contains both a base class from which the test cases inherit, and module level setup and teardown methods. This module handles the creation of test fixture data, including studio level and project level configuration. A partial list of features. Examples of the usage of this module can be found in `tank_util/example_tests.py`. Among other features, this module includes:
 
 ###tank_test_base.setUpModule
-Module level set up function which determines test data location and sets up studio level directories therein. 
+Module level set up function which determines test data location and sets up studio level directories therein.
 
 ###TankTestBase.setUp
 Setup method which creates a project, it's project level directories and mocked shotgun entity.
 
-###TankTestBase.setup_fixtures 
+###TankTestBase.setup_fixtures
 This method copies the config files, test apps and engines from the data directory into the test project.
 
 ###TankTestBase.add_production_path
@@ -57,8 +57,7 @@ This method adds a fake entity to the mocked shotgun, creates the entities path 
 Setting up a test
 -----------------
 * Create a test module in the appropriate section of the tests area. If the module you wish to test is `tank.platform.foo`,
-the test module should be `tests.platform.test_foo`. 
+the test module should be `tests.platform.test_foo`.
 * In this module, import the base class, module setup method and module teardown method: `from tank_test.tank_test_base import *`
 * Create a test class inheriting from the `TankTestBase` class.
 * If a setUp other than the base one is needed, be sure to call super(TestClassName, self).setUp() in order to allow the base class to setup the fixtures.
-

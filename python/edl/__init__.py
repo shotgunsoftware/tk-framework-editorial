@@ -6,4 +6,10 @@
 #
 from .edl import EditList, EditEvent, process_edit, EditProcessor
 from .timecode import Timecode, frame_from_timecode, timecode_from_frame
-from .errors import UnsupportedEDLFeature, BadBLError, BadDropFrameError, BadFrameRateError, BadFCMError
+from .errors import (
+    UnsupportedEDLFeature,
+    BadBLError,
+    BadDropFrameError,
+    BadFrameRateError,
+    BadFCMError,
+)
