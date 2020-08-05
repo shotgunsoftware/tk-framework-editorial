@@ -22,7 +22,7 @@ DROP_FRAME = {
     29.97: {"count": 2, "fps_int": 30, "fp10m": 17982},
     59.94: {"count": 4, "fps_int": 60, "fp10m": 35964},
 }
-VALID_DROP_FRAME_FPS = DROP_FRAME.keys()
+VALID_DROP_FRAME_FPS = list(DROP_FRAME.keys())
 
 # Our official delimiters.
 DROP_FRAME_DELIMITER = ";"
