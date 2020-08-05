@@ -102,7 +102,7 @@ def frame_from_timecode(timecode, fps=24, drop_frame=None):
     # If we're using drop frame, calculate the total frames to drop by multiplying the number of
     # frames we drop each minute, by the total number of minutes MINUS the number of 10-minute
     # intervals.
-    frames_to_drop = drop_frames_per_min * (total_minutes - (total_minutes / 10))
+    frames_to_drop = drop_frames_per_min * (total_minutes - int(total_minutes / 10))
     # Subtract any frames to drop to get our final frame number.
     frame_number -= frames_to_drop
 
@@ -207,14 +207,14 @@ def timecode_from_frame(frame_number, fps=24, drop_frame=False):
         additional_frames_per_1m = drop_frames_per_min
 
         # Number of 10-minute chunks of frames
-        ten_minute_chunks = frame_number / frames_per_10_mins
+        ten_minute_chunks = int(frame_number / frames_per_10_mins)
         # Remainder of frames after splitting into 10 minute chunks
         remaining_frames = frame_number % frames_per_10_mins
 
         if remaining_frames > drop_frames_per_min:
             add_frames = (additional_frames_per_10m * ten_minute_chunks) + (
                 additional_frames_per_1m
-                * ((remaining_frames - drop_frames_per_min) / frames_per_min_drop)
+                * int((remaining_frames - drop_frames_per_min) / frames_per_min_drop)
             )
         else:
             add_frames = additional_frames_per_10m * ten_minute_chunks
