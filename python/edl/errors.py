@@ -13,9 +13,12 @@ class BadFrameRateError(ValueError):
     Thin wrapper around ValueError for frame rate errors, allowing them to be
     caught easily.
     """
+
     # Standard error message for bad frame rate errors
-    __ERROR_MSG = ("Invalid frame value [%d], it must be smaller than the "
-                   "specified frame rate [%d]")
+    __ERROR_MSG = (
+        "Invalid frame value [%d], it must be smaller than the "
+        "specified frame rate [%d]"
+    )
 
     def __init__(self, frame_value, frame_rate, *args, **kwargs):
         """
@@ -23,14 +26,12 @@ class BadFrameRateError(ValueError):
         the given frame value and frame rate.
 
         :param frame_value: An integer, the frame value which caused the error.
-        :param frame_rate: An integer, the frame rate for which the frame value 
+        :param frame_rate: An integer, the frame rate for which the frame value
                            caused the error.
         """
         super(BadFrameRateError, self).__init__(
-            self.__ERROR_MSG % (frame_value, frame_rate),
-            *args,
-            **kwargs
-            )
+            self.__ERROR_MSG % (frame_value, frame_rate), *args, **kwargs
+        )
         # Store value internally, in case some apps want to retrieve them
         self._frame_value = frame_value
         self._frame_rate = frame_rate
@@ -59,12 +60,15 @@ class BadDropFrameError(ValueError):
     Thin wrapper around ValueError for drop frame errors, allowing them to be
     caught easily.
     """
+
     # Standard error message for bad frame rate errors
-    __ERROR_MSG = ("Timecode format \"%s\" indicates drop frame which conflicts with the "
-                   "explicit drop_frame parameter setting \"%s\". Drop frame timecodes are "
-                   "delimited with a ; or , between the seconds and frames. To fix this, either "
-                   "call this function with drop_frame=True or modify your timecode format to use "
-                   "only non-drop frame delimiters: %s.")
+    __ERROR_MSG = (
+        'Timecode format "%s" indicates drop frame which conflicts with the '
+        'explicit drop_frame parameter setting "%s". Drop frame timecodes are '
+        "delimited with a ; or , between the seconds and frames. To fix this, either "
+        "call this function with drop_frame=True or modify your timecode format to use "
+        "only non-drop frame delimiters: %s."
+    )
 
     def __init__(self, timecode_str, drop_frame, valid_delimiters, *args, **kwargs):
         """
@@ -72,7 +76,7 @@ class BadDropFrameError(ValueError):
         the given frame value and frame rate.
 
         :param timecode_str: Timecode string that contributed to the error.
-        :param drop_frame: Boolean value indicating the use of drop frame or not that conflicts 
+        :param drop_frame: Boolean value indicating the use of drop frame or not that conflicts
                            with timecode string format.
         :param valid_delimiters: List of valid delimiters for drop frame notation.
         """
@@ -80,7 +84,7 @@ class BadDropFrameError(ValueError):
             self.__ERROR_MSG % (timecode_str, drop_frame, valid_delimiters),
             *args,
             **kwargs
-            )
+        )
         # Store values internally, in case some apps want to retrieve them.
         self._timecode_str = timecode_str
         self._drop_frame = drop_frame
@@ -116,12 +120,13 @@ class BadDropFrameError(ValueError):
 
 class UnsupportedEDLFeature(NotImplementedError):
     """
-    Base class for all exceptions related to EDL features not being supported by 
+    Base class for all exceptions related to EDL features not being supported by
     the current implementation.
 
     If needed, more specific Exceptions can be implemented by just deriving from
     this class and changing the error message.
     """
+
     def __init__(self, edl_name, *args, **kwargs):
         """
         Instantiate a new UnsupportedEDLFeature.
@@ -129,9 +134,7 @@ class UnsupportedEDLFeature(NotImplementedError):
         :param edl_name: A string, the EDL file name.
         """
         super(UnsupportedEDLFeature, self).__init__(
-            self._error_message() % edl_name,
-            *args,
-            **kwargs
+            self._error_message() % edl_name, *args, **kwargs
         )
 
     def _error_message(self):
@@ -177,4 +180,3 @@ class BadFCMError(UnsupportedEDLFeature):
         return (
             "Unknown FCM setting found in %s. Unable to determine drop frame setting."
         )
-

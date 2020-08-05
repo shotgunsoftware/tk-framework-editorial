@@ -41,7 +41,7 @@ x.push(['Variables','dl.data > dt']);
 
 x.forEach(function (e){
     var l = createList(e[1]);
-    if (l) {        
+    if (l) {
         var ul = c.clone()
             .append('<p class="rubric">'+e[0]+'</p>')
             .append(l);

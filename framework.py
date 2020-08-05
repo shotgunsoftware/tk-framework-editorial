@@ -17,6 +17,3 @@ class EditorialFramework(sgtk.platform.Framework):
 
     def destroy_framework(self):
         self.log_debug("%s: Destroying..." % self)
-
-
-

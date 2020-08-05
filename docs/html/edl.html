@@ -7,72 +7,72 @@
 <!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
 <head>
   <meta charset="utf-8">
-  
+
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  
+
   <title>EDL &mdash; tk-framework-editorial v1.4.0 documentation</title>
-  
 
-  
-  
 
-  
 
-  
-  
-    
 
-  
 
-  
-  
+
+
+
+
+
+
+
+
+
+
     <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
-  
 
-  
 
-  
+
+
+
     <link rel="top" title="tk-framework-editorial v1.4.0 documentation" href="index.html"/>
         <link rel="next" title="Timecode" href="timecode.html"/>
-        <link rel="prev" title="The Editorial Framework" href="index.html"/> 
+        <link rel="prev" title="The Editorial Framework" href="index.html"/>
 
-  
+
   <script src="_static/js/modernizr.min.js"></script>
 
 </head>
 
 <body class="wy-body-for-nav" role="document">
 
-   
+
   <div class="wy-grid-for-nav">
 
-    
+
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search">
-          
+
     <a href='http://developer.shotgunsoftware.com'>
-    
+
         <img style='width: 191px;
-                height: 60px; 
+                height: 60px;
                 margin: 2px;
-                border-radius: 0px; 
-                padding: 0px;' 
+                border-radius: 0px;
+                padding: 0px;'
             src='_static/logo@2x.png'/>
-    
+
     </a>
-    
 
-          
+
+
             <a href="index.html" class="icon icon-home"> tk-framework-editorial
-          
 
-          
+
+
           </a>
 
-          
 
-          
+
+
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
     <input type="text" name="q" placeholder="Search docs" />
@@ -81,15 +81,15 @@
   </form>
 </div>
 
-          
+
 
         </div>
 
         <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
-          
-    
-            
-            
+
+
+
+
                 <ul class="current">
 <li class="toctree-l1 current"><a class="current reference internal" href="#">EDL</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#editprocessor">EditProcessor</a></li>
@@ -101,32 +101,32 @@
 <li class="toctree-l1"><a class="reference internal" href="timecode.html">Timecode</a></li>
 </ul>
 
-            
-          
-       
+
+
+
     <div style='margin-top: 50px;
                 margin-left: 10px;
                 margin-right: 10px;
-                padding: 10px; 
-                color: #b3b3b3; 
+                padding: 10px;
+                color: #b3b3b3;
                 font-size: 70%;
                 border-radius: 3px;
                 background-color: #444;
                 line-height: 18px;
-                '>    
+                '>
     <style>
-        a.custom_post_menu { display: inline; 
-                             padding: 0px; 
+        a.custom_post_menu { display: inline;
+                             padding: 0px;
                              text-decoration: underline; }
     </style>
 
     <b>tk-framework-editorial</b> v1.4.0.<br>
-    
+
         This documentation is part of the Shotgun Pipeline Toolkit.
-    
+
     For more information, please visit
     <a class=custom_post_menu href='https://support.shotgunsoftware.com/home'>Shotgun Support</a>.
-    The code associated with this documentation can be found 
+    The code associated with this documentation can be found
     <a class=custom_post_menu href='https://github.com/shotgunsoftware/tk-framework-editorial'>here</a>.
 
     </div>
@@ -137,19 +137,19 @@
 
     <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
 
-      
+
       <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
-        
+
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
           <a href="index.html">tk-framework-editorial</a>
-        
+
       </nav>
 
 
-      
+
       <div class="wy-nav-content">
         <div class="rst-content">
-          
+
 
 
 
@@ -165,24 +165,24 @@
 
 <div role="navigation" aria-label="breadcrumbs navigation">
   <ul class="wy-breadcrumbs">
-    
+
       <li><a href="index.html">Docs</a> &raquo;</li>
-        
+
       <li>EDL</li>
-    
-    
+
+
       <li class="wy-breadcrumbs-aside">
-        
-            
-        
+
+
+
       </li>
-    
+
   </ul>
   <hr/>
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
-            
+
   <div class="section" id="edl">
 <h1>EDL<a class="headerlink" href="#edl" title="Permalink to this headline">¶</a></h1>
 <div class="section" id="editprocessor">
@@ -234,7 +234,7 @@ hh:mm:ss:ff for non-drop frame or hh:mm:ss;ff for drop frame.</li>
 <li><strong>record_out</strong> &#8211; Timecode out for the recorder, as a string formatted as
 hh:mm:ss:ff for non-drop frame or hh:mm:ss;ff for drop frame.</li>
 <li><strong>fps</strong> &#8211; Number of frames per second for this edit, as an int or float.</li>
-<li><strong>drop_frame</strong> &#8211; Boolean indicating whether this edit uses drop frame or not or None 
+<li><strong>drop_frame</strong> &#8211; Boolean indicating whether this edit uses drop frame or not or None
 if it&#8217;s not specified. Default is None.</li>
 </ul>
 </td>
@@ -349,7 +349,7 @@ edit as a tuple.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">Tuple of timecodes for this EditEvent as 
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">Tuple of timecodes for this EditEvent as
 <code class="docutils literal"><span class="pre">(source_in,</span> <span class="pre">source_out,</span> <span class="pre">record_in,</span> <span class="pre">record_out)</span></code>.</td>
 </tr>
 </tbody>
@@ -457,7 +457,7 @@ edit as a tuple.</p>
 <dl class="method">
 <dt id="edl.EditEvent.add_effect">
 <code class="descname">add_effect</code><span class="sig-paren">(</span><em>tokens</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/edl/edl.html#EditEvent.add_effect"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#edl.EditEvent.add_effect" title="Permalink to this definition">¶</a></dt>
-<dd><p>For now, just register the effect line as a string and append it to the 
+<dd><p>For now, just register the effect line as a string and append it to the
 list of effects for this EditEvent.</p>
 <p>Later we might want to parse the tokens, and store some actual
 effects value on this edit.</p>
@@ -503,7 +503,7 @@ EditEvent.</td>
 <dl class="method">
 <dt id="edl.EditEvent.add_retime">
 <code class="descname">add_retime</code><span class="sig-paren">(</span><em>tokens</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/edl/edl.html#EditEvent.add_retime"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#edl.EditEvent.add_retime" title="Permalink to this definition">¶</a></dt>
-<dd><p>For now, just register the retime line as a string and append it to the 
+<dd><p>For now, just register the retime line as a string and append it to the
 list of retimes for this EditEvent.</p>
 <p>Later we might want to parse the tokens, and store some actual
 retime values.</p>
@@ -721,16 +721,16 @@ edit name.</li>
            </div>
           </div>
           <footer>
-  
+
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
-      
+
         <a href="timecode.html" class="btn btn-neutral float-right" title="Timecode" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
-      
-      
+
+
         <a href="index.html" class="btn btn-neutral" title="The Editorial Framework" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
-      
+
     </div>
-  
+
 
   <hr/>
 
@@ -739,7 +739,7 @@ edit name.</li>
         &copy; Copyright 2016, Autodesk.
 
     </p>
-  </div> 
+  </div>
 
 </footer>
 
@@ -749,10 +749,10 @@ edit name.</li>
     </section>
 
   </div>
-  
 
 
-  
+
+
 
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
@@ -767,22 +767,22 @@ edit name.</li>
       <script type="text/javascript" src="_static/underscore.js"></script>
       <script type="text/javascript" src="_static/doctools.js"></script>
 
-  
 
-  
-  
+
+
+
     <script type="text/javascript" src="_static/js/theme.js"></script>
-  
 
-  
-  
+
+
+
   <script type="text/javascript">
       jQuery(function () {
           SphinxRtdTheme.StickyNav.enable();
       });
   </script>
-  
- 
+
+
 
 <script>
   (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){

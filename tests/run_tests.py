@@ -4,23 +4,25 @@
 # provided at the time of installation or download, or which otherwise accompanies
 # this software in either electronic or hard copy form.
 #
+from __future__ import print_function
 import sys
 import os
 from optparse import OptionParser
 import unittest2 as unittest
 import logging
+
 logging.basicConfig(level=logging.INFO)
 
 # prepend tank_vendor location to PYTHONPATH to make sure we are running
 # the tests against the vendor libs, not local libs on the machine
 python_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "python"))
-print "Adding tank location to python_path: %s" % python_path
+print("Adding tank location to python_path: %s" % python_path)
 sys.path = [python_path] + sys.path
 
 # prepend tank_vendor location to PYTHONPATH to make sure we are running
 # the tests against the vendor libs, not local libs on the machine
 python_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "python"))
-print "Adding tests/python location to python_path: %s" % python_path
+print("Adding tests/python location to python_path: %s" % python_path)
 sys.path = [python_path] + sys.path
 
 
@@ -42,6 +44,7 @@ class TestRunner(object):
 
     def run_tests_with_coverage(self, test_name):
         import coverage
+
         cov = coverage.coverage(source=["edl"])
         cov.start()
         self.setup_suite(test_name)
@@ -58,10 +61,12 @@ class TestRunner(object):
 
 if __name__ == "__main__":
     parser = OptionParser()
-    parser.add_option("--with-coverage",
-                      action="store_true",
-                      dest="coverage",
-                      help="run with coverage (requires coverage is installed)")
+    parser.add_option(
+        "--with-coverage",
+        action="store_true",
+        dest="coverage",
+        help="run with coverage (requires coverage is installed)",
+    )
     (options, args) = parser.parse_args()
     test_name = None
     if args:

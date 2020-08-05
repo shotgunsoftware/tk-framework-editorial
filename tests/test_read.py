@@ -8,7 +8,14 @@ import os
 import decimal
 import unittest2 as unittest
 from edl import edl
-from edl import timecode, BadDropFrameError, BadBLError, UnsupportedEDLFeature, BadFrameRateError, BadFCMError
+from edl import (
+    timecode,
+    BadDropFrameError,
+    BadBLError,
+    UnsupportedEDLFeature,
+    BadFrameRateError,
+    BadFCMError,
+)
 import logging
 import re
 
@@ -33,7 +40,9 @@ class TestRead(unittest.TestCase):
         self._unsupported_dir = os.path.join(self._resources_dir, "unsupported")
         for f in os.listdir(self._unsupported_dir):
             if f.endswith(".edl"):
-                self._unsupported_examples.append(os.path.join(self._unsupported_dir, f))
+                self._unsupported_examples.append(
+                    os.path.join(self._unsupported_dir, f)
+                )
 
         # Define some useful valid frame rates to test with
         self._frame_rates = [23.97, 24, 29.97, 30, 59.94, 60]
@@ -73,22 +82,22 @@ class TestRead(unittest.TestCase):
             (59.94, True, 1234567, "05:43:16;43"),
             (59.94, True, 2345678, "10:52:13;46"),
             (59.94, True, 12345678, "57:12:47;14"),
-            (59.94, True, 23456789, "108:42:17;49")
+            (59.94, True, 23456789, "108:42:17;49"),
         ]
 
         # Data for testing drop frame without drop frame notation.
         # Since Timecode objects automatically use drop frame notation for drop
-        # frame timecodes, we don't use this set in them roundtrip tests or 
+        # frame timecodes, we don't use this set in them roundtrip tests or
         # frames_to_timecode tests.
         self._frames_timecode_df_no_notation_map = [
-            (29.97, True, 1234567, "11:26:33:13"), 
-            (29.97, True, 2345678, "21:44:27:16"), 
+            (29.97, True, 1234567, "11:26:33:13"),
+            (29.97, True, 2345678, "21:44:27:16"),
             (29.97, True, 12345678, "114:25:34:16"),
             (29.97, True, 23456789, "217:24:35:19"),
-            (59.94, True, 1234567, "05:43:16:43"), 
-            (59.94, True, 2345678, "10:52:13:46"), 
+            (59.94, True, 1234567, "05:43:16:43"),
+            (59.94, True, 2345678, "10:52:13:46"),
             (59.94, True, 12345678, "57:12:47:14"),
-            (59.94, True, 23456789, "108:42:17:49")
+            (59.94, True, 23456789, "108:42:17:49"),
         ]
 
     def read_edl_file(self, file):
@@ -123,7 +132,7 @@ class TestRead(unittest.TestCase):
         edl.process_edit(
             edit,
             logger,
-            shot_regexp="(?P<shot_name>\w+)_(?P<type>\w\w\d\d)_(?P<version>[V,v]\d+)$"
+            shot_regexp="(?P<shot_name>\w+)_(?P<type>\w\w\d\d)_(?P<version>[V,v]\d+)$",
         )
 
     def test_standard_visitor(self):
@@ -143,17 +152,16 @@ class TestRead(unittest.TestCase):
         # Check we are able to extract expected information from a well known
         # example
         path = os.path.join(self._multiple_tests_dir, "scan_request_test.edl")
-        tc = edl.EditList(
-            file_path=path,
-            visitor=self.advanced_visitor,
-        )
+        tc = edl.EditList(file_path=path, visitor=self.advanced_visitor,)
         for edit in tc.edits:
             self.assertIsNotNone(edit._shot_name)
             self.assertIsNotNone(edit._name)
             self.assertEqual(edit._asc_sat, "asat%d" % edit.id)
             self.assertEqual(edit._asc_sop, "asop%d" % edit.id)
             self.assertEqual(edit._version, "V0001")
-            self.assertEqual(edit._name, "%s_%s_%s" % (edit._shot_name, edit._type, edit._version))
+            self.assertEqual(
+                edit._name, "%s_%s_%s" % (edit._shot_name, edit._type, edit._version)
+            )
             # All comments in this example include known keywords
             # so the very first call to next should raise a StopIteration
             with self.assertRaises(StopIteration):
@@ -172,40 +180,54 @@ class TestRead(unittest.TestCase):
         """
         # Edls and their expected comment values.
         comment_edls = {
-                        "079_HA_006.edl": ["*079_HA_0010",
-                                           "*FROM CLIP NAME:  V8033-14_SC65 NB MOS*",
-                                           "*SOURCE FILE: N005_C020_11099E"],
-                        "audio-at-end.edl": ["* FROM CLIP NAME: mad.men.714.hdtv-lol.mp4"],
-                        "cut_import_example.edl": ["* FROM CLIP NAME:  204_CTE_0005_CMP_V0003.MOV",
-                                                   "* LOC: 01:00:00:12 YELLOW  001_001"],
-                        "DD_509_LOCKED_VFX_LINK.edl": ["LOC: 00:00:01:00 YELLOW DD509_0010|D:464"],
-                        "EDL_Colors_v4.EDL": ["Sh_0010_CYAN", "FROM CLIP NAME: CYAN"],
-                        "ER_00119_with_comments.edl": ["* FROM CLIP NAME:  VYD31C-3",
-                                                       "* LOC: 01:01:03:00 YELLOW  YA0010",
-                                                       "* SOURCE FILE: A502_C014_0327NX",
-                                                       "* ========================================================this_is_a_pure_comment",
-                                                       "* All pure comments in this file should be tagged with \"this_is_a_pure_comment\"",
-                                                       "* this_is_a_pure_comment",
-                                                       "* this_is_a_pure_comment",
-                                                       "* this_is_a_pure_comment",
-                                                       "* ========================================================this_is_a_pure_comment",
-                                                       "* foo bar blah this_is_a_pure_comment",
-                                                       "* COMMENT :foo bar blah this_is_a_pure_comment"],
-                        "HSM_SATL_v001_shotNameNote.edl": ["*HSM_SATL_0010"],
-                        "MessyTL_clean.EDL": ["FROM CLIP NAME: 4b",
-                                              "TO CLIP NAME: 2a",
-                                              "* UNSUPPORTED EFFECT:0 RESIZE",
-                                              "* UNSUPPORTED EFFECT:1 COLOUR CORRECTON",
-                                              "* UNSUPPORTED EFFECT:1 RESIZE",
-                                              "DLEDL: FOCUS_DESCR CENTERED"],
-                        "pxy5.edl": ["* FROM CLIP NAME:  GJ_2_LAYOUT_SC011_003_WZ_0606.MOV",
-                                     "* COMMENT:"],
-                        "raphe_temp1_rfe_R01_v01_TRANSITIONS.edl": ["* FROM CLIP NAME: Transparent Video"],
-                        "scan_request_test.edl": ["*FROM CLIP NAME: 053_CSC_0750_PC01_V0001",
-                                                  "*ASC_SOP: asop1",
-                                                  "*ASC_SAT: asat1",
-                                                  "* LOC: 00:00:02:19 YELLOW  053_CSC_0750_PC01_V0001 997 // 8-8 Match to edit"]
-                        }
+            "079_HA_006.edl": [
+                "*079_HA_0010",
+                "*FROM CLIP NAME:  V8033-14_SC65 NB MOS*",
+                "*SOURCE FILE: N005_C020_11099E",
+            ],
+            "audio-at-end.edl": ["* FROM CLIP NAME: mad.men.714.hdtv-lol.mp4"],
+            "cut_import_example.edl": [
+                "* FROM CLIP NAME:  204_CTE_0005_CMP_V0003.MOV",
+                "* LOC: 01:00:00:12 YELLOW  001_001",
+            ],
+            "DD_509_LOCKED_VFX_LINK.edl": ["LOC: 00:00:01:00 YELLOW DD509_0010|D:464"],
+            "EDL_Colors_v4.EDL": ["Sh_0010_CYAN", "FROM CLIP NAME: CYAN"],
+            "ER_00119_with_comments.edl": [
+                "* FROM CLIP NAME:  VYD31C-3",
+                "* LOC: 01:01:03:00 YELLOW  YA0010",
+                "* SOURCE FILE: A502_C014_0327NX",
+                "* ========================================================this_is_a_pure_comment",
+                '* All pure comments in this file should be tagged with "this_is_a_pure_comment"',
+                "* this_is_a_pure_comment",
+                "* this_is_a_pure_comment",
+                "* this_is_a_pure_comment",
+                "* ========================================================this_is_a_pure_comment",
+                "* foo bar blah this_is_a_pure_comment",
+                "* COMMENT :foo bar blah this_is_a_pure_comment",
+            ],
+            "HSM_SATL_v001_shotNameNote.edl": ["*HSM_SATL_0010"],
+            "MessyTL_clean.EDL": [
+                "FROM CLIP NAME: 4b",
+                "TO CLIP NAME: 2a",
+                "* UNSUPPORTED EFFECT:0 RESIZE",
+                "* UNSUPPORTED EFFECT:1 COLOUR CORRECTON",
+                "* UNSUPPORTED EFFECT:1 RESIZE",
+                "DLEDL: FOCUS_DESCR CENTERED",
+            ],
+            "pxy5.edl": [
+                "* FROM CLIP NAME:  GJ_2_LAYOUT_SC011_003_WZ_0606.MOV",
+                "* COMMENT:",
+            ],
+            "raphe_temp1_rfe_R01_v01_TRANSITIONS.edl": [
+                "* FROM CLIP NAME: Transparent Video"
+            ],
+            "scan_request_test.edl": [
+                "*FROM CLIP NAME: 053_CSC_0750_PC01_V0001",
+                "*ASC_SOP: asop1",
+                "*ASC_SAT: asat1",
+                "* LOC: 00:00:02:19 YELLOW  053_CSC_0750_PC01_V0001 997 // 8-8 Match to edit",
+            ],
+        }
         for comment_edl in comment_edls:
             path = os.path.join(self._multiple_tests_dir, comment_edl)
             tc = edl.EditList(file_path=path)
@@ -224,10 +246,18 @@ class TestRead(unittest.TestCase):
             tc = edl.EditList(file_path=path)
             for edit, item in enumerate(tc.edits):
                 if item.id == 2:
-                    self.assertEqual(str(item.source_in), str(timecode.Timecode("00:59:59:09")))
-                    self.assertEqual(str(item.source_out), str(timecode.Timecode("01:00:05:15")))
-                    self.assertEqual(str(item.record_in), str(timecode.Timecode("01:00:07:23")))
-                    self.assertEqual(str(item.record_out), str(timecode.Timecode("01:00:14:05")))
+                    self.assertEqual(
+                        str(item.source_in), str(timecode.Timecode("00:59:59:09"))
+                    )
+                    self.assertEqual(
+                        str(item.source_out), str(timecode.Timecode("01:00:05:15"))
+                    )
+                    self.assertEqual(
+                        str(item.record_in), str(timecode.Timecode("01:00:07:23"))
+                    )
+                    self.assertEqual(
+                        str(item.record_out), str(timecode.Timecode("01:00:14:05"))
+                    )
 
     def test_frames_input(self):
         """
@@ -240,8 +270,12 @@ class TestRead(unittest.TestCase):
             path = os.path.join(self._multiple_tests_dir, frame_edl)
             tc = edl.EditList(file_path=path)
             for edit, item in enumerate(tc.edits):
-                self.assertEqual(str(item.source_in), str(timecode.Timecode("00:00:00:09")))
-                self.assertEqual(str(item.source_out), str(timecode.Timecode("00:00:02:16")))
+                self.assertEqual(
+                    str(item.source_in), str(timecode.Timecode("00:00:00:09"))
+                )
+                self.assertEqual(
+                    str(item.source_out), str(timecode.Timecode("00:00:02:16"))
+                )
                 break
 
     def test_ignore_audio(self):
@@ -250,7 +284,11 @@ class TestRead(unittest.TestCase):
         ignored, more than 2 events will be found. Test succeeds if no more than
         2 events are found.
         """
-        audio_edls = ["audio-at-end.edl", "audio-follows-video.edl", "audio-separately.edl"]
+        audio_edls = [
+            "audio-at-end.edl",
+            "audio-follows-video.edl",
+            "audio-separately.edl",
+        ]
         for audio_edl in audio_edls:
             path = os.path.join(self._multiple_tests_dir, audio_edl)
             tc = edl.EditList(file_path=path)
@@ -264,8 +302,7 @@ class TestRead(unittest.TestCase):
         with self.assertRaises(AttributeError) as cm:
             for f in self._edl_examples:
                 edl.EditList(
-                    file_path=f,
-                    visitor=self.failing_property_override,
+                    file_path=f, visitor=self.failing_property_override,
                 )
 
     def test_tc_round_trip(self):
@@ -293,7 +330,7 @@ class TestRead(unittest.TestCase):
         frames = [2394732, 12332, 8599999, 8640005]
         for frame in frames:
             # NDF
-            for fps in self._frame_rates: 
+            for fps in self._frame_rates:
                 tc = timecode.timecode_from_frame(frame, fps=fps, drop_frame=False)
                 new_frame = timecode.frame_from_timecode(tc, fps=fps, drop_frame=False)
                 self.assertEqual(frame, new_frame)
@@ -302,7 +339,6 @@ class TestRead(unittest.TestCase):
                 tc = timecode.timecode_from_frame(frame, fps=fps, drop_frame=True)
                 new_frame = timecode.frame_from_timecode(tc, fps=fps, drop_frame=True)
                 self.assertEqual(frame, new_frame)
-
 
     def test_fps_types(self):
         # Testing input of effective int and establishing the fact that these
@@ -366,7 +402,12 @@ class TestRead(unittest.TestCase):
         Test we return the correct frames for timecode and fps using drop frame without
         drop frame notation.
         """
-        for fps, drop_frame, expected_frame, tc in self._frames_timecode_df_no_notation_map:
+        for (
+            fps,
+            drop_frame,
+            expected_frame,
+            tc,
+        ) in self._frames_timecode_df_no_notation_map:
             frame = timecode.frame_from_timecode(tc, fps=fps, drop_frame=drop_frame)
             self.assertEqual(frame, expected_frame)
 
@@ -400,7 +441,12 @@ class TestRead(unittest.TestCase):
         """
         Test that we correctly determine drop frame when not using DF notation.
         """
-        for fps, drop_frame, expected_frame, tc_str in self._frames_timecode_df_no_notation_map:
+        for (
+            fps,
+            drop_frame,
+            expected_frame,
+            tc_str,
+        ) in self._frames_timecode_df_no_notation_map:
             # check we get a drop frame Timecode object
             tc = timecode.Timecode(tc_str, fps=fps, drop_frame=drop_frame)
             self.assertTrue(tc._drop_frame)
@@ -412,7 +458,7 @@ class TestRead(unittest.TestCase):
 
     def test_conflicting_drop_frame(self):
         """
-        Test that we raise an exception when providing conflicting drop frame values. Eg. timecode 
+        Test that we raise an exception when providing conflicting drop frame values. Eg. timecode
         with drop frame notation while specifying non-drop frame.
         """
         df_timecodes = ["11:22:33;22", "11:22:33,22", "11:22:33.22"]
@@ -422,7 +468,7 @@ class TestRead(unittest.TestCase):
 
     def test_invalid_drop_frame_fps(self):
         """
-        Test that we raise NotImplementedError when trying to use drop frame on unsupported 
+        Test that we raise NotImplementedError when trying to use drop frame on unsupported
         frame rates.
         """
         invalid_drop_fps = [23.97, 30, 60, 29.976]

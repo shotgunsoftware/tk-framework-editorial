@@ -30,7 +30,9 @@ NON_DROP_FRAME_DELIMITER = ":"
 
 VALID_DROP_FRAME_DELIMITERS = [";", ",", "."]
 VALID_NON_DROP_FRAME_DELIMITERS = [":"]
-VALID_TIMECODE_DELIMITERS = VALID_DROP_FRAME_DELIMITERS + VALID_NON_DROP_FRAME_DELIMITERS
+VALID_TIMECODE_DELIMITERS = (
+    VALID_DROP_FRAME_DELIMITERS + VALID_NON_DROP_FRAME_DELIMITERS
+)
 
 
 # Some helpers to convert timecodes to frames, back and forth.
@@ -38,15 +40,15 @@ def frame_from_timecode(timecode, fps=24, drop_frame=None):
     """
     Return the frame number for the given timecode.
 
-    :param timecode: A timecode as a string (formatted as ``hh:mm:ss:ff`` for non-drop frame 
-                     or ``hh:mm:ss;ff`` for drop frame) or as a (hours, minutes, seconds, frames) 
+    :param timecode: A timecode as a string (formatted as ``hh:mm:ss:ff`` for non-drop frame
+                     or ``hh:mm:ss;ff`` for drop frame) or as a (hours, minutes, seconds, frames)
                      tuple.
     :param fps: Number of frames per second as an int or float. Default is 24.
     :param drop_frame: Boolean determining whether timecode should use drop frame or not. None if
-                       this value should be determined by the timecode's delimiter notation. 
+                       this value should be determined by the timecode's delimiter notation.
                        Default is None.
     :return: Corresponding frame number, as an int.
-    :raises: NotImplementedError if ``drop_frame`` is ``True`` and the fps value is unsupported 
+    :raises: NotImplementedError if ``drop_frame`` is ``True`` and the fps value is unsupported
              for drop frame.
     """
     if isinstance(timecode, str):
@@ -56,7 +58,7 @@ def frame_from_timecode(timecode, fps=24, drop_frame=None):
 
         if tc_drop_frame and fps not in VALID_DROP_FRAME_FPS:
             raise NotImplementedError(
-                "Invalid fps setting \"%s\". Time code calculation logic only supports drop frame "
+                'Invalid fps setting "%s". Time code calculation logic only supports drop frame '
                 "calculations for the following fps values: %s."
                 % (fps, VALID_DROP_FRAME_FPS)
             )
@@ -81,7 +83,7 @@ def frame_from_timecode(timecode, fps=24, drop_frame=None):
     # We don't need the exact framerate anymore if we're using drop frame, we just need it
     # rounded to nearest integer. Non-drop frame will return the same value.
     fps_int = int(round(fps))
-    
+
     # Number of frames per hour (non-drop)
     frames_per_hour = fps_int * 60 * 60
     # Number of frames per minute (non-drop)
@@ -90,8 +92,12 @@ def frame_from_timecode(timecode, fps=24, drop_frame=None):
     total_minutes = (60 * hours) + minutes
 
     # Put it all together.
-    frame_number = (frames_per_hour * hours) + (frames_per_minute * minutes) + \
-        (fps_int * seconds) + frames
+    frame_number = (
+        (frames_per_hour * hours)
+        + (frames_per_minute * minutes)
+        + (fps_int * seconds)
+        + frames
+    )
 
     # If we're using drop frame, calculate the total frames to drop by multiplying the number of
     # frames we drop each minute, by the total number of minutes MINUS the number of 10-minute
@@ -109,13 +115,13 @@ def timecode_from_frame(frame_number, fps=24, drop_frame=False):
 
     .. note::
         We don't need to use the :mod:`decimal` module here because frame/timecode calculations
-        are not exact (there is no such thing as a fractional frame). 
+        are not exact (there is no such thing as a fractional frame).
 
         When using a float frame rate (fps) calculations of frames and timecode are not
         technically exact, and will cause time drift away from "wall clock" time. But
-        this is still correct. Drop frame was created to help mitigate this and it attempts 
-        to correct the drift by skipping frame numbers at certain intervals. However, it's 
-        still technically not exact and will usually be a fraction of time off. But it's 
+        this is still correct. Drop frame was created to help mitigate this and it attempts
+        to correct the drift by skipping frame numbers at certain intervals. However, it's
+        still technically not exact and will usually be a fraction of time off. But it's
         exact enough for the editorial world (and is therefore "correct").
 
     :param frame_number: A frame number, as an int.
@@ -129,10 +135,10 @@ def timecode_from_frame(frame_number, fps=24, drop_frame=False):
     """
     if drop_frame and fps not in VALID_DROP_FRAME_FPS:
         raise NotImplementedError(
-            "Invalid fps setting \"%s\". Time code calculation logic only supports drop frame "
+            'Invalid fps setting "%s". Time code calculation logic only supports drop frame '
             "calculations for the following fps values: %s."
             % (fps, VALID_DROP_FRAME_FPS)
-        )   
+        )
 
     if drop_frame:
         fps_int = DROP_FRAME[fps]["fps_int"]
@@ -206,9 +212,10 @@ def timecode_from_frame(frame_number, fps=24, drop_frame=False):
         remaining_frames = frame_number % frames_per_10_mins
 
         if remaining_frames > drop_frames_per_min:
-            add_frames = (additional_frames_per_10m * ten_minute_chunks) + \
-                (additional_frames_per_1m *
-                    ((remaining_frames - drop_frames_per_min) / frames_per_min_drop))
+            add_frames = (additional_frames_per_10m * ten_minute_chunks) + (
+                additional_frames_per_1m
+                * ((remaining_frames - drop_frames_per_min) / frames_per_min_drop)
+            )
         else:
             add_frames = additional_frames_per_10m * ten_minute_chunks
 
@@ -219,7 +226,7 @@ def timecode_from_frame(frame_number, fps=24, drop_frame=False):
         frames_token = DROP_FRAME_DELIMITER
 
     else:
-        # Non-drop frame timecodes that are floats are simply rounded to their nearest integer 
+        # Non-drop frame timecodes that are floats are simply rounded to their nearest integer
         # for frame calculation. Since there can't be a fractional frame number and we're not
         # dropping frames to compensate, the timecode will drift from wall clock time as expected.
         # This is often the case in short-form media like commercials (< 1 minute) since drop
@@ -243,13 +250,13 @@ def _compute_drop_frame_setting(timecode_str, drop_frame):
     drop_frame parameter (if any).
 
     .. note::
-        While it's clear that timecodes with ; or , or . delimiters indicate drop frame, the absence 
-        of them doesn't necessarily indicate non-drop frame. More specifically, when calling this 
-        function, we may not want to require that the user always know to add the correct drop 
-        frame delimiters in the timecode string. So we are only raising an error here if the 
+        While it's clear that timecodes with ; or , or . delimiters indicate drop frame, the absence
+        of them doesn't necessarily indicate non-drop frame. More specifically, when calling this
+        function, we may not want to require that the user always know to add the correct drop
+        frame delimiters in the timecode string. So we are only raising an error here if the
         timecode indicates drop frame and the user has explicitly indicated non-drop frame.
 
-    :param timecode_str: A timecode as a string (eg. "hh:mm:ss:ff" for non-drop frame 
+    :param timecode_str: A timecode as a string (eg. "hh:mm:ss:ff" for non-drop frame
                          or "hh:mm:ss;ff" for drop frame).
     :param drop_frame: Boolean indicating whether the user intends to use drop frame or not. None
                        if the user did not pass in a drop_frame value explicitly indicating we
@@ -264,7 +271,9 @@ def _compute_drop_frame_setting(timecode_str, drop_frame):
 
     if drop_frame is not None:
         if drop_frame is False and tc_drop_frame:
-            raise BadDropFrameError(timecode_str, drop_frame, VALID_NON_DROP_FRAME_DELIMITERS)
+            raise BadDropFrameError(
+                timecode_str, drop_frame, VALID_NON_DROP_FRAME_DELIMITERS
+            )
         elif drop_frame is True and not tc_drop_frame:
             # We will accept that this timecode should be drop frame despite the fact that
             # it does not contain the typical drop frame delimiter(s).
@@ -278,6 +287,7 @@ class Timecode(object):
     """
     A Timecode object.
     """
+
     def __init__(self, timecode_string, fps=24, drop_frame=None):
         """
         Instantiate a Timecode object from a timecode or frame number as a string.
@@ -285,17 +295,17 @@ class Timecode(object):
         .. note::
             The following sites were referenced for determining the best way to formulate
             the calculations in this module and are provided as a reference:
-                
+
                 - http://andrewduncan.net/timecodes/
                 - http://www.davidheidelberger.com/blog/?p=29
                 - https://documentation.apple.com/en/finalcutpro/usermanual/index.html#chapter=D%26section=6
                 - http://www.connect.ecuad.ca/~mrose/pdf_documents/timecode.pdf
                 - http://www.evertz.com/resources/The-Right-Time.pdf
 
-        :param timecode_string: A timecode as a string (formatted as hh:mm:ss:ff for non-drop frame 
+        :param timecode_string: A timecode as a string (formatted as hh:mm:ss:ff for non-drop frame
                                 or hh:mm:ss;ff for drop frame) or a frame number as a string.
         :param fps: Frames per second setting as an int or float. Default is 24.
-        :param drop_frame: Boolean indicating whether to use drop frame or not. None if the 
+        :param drop_frame: Boolean indicating whether to use drop frame or not. None if the
                            timecode string should determine this value. Default is None.
 
         :raises: ValueError if timecode_string cannot be transformed into a Timecode object.
@@ -306,29 +316,39 @@ class Timecode(object):
         # the input as if it was a timecode and not a frame.
         if timecode_string.isdigit():
             try:
-                new_timecode_string = timecode_from_frame(int(timecode_string), fps, drop_frame)
-                self._hours, self._minutes, self._seconds, self._frames = \
-                    self.parse_timecode(new_timecode_string)
+                new_timecode_string = timecode_from_frame(
+                    int(timecode_string), fps, drop_frame
+                )
+                (
+                    self._hours,
+                    self._minutes,
+                    self._seconds,
+                    self._frames,
+                ) = self.parse_timecode(new_timecode_string)
                 self._drop_frame = drop_frame
-            except ValueError, e:
+            except ValueError as e:
                 raise ValueError(
-                    "Frame number \"%s\" can not be converted to a Timecode: %s"
+                    'Frame number "%s" can not be converted to a Timecode: %s'
                     % (timecode_string, e)
                 )
         else:
             # Parse the timecode_string into values.
-            self._hours, self._minutes, self._seconds, self._frames = \
-                self.parse_timecode(timecode_string)
+            (
+                self._hours,
+                self._minutes,
+                self._seconds,
+                self._frames,
+            ) = self.parse_timecode(timecode_string)
             self._drop_frame = _compute_drop_frame_setting(timecode_string, drop_frame)
 
         if self._drop_frame and fps not in VALID_DROP_FRAME_FPS:
             raise NotImplementedError(
-                "Invalid fps setting \"%s\". Time code calculation logic only supports drop frame "
+                'Invalid fps setting "%s". Time code calculation logic only supports drop frame '
                 "calculations for the following fps values: %s."
                 % (fps, VALID_DROP_FRAME_FPS)
-            )   
+            )
         self._fps = fps
- 
+
         # Use the "correct" frame token delimiter
         if self._drop_frame:
             self._frame_delimiter = DROP_FRAME_DELIMITER
@@ -369,12 +389,12 @@ class Timecode(object):
         :returns: Boolean True if timecode is using drop frame notation, False if not.
         :raises: ValueError if timecode_str is not a valid hh:mm:ss:ff format and cannot
                  be parsed correctly.
-        """ 
+        """
         # Find the delimited being used between the seconds and frames entry.
         m = re.match(".*(%s)\d{2}$" % VALID_TIMECODE_DELIMITERS, timecode_str)
         if not m:
             raise ValueError(
-                "Timecode \"%s\" is not in a valid format (eg. hh:mm:ss:ff or hh:mm:ss;ff). "
+                'Timecode "%s" is not in a valid format (eg. hh:mm:ss:ff or hh:mm:ss;ff). '
                 "The timecode must be delimited by one of the following characters: %s"
                 % (timecode_str, VALID_TIMECODE_DELIMITERS)
             )
@@ -384,14 +404,14 @@ class Timecode(object):
             return True
         else:
             return False
-       
+
     @classmethod
     def parse_timecode(cls, timecode_str):
         """
         Parse a timecode string to valid hour, minute, second, and frame values.
 
-        Splits the timecode string by any non-alphanumeric character. This ensures that that 
-        we can support various formats of delimiting timecode strings. 
+        Splits the timecode string by any non-alphanumeric character. This ensures that that
+        we can support various formats of delimiting timecode strings.
         For example::
 
             00:12:34:21 # NON-DROP FRAME variation 1
@@ -400,7 +420,7 @@ class Timecode(object):
             00:12:34,21 # DROP FRAME variation 2
             00;12;34;56 # DROP FRAME variation 3
 
-        :param timecode_str: A timecode string (eg. ``hh:mm:ss:ff`` for non-drop frame 
+        :param timecode_str: A timecode string (eg. ``hh:mm:ss:ff`` for non-drop frame
                              or ``hh:mm:ss;ff`` for drop frame).
         :return: Tuple of (hours, minutes, seconds, frames) where all values are ints.
         :raises: ValueError if string cannot be parsed.
@@ -408,11 +428,16 @@ class Timecode(object):
         m = re.match(r"(\d{2,3}):(\d{2}):(\d{2})[:;\.,](\d{2})", timecode_str)
         if not m:
             raise ValueError(
-                "Timecode \"%s\" is not in a valid format (eg. hh:mm:ss:ff or hh:mm:ss;ff)."
+                'Timecode "%s" is not in a valid format (eg. hh:mm:ss:ff or hh:mm:ss;ff).'
                 % timecode_str
             )
 
-        tc_tuple = (int(m.group(1)), int(m.group(2)), int(m.group(3)), int(m.group(4)),)
+        tc_tuple = (
+            int(m.group(1)),
+            int(m.group(2)),
+            int(m.group(3)),
+            int(m.group(4)),
+        )
 
         return tc_tuple
 
@@ -423,9 +448,9 @@ class Timecode(object):
 
         :param frame: A frame number, as an :obj:`int`.
         :param fps: Number of frames per second, as an :obj:`int` or :obj:`float`. Defaults to 24.
-        :param drop_frame: Boolean indicating whether to use drop frame or not. Default 
+        :param drop_frame: Boolean indicating whether to use drop frame or not. Default
                            is ``False``.
-        
+
         :return: A :class:`Timecode` instance.
         """
         timecode = timecode_from_frame(frame, fps, drop_frame)
@@ -438,7 +463,9 @@ class Timecode(object):
         :return: A frame number, as an :obj:`int`.
         """
         return frame_from_timecode(
-            (self._hours, self._minutes, self._seconds, self._frames), self._fps, self._drop_frame
+            (self._hours, self._minutes, self._seconds, self._frames),
+            self._fps,
+            self._drop_frame,
         )
 
     def to_seconds(self):
@@ -453,10 +480,10 @@ class Timecode(object):
 
             When using a float frame rate (fps) calculations of frames and timecode are not
             technically exact, and will cause time drift away from "wall clock" time. But
-            this is still correct. Drop frame was created to help mitigate this and it attempts 
-            to correct the drift by skipping frame numbers at certain intervals. However, it's 
-            still technically not exact and will usually be a fraction of time off. But it's 
-            exact enough for the editorial world.   
+            this is still correct. Drop frame was created to help mitigate this and it attempts
+            to correct the drift by skipping frame numbers at certain intervals. However, it's
+            still technically not exact and will usually be a fraction of time off. But it's
+            exact enough for the editorial world.
 
         .. seealso:: https://docs.python.org/2/tutorial/floatingpoint.html#tut-fp-issues
 
@@ -471,14 +498,16 @@ class Timecode(object):
         + operator override: Add a Timecode or a number of frames to this :class:`Timecode`
         with the :class:`Timecode` on the right of the operator.
 
-        :param right: Right operand for ``+`` operator, either a :class:`Timecode` instance or an 
+        :param right: Right operand for ``+`` operator, either a :class:`Timecode` instance or an
                       :obj:`int` representing a number of frames.
-        
-        :return: A new :class:`Timecode` instance, in this :class:`Timecode` fps, result of the 
+
+        :return: A new :class:`Timecode` instance, in this :class:`Timecode` fps, result of the
                  addition.
         """
         if isinstance(right, Timecode):
-            return self.from_frame(self.to_frame() + right.to_frame(), self._fps, self._drop_frame)
+            return self.from_frame(
+                self.to_frame() + right.to_frame(), self._fps, self._drop_frame
+            )
         if isinstance(right, int):
             return self.from_frame(self.to_frame() + right, self._fps, self._drop_frame)
         raise TypeError("Unsupported operand type %s for +" % type(right))
@@ -488,9 +517,9 @@ class Timecode(object):
         + operator override : Add a number of frames to this :class:`Timecode`, with the
         timecode on the left of the ``+`` operator.
 
-        :param left: Left operand for ``+`` operator, either a :class:`Timecode` instance or an 
+        :param left: Left operand for ``+`` operator, either a :class:`Timecode` instance or an
                      :obj:`int` representing a number of frames.
-        :return: A new :class:`Timecode` instance, in this :class:`Timecode` fps, result of the 
+        :return: A new :class:`Timecode` instance, in this :class:`Timecode` fps, result of the
                  addition.
         """
         return self.__add__(left)
@@ -500,13 +529,15 @@ class Timecode(object):
         - operator override : Subtract a Timecode or a number of frames to this :class:`Timecode`
         with the timecode on the right of the operator.
 
-        :param right: Right operand for ``-`` operator, either a :class:`Timecode` instance or an 
+        :param right: Right operand for ``-`` operator, either a :class:`Timecode` instance or an
                       :obj:`int` representing a number of frames.
-        :return: A new :class:`Timecode` instance, in this :class:`Timecode` fps, result of the 
+        :return: A new :class:`Timecode` instance, in this :class:`Timecode` fps, result of the
                  subtraction.
         """
         if isinstance(right, Timecode):
-            return self.from_frame(self.to_frame() - right.to_frame(), self._fps, self._drop_frame)
+            return self.from_frame(
+                self.to_frame() - right.to_frame(), self._fps, self._drop_frame
+            )
         if isinstance(right, int):
             return self.from_frame(self.to_frame() - right, self._fps, self._drop_frame)
         raise TypeError("Unsupported operand type %s for -" % type(right))
@@ -516,9 +547,9 @@ class Timecode(object):
         - operator override : Subtract a number of frames to this :class:`Timecode`, with the
         timecode on the left of the ``-`` operator.
 
-        :param left: Left operand for ``-`` operator, either a :class:`Timecode` instance or an 
+        :param left: Left operand for ``-`` operator, either a :class:`Timecode` instance or an
                      :obj:`int` representing a number of frames.
-        :return: A new :class:`Timecode` instance, in this :class:`Timecode` fps, result of the 
+        :return: A new :class:`Timecode` instance, in this :class:`Timecode` fps, result of the
                  subtraction.
         """
         return self.__sub__(left)
@@ -528,7 +559,11 @@ class Timecode(object):
         String representation of this :class:`Timecode` instance.
         """
         return "%02d:%02d:%02d%s%02d" % (
-            self._hours, self._minutes, self._seconds, self._frame_delimiter, self._frames
+            self._hours,
+            self._minutes,
+            self._seconds,
+            self._frame_delimiter,
+            self._frames,
         )
 
     def __repr__(self):
@@ -539,6 +574,12 @@ class Timecode(object):
         if self._drop_frame:
             drop = "DF"
         return "<class %s %02d:%02d:%02d%s%02d (%sfps %s)>" % (
-            self.__class__.__name__, self._hours, self._minutes, self._seconds,
-            self._frame_delimiter, self._frames, self._fps, drop
+            self.__class__.__name__,
+            self._hours,
+            self._minutes,
+            self._seconds,
+            self._frame_delimiter,
+            self._frames,
+            self._fps,
+            drop,
         )

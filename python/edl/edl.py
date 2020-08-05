@@ -18,7 +18,7 @@ _COMMENTS_KEYWORDS = [
     "FROM CLIP NAME",
     "CLIP NAME",
     "ASC_SOP",
-    "ASC_SAT"
+    "ASC_SAT",
 ]
 # Build a regular expression to match the keywords above, matching lines beginning
 # with :
@@ -35,6 +35,7 @@ class EditProcessor(object):
     An example of keeping previous parsed edit event around, while using the process
     edit function.
     """
+
     def __init__(self, shot_regexp=None):
         super(EditProcessor, self).__init__()
         self._previous_edit = None
@@ -134,7 +135,9 @@ def process_edit(edit, logger, shot_regexp=None):
                 grid = regexp.groupindex
                 if "shot_name" not in grid:
                     raise ValueError(
-                        "No \"shot_name\" named group in regular expression %s" % regexp.pattern)
+                        'No "shot_name" named group in regular expression %s'
+                        % regexp.pattern
+                    )
                 edit._shot_name = m.group("shot_name")
                 if "type" in grid:
                     edit._type = m.group("type")
@@ -158,6 +161,7 @@ class EditEvent(object):
     frame long record would be ``00:00:00:01 00:00:00:02`` ( not ``00:00:00:01`` )
 
     """
+
     # Our known attributes
     # Every other attributes will go into the _meta_data dictionary
     __mine = [
@@ -171,7 +175,7 @@ class EditEvent(object):
         "_source_in",
         "_source_out",
         "_record_in",
-        "_record_out"
+        "_record_out",
     ]
     # Protect accessors clashes by building a list of them
     # from internal attributes
@@ -179,15 +183,15 @@ class EditEvent(object):
 
     def __init__(
         self,
-        id          = None,
-        reel        = None,
-        channels    = None,
-        source_in   = None,
-        source_out  = None,
-        record_in   = None,
-        record_out  = None,
-        fps         = 24,
-        drop_frame  = None
+        id=None,
+        reel=None,
+        channels=None,
+        source_in=None,
+        source_out=None,
+        record_in=None,
+        record_out=None,
+        fps=24,
+        drop_frame=None,
     ):
         """
         Instantiate a new EditEvent
@@ -204,7 +208,7 @@ class EditEvent(object):
         :param record_out: Timecode out for the recorder, as a string formatted as
                           hh:mm:ss:ff for non-drop frame or hh:mm:ss;ff for drop frame.
         :param fps: Number of frames per second for this edit, as an int or float.
-        :param drop_frame: Boolean indicating whether this edit uses drop frame or not or None 
+        :param drop_frame: Boolean indicating whether this edit uses drop frame or not or None
                            if it's not specified. Default is None.
         """
 
@@ -296,15 +300,10 @@ class EditEvent(object):
         Return the source in, source out, record in, record out timecodes for this
         edit as a tuple.
 
-        :returns: Tuple of timecodes for this EditEvent as 
+        :returns: Tuple of timecodes for this EditEvent as
                   ``(source_in, source_out, record_in, record_out)``.
         """
-        return (
-            self._source_in,
-            self._source_out,
-            self._record_in,
-            self._record_out
-        )
+        return (self._source_in, self._source_out, self._record_in, self._record_out)
 
     @property
     def source_in(self):
@@ -375,9 +374,9 @@ class EditEvent(object):
 
     def add_effect(self, tokens):
         """
-        For now, just register the effect line as a string and append it to the 
+        For now, just register the effect line as a string and append it to the
         list of effects for this EditEvent.
-        
+
         Later we might want to parse the tokens, and store some actual
         effects value on this edit.
 
@@ -405,13 +404,13 @@ class EditEvent(object):
 
     def add_retime(self, tokens):
         """
-        For now, just register the retime line as a string and append it to the 
+        For now, just register the retime line as a string and append it to the
         list of retimes for this EditEvent.
 
         Later we might want to parse the tokens, and store some actual
         retime values.
 
-        :param tokens: List of tokens for the retime. 
+        :param tokens: List of tokens for the retime.
         """
         self._retime = " ".join(tokens)
 
@@ -427,7 +426,7 @@ class EditEvent(object):
             str(self._source_in),
             str(self._source_out),
             str(self._record_in),
-            str(self._record_out)
+            str(self._record_out),
         )
 
     def __setattr__(self, attr_name, value):
@@ -439,7 +438,9 @@ class EditEvent(object):
         :param value: The value the attribute should take.
         """
         if attr_name in self.__protected:
-            raise AttributeError("EditEvent %s attribute can't be redefined" % attr_name)
+            raise AttributeError(
+                "EditEvent %s attribute can't be redefined" % attr_name
+            )
         if attr_name in self.__mine:
             object.__setattr__(self, attr_name, value)
         else:
@@ -501,7 +502,7 @@ class EditList(object):
                 raise NotImplementedError(
                     "Can't read %s: don't know how to read files with %s extension",
                     file_path,
-                    ext
+                    ext,
                 )
             self.read_cmx_edl(file_path, fps=self._fps, visitor=visitor)
 
@@ -595,7 +596,7 @@ class EditList(object):
                         if len(line_tokens) > 1:
                             self._title = " ".join(line_tokens[1:])
                     elif line.startswith("FCM:"):
-                        # Frame Code Mode: Can be DROP FRAME or NON DROP FRAME. If it's 
+                        # Frame Code Mode: Can be DROP FRAME or NON DROP FRAME. If it's
                         # something else, raise an error.
                         if line_tokens[1] == "DROP" and line_tokens[2] == "FRAME":
                             drop_frame = True
@@ -604,27 +605,24 @@ class EditList(object):
                         else:
                             raise BadFCMError(os.path.basename(path))
                         # Only set the EDL drop frame value once.
-                        # Some EDLS contain additional FCM notes for transitions. It's 
+                        # Some EDLS contain additional FCM notes for transitions. It's
                         # unclear if these can conflict with the EDL setting or not but for
-                        # now we will ignore it if that happens and issue a warning. 
+                        # now we will ignore it if that happens and issue a warning.
                         if self._drop_frame is None:
                             self._drop_frame = drop_frame
                         else:
                             if self._drop_frame != drop_frame:
                                 self.__logger.warning(
-                                    "Found an FCM note \"%s\" that conflicts with the EDL's "
+                                    'Found an FCM note "%s" that conflicts with the EDL\'s '
                                     "drop frame setting. Only one FCM note is supported for "
                                     "setting the drop frame mode for the entire EDL. Any "
-                                    "additional FCM notes will be ignored." 
-                                    % line
+                                    "additional FCM notes will be ignored." % line
                                 )
                     elif len(line_tokens) > 1 and line_tokens[1] == "BL":
                         raise BadBLError(os.path.basename(path))
                     elif line_tokens[0] == "M2":  # Retime
                         if not edit:
-                            raise RuntimeError(
-                                "Found unexpected line"
-                            )
+                            raise RuntimeError("Found unexpected line")
                         edit.add_retime(line_tokens)
                     elif line_tokens[0].isdigit():
                         media_type = line_tokens[2]
@@ -653,22 +651,20 @@ class EditList(object):
                             # so tokens at the end of the line are indexed with
                             # negative indexes
                             edit = EditEvent(
-                                fps         = fps,
-                                id          = id,
-                                reel        = line_tokens[1],
-                                channels    = media_type,
-                                source_in   = line_tokens[-4],
-                                source_out  = line_tokens[-3],
-                                record_in   = line_tokens[-2],
-                                record_out  = line_tokens[-1],
-                                drop_frame  = self._drop_frame,
+                                fps=fps,
+                                id=id,
+                                reel=line_tokens[1],
+                                channels=media_type,
+                                source_in=line_tokens[-4],
+                                source_out=line_tokens[-3],
+                                record_in=line_tokens[-2],
+                                record_out=line_tokens[-1],
+                                drop_frame=self._drop_frame,
                             )
                             self._edits.append(edit)
                         else:
                             if not edit:
-                                raise RuntimeError(
-                                    "Found unexpected effect"
-                                )
+                                raise RuntimeError("Found unexpected effect")
                             edit.add_effect(line_tokens)
                     else:
                         # A comment
@@ -678,9 +674,11 @@ class EditList(object):
                 if edit and visitor:
                     self.__logger.debug("Visiting: [%s]" % edit)
                     visitor(edit, self.__logger)
-            except Exception, e:  # Catch the exception so we can add the current line contents
-                args = ["%s.\n\nError reported while parsing %s at line:\n\n%s" % (
-                    e.args[0], path, line)] + list(e.args[1:])
+            except Exception as e:  # Catch the exception so we can add the current line contents
+                args = [
+                    "%s.\n\nError reported while parsing %s at line:\n\n%s"
+                    % (e.args[0], path, line)
+                ] + list(e.args[1:])
                 e.args = args
                 raise
         # Once we have our edits list, we can loop through it and adjust any
@@ -697,38 +695,34 @@ class EditList(object):
                     if prev > -1:
                         # Add the transition duration to the previous edit's source out.
                         trans_duration = Timecode(
-                                effect_tokens[4],
-                                fps=edit.fps,
-                                drop_frame=self._drop_frame
+                            effect_tokens[4], fps=edit.fps, drop_frame=self._drop_frame
                         ).to_frame()
                         self._edits[prev]._source_out = Timecode(
-                            str(self._edits[prev]._source_out.to_frame() + trans_duration),
+                            str(
+                                self._edits[prev]._source_out.to_frame()
+                                + trans_duration
+                            ),
                             fps=self._edits[prev].fps,
-                            drop_frame=self._drop_frame
+                            drop_frame=self._drop_frame,
                         )
                         self._edits[prev]._record_out = Timecode(
-                            str(self._edits[prev]._record_out.to_frame() + trans_duration),
+                            str(
+                                self._edits[prev]._record_out.to_frame()
+                                + trans_duration
+                            ),
                             fps=self._edits[prev].fps,
-                            drop_frame=self._drop_frame
+                            drop_frame=self._drop_frame,
                         )
                     # Take the values from the Dissolve effect for the current edit.
                     edit._source_in = Timecode(
-                            effect_tokens[5],
-                            fps=edit.fps,
-                            drop_frame=self._drop_frame
+                        effect_tokens[5], fps=edit.fps, drop_frame=self._drop_frame
                     )
                     edit._source_out = Timecode(
-                            effect_tokens[6],
-                            fps=edit.fps,
-                            drop_frame=self._drop_frame
+                        effect_tokens[6], fps=edit.fps, drop_frame=self._drop_frame
                     )
                     edit._record_in = Timecode(
-                            effect_tokens[7],
-                            fps=edit.fps,
-                            drop_frame=self._drop_frame
+                        effect_tokens[7], fps=edit.fps, drop_frame=self._drop_frame
                     )
                     edit._record_out = Timecode(
-                            effect_tokens[8],
-                            fps=edit.fps,
-                            drop_frame=self._drop_frame
+                        effect_tokens[8], fps=edit.fps, drop_frame=self._drop_frame
                     )
