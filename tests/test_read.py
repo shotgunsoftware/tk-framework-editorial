@@ -165,7 +165,7 @@ class TestRead(unittest.TestCase):
             # All comments in this example include known keywords
             # so the very first call to next should raise a StopIteration
             with self.assertRaises(StopIteration):
-                edit.pure_comments.next()
+                next(edit.pure_comments)
 
     def test_pure_comments(self):
         path = os.path.join(self._multiple_tests_dir, "ER_00119_with_comments.edl")
