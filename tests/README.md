@@ -45,13 +45,13 @@ There is a tank tests module, `tank_test.tank_test_base.py` which contains both 
 Module level set up function which determines test data location and sets up studio level directories therein.
 
 ###TankTestBase.setUp
-Setup method which creates a project, it's project level directories and mocked shotgun entity.
+Setup method which creates a project, it's project level directories and mocked shotgrid entity.
 
 ###TankTestBase.setup_fixtures
 This method copies the config files, test apps and engines from the data directory into the test project.
 
 ###TankTestBase.add_production_path
-This method adds a fake entity to the mocked shotgun, creates the entities path in test project and registers that entity with that path in the test project's path cache.
+This method adds a fake entity to the mocked shotgrid, creates the entities path in test project and registers that entity with that path in the test project's path cache.
 
 
 Setting up a test
