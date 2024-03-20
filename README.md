@@ -1,11 +1,11 @@
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 
 ## Documentation
-This repository is a part of the ShotGrid Pipeline Toolkit.
+This repository is a part of the Flow Production Tracking Toolkit.
 
 - For more information about this framework and for release notes, *see the wiki section*.
 - For general information and documentation, click here: https://developer.shotgridsoftware.com/d587be80/?title=Integrations+User+Guide
-- For information about ShotGrid in general, click here: https://www.shotgridsoftware.com/integrations
+- For information about Flow Production Tracking in general, click here: https://www.shotgridsoftware.com/integrations
 
 ## Using this framework in your Setup
 All the frameworks that are part of our standard framework suite are pushed to our App Store.
