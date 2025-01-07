@@ -8,12 +8,11 @@ import decimal
 import os
 import sys
 import unittest
+import logging
+import re
 
 repo_root = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 sys.path.insert(0, os.path.join(repo_root, "python"))
-
-import logging
-import re
 
 from edl import edl
 from edl import (

@@ -153,7 +153,7 @@ class BadBLError(UnsupportedEDLFeature):
     """
 
     def _error_message(self):
-        """ "
+        """
         Return a standard error message to use as the exception message.
 
         :returns: A string
@@ -168,7 +168,7 @@ class BadFCMError(UnsupportedEDLFeature):
     """
 
     def _error_message(self):
-        """ "
+        """
         Return a standard error message to use as the exception message.
 
         :returns: A string
