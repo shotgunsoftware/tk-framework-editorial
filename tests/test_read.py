@@ -6,7 +6,7 @@
 #
 import os
 import decimal
-import unittest2 as unittest
+import unittest
 from edl import edl
 from edl import (
     timecode,
@@ -22,7 +22,7 @@ import re
 
 class TestRead(unittest.TestCase):
     def __init__(self, *args, **kwargs):
-        super(TestRead, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         self._edl_examples = []
         self._unsupported_examples = []
         self._resources_dir = None

@@ -4,8 +4,6 @@ Readme for Editorial framework tests
 
 Required packages
 -----------------
-* unittest2
-* mock
 * coverage (only if coverage option is used)
 
 Running the test suite

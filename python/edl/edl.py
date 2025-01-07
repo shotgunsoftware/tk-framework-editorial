@@ -37,7 +37,7 @@ class EditProcessor(object):
     """
 
     def __init__(self, shot_regexp=None):
-        super(EditProcessor, self).__init__()
+        super().__init__()
         self._previous_edit = None
         self._shot_regexp = shot_regexp
 

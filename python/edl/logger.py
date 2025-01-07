@@ -18,7 +18,7 @@ class FrameworkLogHandler(logging.StreamHandler):
 
         :param framework: A Toolkit framework
         """
-        super(FrameworkLogHandler, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         self._framework = framework
 
     def emit(self, record):

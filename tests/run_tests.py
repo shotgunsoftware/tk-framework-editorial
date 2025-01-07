@@ -4,11 +4,10 @@
 # provided at the time of installation or download, or which otherwise accompanies
 # this software in either electronic or hard copy form.
 #
-from __future__ import print_function
 import sys
 import os
 from optparse import OptionParser
-import unittest2 as unittest
+import unittest
 import logging
 
 logging.basicConfig(level=logging.INFO)
@@ -38,9 +37,9 @@ class TestRunner(object):
     def setup_suite(self, test_name):
         # args used to specify specific module.TestCase.test
         if test_name:
-            self.suite = unittest.loader.TestLoader().loadTestsFromName(test_name)
+            self.suite = unittest.TestLoader().loadTestsFromName(test_name)
         else:
-            self.suite = unittest.loader.TestLoader().discover(self.test_path)
+            self.suite = unittest.TestLoader().discover(self.test_path)
 
     def run_tests_with_coverage(self, test_name):
         import coverage
