@@ -579,7 +579,7 @@ class EditList(object):
         self._edits = []
         # And read the file
         self.__logger.info("Parsing EDL %s" % path)
-        with open(path, "r") as handle:
+        with open(path, "r", encoding="utf-8") as handle:
             edit = None
             id_offset = 0
             try:
