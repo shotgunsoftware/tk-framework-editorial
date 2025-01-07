@@ -152,7 +152,10 @@ class TestRead(unittest.TestCase):
         # Check we are able to extract expected information from a well known
         # example
         path = os.path.join(self._multiple_tests_dir, "scan_request_test.edl")
-        tc = edl.EditList(file_path=path, visitor=self.advanced_visitor,)
+        tc = edl.EditList(
+            file_path=path,
+            visitor=self.advanced_visitor,
+        )
         for edit in tc.edits:
             self.assertIsNotNone(edit._shot_name)
             self.assertIsNotNone(edit._name)
@@ -302,7 +305,8 @@ class TestRead(unittest.TestCase):
         with self.assertRaises(AttributeError) as cm:
             for f in self._edl_examples:
                 edl.EditList(
-                    file_path=f, visitor=self.failing_property_override,
+                    file_path=f,
+                    visitor=self.failing_property_override,
                 )
 
     def test_tc_round_trip(self):
