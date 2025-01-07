@@ -41,7 +41,4 @@ variables:
 jobs:
 - template: build-pipeline.yml@templates
   parameters:
-    extra_test_dependencies:
-        - timecode
-        - edl
     has_unit_tests: true
