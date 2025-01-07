@@ -4,9 +4,17 @@
 # provided at the time of installation or download, or which otherwise accompanies
 # this software in either electronic or hard copy form.
 #
-import os
 import decimal
+import os
+import sys
 import unittest
+
+repo_root = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+sys.path.insert(0, os.path.join(repo_root, "python"))
+
+import logging
+import re
+
 from edl import edl
 from edl import (
     timecode,
@@ -16,8 +24,6 @@ from edl import (
     BadFrameRateError,
     BadFCMError,
 )
-import logging
-import re
 
 
 class TestRead(unittest.TestCase):
