@@ -40,5 +40,7 @@ variables:
 # Launch into the build pipeline.
 jobs:
 - template: build-pipeline.yml@templates
+  extra_test_dependencies:
+      - edl
   parameters:
     has_unit_tests: true
