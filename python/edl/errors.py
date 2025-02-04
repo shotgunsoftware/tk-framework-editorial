@@ -29,9 +29,7 @@ class BadFrameRateError(ValueError):
         :param frame_rate: An integer, the frame rate for which the frame value
                            caused the error.
         """
-        super(BadFrameRateError, self).__init__(
-            self.__ERROR_MSG % (frame_value, frame_rate), *args, **kwargs
-        )
+        super().__init__(self.__ERROR_MSG % (frame_value, frame_rate), *args, **kwargs)
         # Store value internally, in case some apps want to retrieve them
         self._frame_value = frame_value
         self._frame_rate = frame_rate
@@ -80,7 +78,7 @@ class BadDropFrameError(ValueError):
                            with timecode string format.
         :param valid_delimiters: List of valid delimiters for drop frame notation.
         """
-        super(BadDropFrameError, self).__init__(
+        super().__init__(
             self.__ERROR_MSG % (timecode_str, drop_frame, valid_delimiters),
             *args,
             **kwargs
@@ -133,9 +131,7 @@ class UnsupportedEDLFeature(NotImplementedError):
 
         :param edl_name: A string, the EDL file name.
         """
-        super(UnsupportedEDLFeature, self).__init__(
-            self._error_message() % edl_name, *args, **kwargs
-        )
+        super().__init__(self._error_message() % edl_name, *args, **kwargs)
 
     def _error_message(self):
         """
@@ -157,7 +153,7 @@ class BadBLError(UnsupportedEDLFeature):
     """
 
     def _error_message(self):
-        """"
+        """
         Return a standard error message to use as the exception message.
 
         :returns: A string
@@ -172,7 +168,7 @@ class BadFCMError(UnsupportedEDLFeature):
     """
 
     def _error_message(self):
-        """"
+        """
         Return a standard error message to use as the exception message.
 
         :returns: A string

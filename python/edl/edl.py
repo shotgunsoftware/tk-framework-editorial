@@ -37,7 +37,7 @@ class EditProcessor(object):
     """
 
     def __init__(self, shot_regexp=None):
-        super(EditProcessor, self).__init__()
+        super().__init__()
         self._previous_edit = None
         self._shot_regexp = shot_regexp
 
@@ -579,7 +579,7 @@ class EditList(object):
         self._edits = []
         # And read the file
         self.__logger.info("Parsing EDL %s" % path)
-        with open(path, "rU") as handle:
+        with open(path, "r", encoding="utf-8") as handle:
             edit = None
             id_offset = 0
             try:

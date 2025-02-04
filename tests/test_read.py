@@ -4,9 +4,16 @@
 # provided at the time of installation or download, or which otherwise accompanies
 # this software in either electronic or hard copy form.
 #
-import os
 import decimal
-import unittest2 as unittest
+import os
+import sys
+import unittest
+import logging
+import re
+
+repo_root = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+sys.path.insert(0, os.path.join(repo_root, "python"))
+
 from edl import edl
 from edl import (
     timecode,
@@ -16,13 +23,11 @@ from edl import (
     BadFrameRateError,
     BadFCMError,
 )
-import logging
-import re
 
 
 class TestRead(unittest.TestCase):
     def __init__(self, *args, **kwargs):
-        super(TestRead, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         self._edl_examples = []
         self._unsupported_examples = []
         self._resources_dir = None
@@ -152,7 +157,10 @@ class TestRead(unittest.TestCase):
         # Check we are able to extract expected information from a well known
         # example
         path = os.path.join(self._multiple_tests_dir, "scan_request_test.edl")
-        tc = edl.EditList(file_path=path, visitor=self.advanced_visitor,)
+        tc = edl.EditList(
+            file_path=path,
+            visitor=self.advanced_visitor,
+        )
         for edit in tc.edits:
             self.assertIsNotNone(edit._shot_name)
             self.assertIsNotNone(edit._name)
@@ -302,7 +310,8 @@ class TestRead(unittest.TestCase):
         with self.assertRaises(AttributeError) as cm:
             for f in self._edl_examples:
                 edl.EditList(
-                    file_path=f, visitor=self.failing_property_override,
+                    file_path=f,
+                    visitor=self.failing_property_override,
                 )
 
     def test_tc_round_trip(self):
