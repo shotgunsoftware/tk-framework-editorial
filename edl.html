@@ -1,0 +1,661 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>EDL &mdash; tk-framework-editorial v2.4.0 documentation</title>
+      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="_static/graphviz.css" type="text/css" />
+    <link rel="shortcut icon" href="_static/favicon.ico"/>
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="_static/jquery.js"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+        <script src="_static/doctools.js"></script>
+        <script src="_static/sphinx_highlight.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Timecode" href="timecode.html" />
+    <link rel="prev" title="The Editorial Framework" href="index.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+    <a href='https://help.autodesk.com/view/SGDEV/ENU/'>
+    
+        <img style='width: 191px;
+                height: 60px;
+                margin: 2px;
+                border-radius: 0px;
+                padding: 0px;'
+            src='_static/logo@2x.png'/>
+    
+    </a>
+    
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            tk-framework-editorial
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+    
+              <ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">EDL</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#editprocessor">EditProcessor</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#edl.EditProcessor"><code class="docutils literal notranslate"><span class="pre">EditProcessor</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#edl.EditProcessor.process"><code class="docutils literal notranslate"><span class="pre">EditProcessor.process()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#editevent">EditEvent</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#edl.EditEvent"><code class="docutils literal notranslate"><span class="pre">EditEvent</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#edl.EditEvent.fps"><code class="docutils literal notranslate"><span class="pre">EditEvent.fps</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#edl.EditEvent.drop_frame"><code class="docutils literal notranslate"><span class="pre">EditEvent.drop_frame</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#edl.EditEvent.channels"><code class="docutils literal notranslate"><span class="pre">EditEvent.channels</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#edl.EditEvent.id"><code class="docutils literal notranslate"><span class="pre">EditEvent.id</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#edl.EditEvent.reel"><code class="docutils literal notranslate"><span class="pre">EditEvent.reel</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#edl.EditEvent.comments"><code class="docutils literal notranslate"><span class="pre">EditEvent.comments</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#edl.EditEvent.pure_comments"><code class="docutils literal notranslate"><span class="pre">EditEvent.pure_comments</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#edl.EditEvent.timecodes"><code class="docutils literal notranslate"><span class="pre">EditEvent.timecodes</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#edl.EditEvent.source_in"><code class="docutils literal notranslate"><span class="pre">EditEvent.source_in</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#edl.EditEvent.source_out"><code class="docutils literal notranslate"><span class="pre">EditEvent.source_out</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#edl.EditEvent.source_duration"><code class="docutils literal notranslate"><span class="pre">EditEvent.source_duration</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#edl.EditEvent.record_in"><code class="docutils literal notranslate"><span class="pre">EditEvent.record_in</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#edl.EditEvent.record_out"><code class="docutils literal notranslate"><span class="pre">EditEvent.record_out</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#edl.EditEvent.record_duration"><code class="docutils literal notranslate"><span class="pre">EditEvent.record_duration</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#edl.EditEvent.has_effects"><code class="docutils literal notranslate"><span class="pre">EditEvent.has_effects</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#edl.EditEvent.add_effect"><code class="docutils literal notranslate"><span class="pre">EditEvent.add_effect()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#edl.EditEvent.add_comments"><code class="docutils literal notranslate"><span class="pre">EditEvent.add_comments()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#edl.EditEvent.has_retime"><code class="docutils literal notranslate"><span class="pre">EditEvent.has_retime</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#edl.EditEvent.add_retime"><code class="docutils literal notranslate"><span class="pre">EditEvent.add_retime()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#editlist">EditList</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#edl.EditList"><code class="docutils literal notranslate"><span class="pre">EditList</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#edl.EditList.set_logger"><code class="docutils literal notranslate"><span class="pre">EditList.set_logger()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#edl.EditList.has_transitions"><code class="docutils literal notranslate"><span class="pre">EditList.has_transitions</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#edl.EditList.drop_frame"><code class="docutils literal notranslate"><span class="pre">EditList.drop_frame</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#edl.EditList.edits"><code class="docutils literal notranslate"><span class="pre">EditList.edits</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#edl.EditList.title"><code class="docutils literal notranslate"><span class="pre">EditList.title</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#edl.EditList.fps"><code class="docutils literal notranslate"><span class="pre">EditList.fps</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#edl.EditList.read_cmx_edl"><code class="docutils literal notranslate"><span class="pre">EditList.read_cmx_edl()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#functions">Functions</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#edl.process_edit"><code class="docutils literal notranslate"><span class="pre">process_edit()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="timecode.html">Timecode</a></li>
+</ul>
+
+
+    <a href='genindex.html'>Alphabetic Index</a>
+
+    <div style='margin-top: 50px;
+                margin-left: 10px;
+                margin-right: 10px;
+                padding: 10px;
+                color: #b3b3b3;
+                font-size: 70%;
+                border-radius: 3px;
+                background-color: #444;
+                line-height: 18px;
+                '>
+    <style>
+        a.custom_post_menu { display: inline;
+                             padding: 0px;
+                             text-decoration: underline; }
+    </style>
+
+    <b>tk-framework-editorial</b> v2.4.0.<br>
+    
+        This documentation is part of the Flow Production Tracking.
+    
+    For more information, please visit
+    <a class=custom_post_menu href='https://help.autodesk.com/view/SGDEV/ENU/'>The Flow Production Tracking developer portal.</a>.
+    The code associated with this documentation can be found
+    <a class=custom_post_menu href='https://github.com/shotgunsoftware/tk-framework-editorial'>here</a>.
+
+    </div>
+    <style>
+        p.privacy_links { margin: 4px 0px;}
+    </style>
+    <p class="privacy_links"><a data-opt-in-preferences href="javascript:;">Privacy settings</a></p>
+    <p class="privacy_links"><a data-wat-linkname="manage-ccpa-settings-footer-link" href="javascript:;">Do not sell my personal information</a></p>
+    <p class="privacy_links"><a href="https://www.autodesk.com/company/legal-notices-trademarks/privacy-statement">Privacy/Cookies</a></p>
+
+
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">tk-framework-editorial</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">EDL</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="edl">
+<h1>EDL<a class="headerlink" href="#edl" title="Permalink to this heading"></a></h1>
+<section id="editprocessor">
+<h2>EditProcessor<a class="headerlink" href="#editprocessor" title="Permalink to this heading"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="edl.EditProcessor">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">edl.</span></span><span class="sig-name descname"><span class="pre">EditProcessor</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">shot_regexp</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/edl/edl.html#EditProcessor"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#edl.EditProcessor" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3.9/library/functions.html#object" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<p>An example of keeping previous parsed edit event around, while using the process
+edit function.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="edl.EditProcessor.process">
+<span class="sig-name descname"><span class="pre">process</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">edit</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">logger</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/edl/edl.html#EditProcessor.process"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#edl.EditProcessor.process" title="Permalink to this definition"></a></dt>
+<dd><p>Example : process the current edit and display previous and current one</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="editevent">
+<h2>EditEvent<a class="headerlink" href="#editevent" title="Permalink to this heading"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="edl.EditEvent">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">edl.</span></span><span class="sig-name descname"><span class="pre">EditEvent</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">id</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reel</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">channels</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">source_in</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">source_out</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">record_in</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">record_out</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fps</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">24</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">drop_frame</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/edl/edl.html#EditEvent"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#edl.EditEvent" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3.9/library/functions.html#object" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<p>An entry, or event, or edit from an edit list</p>
+<p>New attributes can be added at runtime, provided that they don’t
+clash with <a class="reference internal" href="#edl.EditEvent" title="edl.EditEvent"><code class="xref py py-class docutils literal notranslate"><span class="pre">EditEvent</span></code></a> regular attributes, by just setting their value, e.g.
+<code class="docutils literal notranslate"><span class="pre">edit.my_own_attribute</span> <span class="pre">=</span> <span class="pre">&quot;awesome&quot;</span></code>
+They then are accessible like other regular attributes, e.g.
+<code class="docutils literal notranslate"><span class="pre">print</span> <span class="pre">edit.my_own_attribute</span></code></p>
+<p>This implementation assume timecodes out are exclusive, meaning that a one
+frame long record would be <code class="docutils literal notranslate"><span class="pre">00:00:00:01</span> <span class="pre">00:00:00:02</span></code> ( not <code class="docutils literal notranslate"><span class="pre">00:00:00:01</span></code> )</p>
+<p>Instantiate a new EditEvent</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>id</strong> – The edit id in a Edit Decision list, as an int.</p></li>
+<li><p><strong>reel</strong> – The reel for this edit as a str.</p></li>
+<li><p><strong>channels</strong> – Channels for this edit, video, audio, etc. as a str.</p></li>
+<li><p><strong>source_in</strong> – Timecode in for the source, as a string formatted as
+hh:mm:ss:ff for non-drop frame or hh:mm:ss;ff for drop frame.</p></li>
+<li><p><strong>source_out</strong> – Timecode out for the source, as a string formatted as
+hh:mm:ss:ff for non-drop frame or hh:mm:ss;ff for drop frame.</p></li>
+<li><p><strong>record_in</strong> – Timecode in for the recorder, as a string formatted as
+hh:mm:ss:ff for non-drop frame or hh:mm:ss;ff for drop frame.</p></li>
+<li><p><strong>record_out</strong> – Timecode out for the recorder, as a string formatted as
+hh:mm:ss:ff for non-drop frame or hh:mm:ss;ff for drop frame.</p></li>
+<li><p><strong>fps</strong> – Number of frames per second for this edit, as an int or float.</p></li>
+<li><p><strong>drop_frame</strong> – Boolean indicating whether this edit uses drop frame or not or None
+if it’s not specified. Default is None.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py property">
+<dt class="sig sig-object py" id="edl.EditEvent.fps">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">fps</span></span><a class="headerlink" href="#edl.EditEvent.fps" title="Permalink to this definition"></a></dt>
+<dd><p>Return the fps for this edit.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Frame rate setting used by this EditEvent as an int or float.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="edl.EditEvent.drop_frame">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">drop_frame</span></span><a class="headerlink" href="#edl.EditEvent.drop_frame" title="Permalink to this definition"></a></dt>
+<dd><p>Return the drop frame value for this edit.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Boolean indicating if this EditEvent is drop frame or not.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="edl.EditEvent.channels">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">channels</span></span><a class="headerlink" href="#edl.EditEvent.channels" title="Permalink to this definition"></a></dt>
+<dd><p>Return the channels for this edit.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>String representing the channels in this EditEvent (eg. “AV”, “V”, etc.)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="edl.EditEvent.id">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">id</span></span><a class="headerlink" href="#edl.EditEvent.id" title="Permalink to this definition"></a></dt>
+<dd><p>Return the id for this edit.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Id of this EditEvent as an int.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="edl.EditEvent.reel">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">reel</span></span><a class="headerlink" href="#edl.EditEvent.reel" title="Permalink to this definition"></a></dt>
+<dd><p>Return the reel for this edit.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Reel for this EditEvent as a str.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="edl.EditEvent.comments">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">comments</span></span><a class="headerlink" href="#edl.EditEvent.comments" title="Permalink to this definition"></a></dt>
+<dd><p>Return the comments for this edit, as a list.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>List of comment strings for this EditEvent.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="edl.EditEvent.pure_comments">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">pure_comments</span></span><a class="headerlink" href="#edl.EditEvent.pure_comments" title="Permalink to this definition"></a></dt>
+<dd><p>An iterator over “pure” comments, that is comments which
+do not contain known keywords.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Yields<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Iterator for looping over pure (non-keyword) comments.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="edl.EditEvent.timecodes">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">timecodes</span></span><a class="headerlink" href="#edl.EditEvent.timecodes" title="Permalink to this definition"></a></dt>
+<dd><p>Return the source in, source out, record in, record out timecodes for this
+edit as a tuple.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Tuple of timecodes for this EditEvent as
+<code class="docutils literal notranslate"><span class="pre">(source_in,</span> <span class="pre">source_out,</span> <span class="pre">record_in,</span> <span class="pre">record_out)</span></code>.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="edl.EditEvent.source_in">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">source_in</span></span><a class="headerlink" href="#edl.EditEvent.source_in" title="Permalink to this definition"></a></dt>
+<dd><p>Return the source in timecode for this edit.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Timecode string representing the source in for this EditEvent.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="edl.EditEvent.source_out">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">source_out</span></span><a class="headerlink" href="#edl.EditEvent.source_out" title="Permalink to this definition"></a></dt>
+<dd><p>Return the source out timecode for this edit.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Timecode string representing the source out for this EditEvent.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="edl.EditEvent.source_duration">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">source_duration</span></span><a class="headerlink" href="#edl.EditEvent.source_duration" title="Permalink to this definition"></a></dt>
+<dd><p>Return the source duration, in frames.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Int representing the source duration in frames.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="edl.EditEvent.record_in">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">record_in</span></span><a class="headerlink" href="#edl.EditEvent.record_in" title="Permalink to this definition"></a></dt>
+<dd><p>Return the record in timecode for this edit.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Timecode string representing the record in for this EditEvent.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="edl.EditEvent.record_out">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">record_out</span></span><a class="headerlink" href="#edl.EditEvent.record_out" title="Permalink to this definition"></a></dt>
+<dd><p>Return the record out timecode for this edit.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Timecode string representing the record out for this EditEvent.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="edl.EditEvent.record_duration">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">record_duration</span></span><a class="headerlink" href="#edl.EditEvent.record_duration" title="Permalink to this definition"></a></dt>
+<dd><p>Return the record duration, in frames.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Int representing the record duration in frames.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="edl.EditEvent.has_effects">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">has_effects</span></span><a class="headerlink" href="#edl.EditEvent.has_effects" title="Permalink to this definition"></a></dt>
+<dd><p>Return <code class="docutils literal notranslate"><span class="pre">True</span></code> if this <a class="reference internal" href="#edl.EditEvent" title="edl.EditEvent"><code class="xref py py-class docutils literal notranslate"><span class="pre">EditEvent</span></code></a> has some effect(s).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Boolean indicating whether this EditEvent has effects.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="edl.EditEvent.add_effect">
+<span class="sig-name descname"><span class="pre">add_effect</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tokens</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/edl/edl.html#EditEvent.add_effect"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#edl.EditEvent.add_effect" title="Permalink to this definition"></a></dt>
+<dd><p>For now, just register the effect line as a string and append it to the
+list of effects for this EditEvent.</p>
+<p>Later we might want to parse the tokens, and store some actual
+effects value on this edit.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>tokens</strong> – List of tokens for the effect.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="edl.EditEvent.add_comments">
+<span class="sig-name descname"><span class="pre">add_comments</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">comments</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/edl/edl.html#EditEvent.add_comments"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#edl.EditEvent.add_comments" title="Permalink to this definition"></a></dt>
+<dd><p>Associate a comment line to this edit.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>comments</strong> – Comment string to append to the list of comments for this
+EditEvent.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="edl.EditEvent.has_retime">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">has_retime</span></span><a class="headerlink" href="#edl.EditEvent.has_retime" title="Permalink to this definition"></a></dt>
+<dd><p>Return <code class="docutils literal notranslate"><span class="pre">True</span></code> if this edit has some retime.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Boolean indicating whether this EditEvent has a retime.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="edl.EditEvent.add_retime">
+<span class="sig-name descname"><span class="pre">add_retime</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tokens</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/edl/edl.html#EditEvent.add_retime"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#edl.EditEvent.add_retime" title="Permalink to this definition"></a></dt>
+<dd><p>For now, just register the retime line as a string and append it to the
+list of retimes for this EditEvent.</p>
+<p>Later we might want to parse the tokens, and store some actual
+retime values.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>tokens</strong> – List of tokens for the retime.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="editlist">
+<h2>EditList<a class="headerlink" href="#editlist" title="Permalink to this heading"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="edl.EditList">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">edl.</span></span><span class="sig-name descname"><span class="pre">EditList</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fps</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">24</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">file_path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">visitor</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/edl/edl.html#EditList"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#edl.EditList" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3.9/library/functions.html#object" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<p>An Edit Decision List.</p>
+<p>Typical use of EditList could look like this:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># Define a visitor to extract some extra information from comments or locators.</span>
+<span class="k">def</span> <span class="nf">edit_parser</span><span class="p">(</span><span class="n">edit</span><span class="p">):</span>
+    <span class="c1"># New attributes can be added on the fly.</span>
+    <span class="k">if</span> <span class="n">edit</span><span class="o">.</span><span class="n">id</span> <span class="o">%</span> <span class="mi">2</span><span class="p">:</span>
+        <span class="n">edit</span><span class="o">.</span><span class="n">is_even</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">edit</span><span class="o">.</span><span class="n">is_even</span> <span class="o">=</span> <span class="kc">True</span>
+
+<span class="n">edl</span> <span class="o">=</span> <span class="n">EditList</span><span class="p">(</span><span class="n">file_path</span><span class="o">=</span><span class="s2">&quot;/tmp/my_edl.edl&quot;</span><span class="p">,</span> <span class="n">visitor</span><span class="o">=</span><span class="n">edit_parser</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">edit</span> <span class="ow">in</span> <span class="n">edl</span><span class="o">.</span><span class="n">edits</span><span class="p">:</span>
+    <span class="nb">print</span> <span class="nb">str</span><span class="p">(</span><span class="n">edit</span><span class="p">)</span>
+    <span class="c1"># Added attributes are reachable like regular ones.</span>
+    <span class="nb">print</span> <span class="n">edit</span><span class="o">.</span><span class="n">is_even</span>
+</pre></div>
+</div>
+<p>Instantiate a new Edit Decision List.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>fps</strong> – Number of frames per second for this EditList as an int or float.</p></li>
+<li><p><strong>file_path</strong> – Full path to a file to read.</p></li>
+<li><p><strong>visitor</strong> – A callable which will be called on every edit and should
+accept as input an <a class="reference internal" href="#edl.EditEvent" title="edl.EditEvent"><code class="xref py py-class docutils literal notranslate"><span class="pre">EditEvent</span></code></a> and a logger.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="edl.EditList.set_logger">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">set_logger</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">logger</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/edl/edl.html#EditList.set_logger"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#edl.EditList.set_logger" title="Permalink to this definition"></a></dt>
+<dd><p>Allow to use another logger than the default one provided in this
+framework.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="edl.EditList.has_transitions">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">has_transitions</span></span><a class="headerlink" href="#edl.EditList.has_transitions" title="Permalink to this definition"></a></dt>
+<dd><p>Return <code class="docutils literal notranslate"><span class="pre">True</span></code> if this EditList contains events with transitions.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Boolean indicating if this EditList contains events with transitions.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="edl.EditList.drop_frame">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">drop_frame</span></span><a class="headerlink" href="#edl.EditList.drop_frame" title="Permalink to this definition"></a></dt>
+<dd><p>Return <code class="docutils literal notranslate"><span class="pre">True</span></code> if this EditList is drop frame.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Boolean indicating if this EditList uses drop frame or not.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="edl.EditList.edits">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">edits</span></span><a class="headerlink" href="#edl.EditList.edits" title="Permalink to this definition"></a></dt>
+<dd><p>Return a list of all edit events in this <a class="reference internal" href="#edl.EditList" title="edl.EditList"><code class="xref py py-class docutils literal notranslate"><span class="pre">EditList</span></code></a>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>List of edit event objects in this edit list.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="edl.EditList.title">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">title</span></span><a class="headerlink" href="#edl.EditList.title" title="Permalink to this definition"></a></dt>
+<dd><p>Return this <a class="reference internal" href="#edl.EditList" title="edl.EditList"><code class="xref py py-class docutils literal notranslate"><span class="pre">EditList</span></code></a>’s title</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Title of this edit list as a str.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="edl.EditList.fps">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">fps</span></span><a class="headerlink" href="#edl.EditList.fps" title="Permalink to this definition"></a></dt>
+<dd><p>Return the number of frame per seconds used by this <a class="reference internal" href="#edl.EditList" title="edl.EditList"><code class="xref py py-class docutils literal notranslate"><span class="pre">EditList</span></code></a>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Frame rate setting used by this edit list as an int or float.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="edl.EditList.read_cmx_edl">
+<span class="sig-name descname"><span class="pre">read_cmx_edl</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fps</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">24</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">visitor</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/edl/edl.html#EditList.read_cmx_edl"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#edl.EditList.read_cmx_edl" title="Permalink to this definition"></a></dt>
+<dd><p>Parse the given edl file, extract a list of versions that need to be
+created.</p>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<ul class="simple">
+<li><p><a class="reference external" href="http://xmil.biz/EDL-X/CMX3600.pdf">http://xmil.biz/EDL-X/CMX3600.pdf</a></p></li>
+<li><p><a class="reference external" href="http://www.scottsimmons.tv/blog/2006/10/12/how-to-read-an-edl/">http://www.scottsimmons.tv/blog/2006/10/12/how-to-read-an-edl/</a></p></li>
+<li><p><a class="reference external" href="http://www.edlmax.com/maxguide.html">http://www.edlmax.com/maxguide.html</a></p></li>
+</ul>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>path</strong> – Full path to a cmx compatible file to read.</p></li>
+<li><p><strong>fps</strong> – Number of frames per-second for this <a class="reference internal" href="#edl.EditList" title="edl.EditList"><code class="xref py py-class docutils literal notranslate"><span class="pre">EditList</span></code></a> as an int or float.</p></li>
+<li><p><strong>visitor</strong> – A callable which will be called on every edit and should
+accept as input an <a class="reference internal" href="#edl.EditEvent" title="edl.EditEvent"><code class="xref py py-class docutils literal notranslate"><span class="pre">EditEvent</span></code></a> and a logger.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="functions">
+<h2>Functions<a class="headerlink" href="#functions" title="Permalink to this heading"></a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="edl.process_edit">
+<span class="sig-prename descclassname"><span class="pre">edl.</span></span><span class="sig-name descname"><span class="pre">process_edit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">edit</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">logger</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">shot_regexp</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/edl/edl.html#process_edit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#edl.process_edit" title="Permalink to this definition"></a></dt>
+<dd><p>Extract standard meta data from comments for an Edit:</p>
+<ul>
+<li><p>name from <code class="docutils literal notranslate"><span class="pre">*</span> <span class="pre">LOC:</span> <span class="pre">01:00:00:12</span> <span class="pre">YELLOW</span>&#160; <span class="pre">MR0200</span></code></p></li>
+<li><p>clip name from <code class="docutils literal notranslate"><span class="pre">*</span> <span class="pre">FROM</span> <span class="pre">CLIP</span> <span class="pre">NAME:</span>&#160; <span class="pre">246AA-6</span></code></p></li>
+<li><p>tape from <code class="docutils literal notranslate"><span class="pre">*</span> <span class="pre">SOURCE</span> <span class="pre">FILE:</span> <span class="pre">LR9907610</span></code></p></li>
+<li><p>asc_sop and asc_sat from:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ASC_SOP</span> <span class="p">(</span><span class="mf">1.0854</span> <span class="mf">1.0451</span> <span class="mf">0.9943</span><span class="p">)(</span><span class="mf">0.0009</span> <span class="mf">0.0022</span> <span class="o">-</span><span class="mf">0.0292</span><span class="p">)(</span><span class="mf">1.0163</span> <span class="mf">1.0105</span> <span class="mf">0.9424</span><span class="p">)</span>
+<span class="n">ASC_SAT</span> <span class="mf">1.0000</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>If a regular expression is given, it will be used to extract extra information
+from the edit name.</p>
+<ul class="simple">
+<li><p>a shot name</p></li>
+<li><p>a type</p></li>
+<li><p>a format</p></li>
+</ul>
+<p>Typical values for the regular expression would be as simple as a single group
+to extract the shot name, e.g. <code class="docutils literal notranslate"><span class="pre">^(\w+)_.+$</span></code>
+or more advanced regular expression with named groups to extract additional
+information, e.g. <code class="docutils literal notranslate"><span class="pre">(?P&lt;shot_name&gt;\w+)_(?P&lt;type&gt;\w\w\d\d)_(?P&lt;version&gt;[V,v]\d+)$</span></code></p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>edit</strong> – An Edit instance.</p></li>
+<li><p><strong>logger</strong> – A standard logger.</p></li>
+<li><p><strong>shot_regexp</strong> – A regular expression to extract extra information from the
+edit name.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="index.html" class="btn btn-neutral float-left" title="The Editorial Framework" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="timecode.html" class="btn btn-neutral float-right" title="Timecode" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Autodesk.</p>
+  </div>
+
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+ 
+
+  <script type="text/javascript">
+    window.wafCCPAForceShow = true;
+    (function(a,b,c,d){
+      a='https://tags.tiqcdn.com/utag/autodesk/micro-basic/prod/utag.js';
+      b=document;c='script';d=b.createElement(c);d.src=a;d.type='text/java'+c;d.async=true;
+      a=b.getElementsByTagName(c)[0];a.parentNode.insertBefore(d,a);
+    })();
+  </script>
+
+
+</body>
+</html>
