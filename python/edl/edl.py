@@ -674,7 +674,9 @@ class EditList(object):
                 if edit and visitor:
                     self.__logger.debug("Visiting: [%s]" % edit)
                     visitor(edit, self.__logger)
-            except Exception as e:  # Catch the exception so we can add the current line contents
+            except (
+                Exception
+            ) as e:  # Catch the exception so we can add the current line contents
                 args = [
                     "%s.\n\nError reported while parsing %s at line:\n\n%s"
                     % (e.args[0], path, line)
