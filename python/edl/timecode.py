@@ -8,7 +8,6 @@ import decimal
 import re
 from .errors import BadFrameRateError, BadDropFrameError
 
-
 # FYI: Number of drop frames per minute is 6.6666...% of framerate rounded to nearest integer.
 # This is convention from other code. While not an absolute exact science, it is exact
 # enough for all of the frame rates in use today. This comes out to 2 for 29.97 and 4 for 59.94.

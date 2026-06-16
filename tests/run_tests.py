@@ -66,7 +66,7 @@ if __name__ == "__main__":
         dest="coverage",
         help="run with coverage (requires coverage is installed)",
     )
-    (options, args) = parser.parse_args()
+    options, args = parser.parse_args()
     test_name = None
     if args:
         test_name = args[0]
